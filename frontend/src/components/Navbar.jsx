@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import React from 'react'
 
 const Navbar = () => {
@@ -13,29 +14,29 @@ const Navbar = () => {
       </a>
     </a>
     <nav className="md:mr-auto md:ml-4 md:py-1 md:pl-4 md:border-l md:border-gray-400	flex flex-wrap items-center text-base justify-center">
-      <a href = "#"
-      className="mr-5 hover:text-gray-900">Platform</a>
-      <a href = ""
-      className="mr-5 hover:text-gray-900">Solutions</a>
-      <a href = "#"
-      className="mr-5 hover:text-gray-900">Enterprise</a>
-      <a href = ""
-      className="mr-5 hover:text-gray-900">Developers</a>
-      <a href = "#"
-      className="mr-5 hover:text-gray-900">Blog</a>
+      <Link href = "#"
+      className="mr-5 hover:text-gray-900">Platform</Link>
+      <Link href = ""
+      className="mr-5 hover:text-gray-900">Solutions</Link>
+      <Link href = "#"
+      className="mr-5 hover:text-gray-900">Enterprise</Link>
+      <Link href = ""
+      className="mr-5 hover:text-gray-900">Developers</Link>
+      <Link href = "#"
+      className="mr-5 hover:text-gray-900">Blog</Link>
     </nav>
     <div className="inline-flex">
       <a href = "#" 
       className="mr-5 hover:text-gray-900">About</a>
-      <a href = "#" 
-      className="mr-5 hover:text-gray-900">Contact</a>
-      <a href = "/login" 
-      className="mr-5 hover:text-gray-900">LogIn</a>
+      <Link href = "#" 
+      className="mr-5 hover:text-gray-900">Contact</Link>
+      <Link href = "/login" 
+      className="mr-5 hover:text-gray-900">LogIn</Link>
     </div>
-    <a href="/register"
+    <Link href="/Signup"
     button className="inline-flex items-center bg-slate-900 border-0 py-1 px-3 focus:outline-none hover:bg-blue-200 rounded text-white mt-4 md:mt-0">
-      Register
-    </a>
+      SignUp
+    </Link>
   </div>
 </header>
 
