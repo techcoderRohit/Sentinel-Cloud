@@ -1,6 +1,6 @@
 const Footer = () => {
   return (
-    <footer className="bg-slate-900 pt-24 pb-12 border-t border-slate-800">
+    <footer className="bg-black pt-24 pb-12 border-t border-slate-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Desktop 4-Column Grid */}
@@ -8,10 +8,10 @@ const Footer = () => {
           <div className="lg:col-span-2">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 bg-cyan-400 rounded-lg flex items-center justify-center font-bold text-slate-900 text-2xl">S</div>
-              <span className="font-bold text-2xl text-white">SaaSy</span>
+              <span className="font-bold text-2xl text-white">Sentinel Cloud</span>
             </div>
             <p className="text-slate-400 text-lg leading-relaxed mb-6 max-w-sm">
-              Building the future of software development with powerful, easy-to-use templates.
+              Building the future of IoT development with powerful, easy-to-use cloud.
             </p>
           </div>
 

@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 const Navbar = () => {
   return (
     <nav className="bg-slate-900 text-white w-full border-b border-slate-800 sticky top-0 z-50">
@@ -13,10 +15,10 @@ const Navbar = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex space-x-10">
-            <a href="#about" className="text-slate-300 hover:text-cyan-400 transition-colors text-base font-medium">About us</a>
-            <a href="#pricing" className="text-slate-300 hover:text-cyan-400 transition-colors text-base font-medium">Pricing</a>
-            <a href="#solutions" className="text-slate-300 hover:text-cyan-400 transition-colors text-base font-medium">Solutions</a>
-            <a href="#features" className="text-slate-300 hover:text-cyan-400 transition-colors text-base font-medium">Features</a>
+            <Link href="#about" className="text-slate-300 hover:text-cyan-400 transition-colors text-base font-medium">About us</Link>
+            {/* <a href="#pricing" className="text-slate-300 hover:text-cyan-400 transition-colors text-base font-medium">Pricing</a> */}
+            <Link href="#solutions" className="text-slate-300 hover:text-cyan-400 transition-colors text-base font-medium">Solutions</Link>
+            <Link href="#features" className="text-slate-300 hover:text-cyan-400 transition-colors text-base font-medium">Features</Link>
           </div>
 
           {/* Desktop Buttons */}

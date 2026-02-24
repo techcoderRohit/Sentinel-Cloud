@@ -23,9 +23,9 @@ export default function Home() {
         <FeaturesGrid />
         <FeatureHighlights />
         <Testimonials />
-        <Pricing />
+        {/* <Pricing /> */}
         <BlogSection />
-        <Faq />
+        {/* <Faq /> */}
         <NewsletterCTA/>
       </main>
 
