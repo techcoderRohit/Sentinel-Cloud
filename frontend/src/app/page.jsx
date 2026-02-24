@@ -1,57 +1,35 @@
-import React from 'react';
+import Navbar from '@/components/Navbar';
+import Hero from '@/components/Hero';
+import Brands from '@/components/Brands';
+import KeyBenefits from '@/components/KeyBenefits';
+import FeaturesGrid from '@/components/FeaturesGrid';
+import FeatureHighlights from '@/components/FeatureHighlights';
+import Testimonials from '@/components/Testimonials';
+import Pricing from '@/components/Pricing';
+import BlogSection from '@/components/BlogSection';
+import Faq from '@/components/Faq';
+import NewsletterCTA from '@/components/NewsletterCTA';
+import Footer from '@/components/Footer';
 
-const Hero = () => {
-  // Senior Move: Store particle configurations in an array to avoid repeating HTML 9 times.
-  const particles = [
-    { left: '10%', delay: '0s' },
-    { left: '20%', delay: '1s' },
-    { left: '30%', delay: '2s' },
-    { left: '40%', delay: '3s' },
-    { left: '50%', delay: '4s' },
-    { left: '60%', delay: '5s' },
-    { left: '70%', delay: '6s' },
-    { left: '80%', delay: '7s' },
-    { left: '90%', delay: '0.5s' }
-  ];
-
+export default function Home() {
   return (
-    <section id="home" className="relative h-screen flex items-center justify-center overflow-hidden">
+    <div className="min-h-screen">
+      <Navbar />
+      
+      <main>
+        <Hero />
+        <Brands />
+        <KeyBenefits />
+        <FeaturesGrid />
+        <FeatureHighlights />
+        <Testimonials />
+        <Pricing />
+        <BlogSection />
+        <Faq />
+        <NewsletterCTA/>
+      </main>
 
-      {/* Background image */}
-      <div className="absolute inset-0 z-0">
-        <img 
-          src="https://img.freepik.com/free-vector/elegant-white-background-with-wave-design_1017-39102.jpg?semt=ais_user_personalization&w=740&q=80" 
-          alt="background" 
-          className="w-full h-full"
-        />
-      </div>
-      
-      {/* Gold particles rendered cleanly using a map function */}
-      <div className="gold-particles z-0">
-        {particles.map((particle, index) => (
-          <div 
-            key={index} 
-            className="particle" 
-            style={{ left: particle.left, animationDelay: particle.delay }}
-          ></div>
-        ))}
-      </div>
-      
-      {/* Content */}
-      <div className="hero-content relative z-10 text-center text-slate-900 px-6 max-w-5xl mx-auto">
-        <h1 className="text-5xl md:text-7xl font-display font-bold mb-6 leading-tight">
-          Lorem ipsum dolor sit.,<br />
-          <span className="gold-gradient-text">Lorem, ipsum.</span>
-        </h1>
-        <p className="text-xl md:text-2xl mb-10 font-light text-slate-900 max-w-3xl mx-auto">
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Nesciunt, beatae!
-        </p>
-        <a href="/login" className="inline-block bg-slate-900 text-white px-10 py-4 rounded-full text-lg font-bold hover:bg-blue-200 text-black transition transform hover:scale-105 btn-pulse">
-          Get Started
-        </a>
-      </div>
-    </section>
+      <Footer />
+    </div>
   );
-};
-
-export default Hero;
+}
