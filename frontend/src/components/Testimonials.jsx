@@ -1,6 +1,6 @@
 const Testimonials = () => {
   return (
-    <section className="bg-slate-900 py-32 border-t border-slate-800">
+    <section className="bg-slate-950 py-3">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <div className="text-center mb-20">

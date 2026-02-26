@@ -60,7 +60,7 @@ const FeaturesGrid = () => {
   ];
 
   return (
-    <section className="bg-slate-900 py-24 border-t border-slate-800" id="features">
+    <section className="bg-slate-950 py-24 border-t border-slate-800" id="features">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-white">

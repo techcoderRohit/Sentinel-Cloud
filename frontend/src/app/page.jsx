@@ -18,13 +18,12 @@ export default function Home() {
       
       <main>
         <Hero />
-        <Brands />
         <KeyBenefits />
         <FeaturesGrid />
-        <FeatureHighlights />
+        {/*<FeatureHighlights />*/}
         <Testimonials />
         {/* <Pricing /> */}
-        <BlogSection />
+       {/* <BlogSection />*/}
         {/* <Faq /> */}
         <NewsletterCTA/>
       </main>

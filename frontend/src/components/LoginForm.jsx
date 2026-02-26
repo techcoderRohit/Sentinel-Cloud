@@ -5,7 +5,7 @@ export default function Login() {
     <div className="flex justify-center items-center min-h-screen bg-slate-950 px-4 py-8">
       <div className="w-full max-w-md p-8 bg-slate-900 rounded-xl shadow-2xl border border-slate-800">
         <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold text-cyan-400">Welcome Back</h2>
+          <h2 className="text-3xl font-bold text-cyan-400">Welcome Back </h2>
           <p className="text-slate-500 mt-2">Login to Sentinal Cloud account</p>
         </div>
 

@@ -1,6 +1,6 @@
 const FeatureHighlights = () => {
   return (
-    <section className="bg-slate-900 py-32 overflow-hidden border-t border-slate-800">
+    <section className="bg-slate-950 py-32 overflow-hidden border-t border-slate-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-40">
         
         {/* Row 1: Text Left, Image Right */}
