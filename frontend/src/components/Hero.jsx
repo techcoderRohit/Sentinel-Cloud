@@ -61,7 +61,7 @@ const Hero = () => {
                
                {/* NOTE: Replace the src below with your actual dashboard image from the public folder */}
                <img
-                 src="/dashboard-image.png" 
+                 src="hero15.jpeg" 
                  alt="Dashboard Interface"
                  className="w-full h-full object-cover"
                />
