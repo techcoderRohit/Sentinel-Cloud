@@ -2,7 +2,7 @@ import React from 'react';
 
 const Hero = () => {
   return (
-    <section className="bg-slate-900 text-white pt-28 pb-20 overflow-hidden text-center relative">
+    <section className="bg-slate-950 text-white pt-28 pb-20 overflow-hidden text-center relative">
       
       {/* Custom CSS for the glowing orb animation moving left and right */}
       <style>
@@ -36,16 +36,16 @@ const Hero = () => {
 
         {/* Buttons */}
         <div className="flex flex-col sm:flex-row justify-center items-center gap-8 mb-20">
-          <button className="bg-cyan-400 hover:bg-cyan-500 text-slate-900 px-8 py-3 rounded-lg font-bold text-lg transition-all shadow-[0_0_20px_rgba(34,211,238,0.4)]">
+          <button className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 hover:scale-95 text-slate-900 px-6 py-3 rounded-lg font-bold text-lg transition-all">
             Get started
           </button>
           
-          <button className="flex items-center gap-3 text-white hover:text-cyan-400 font-medium text-lg transition-all">
+          <button className="flex items-center gap-3 text-white hover:text-cyan-400 hover:border-1 hover:scale-95 px-6 py-3 rounded-lg hover:border-white font-medium text-lg transition-all">
             {/* The small circle icon next to Learn More */}
-            <div className="flex items-center justify-center w-5 h-5 rounded-full border-[2px] border-cyan-400">
+            <div className="flex items-center justify-center w-5 h-5 rounded-full border-2 border-cyan-500">
                <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
             </div>
-            Learn more
+            Live Demo
           </button>
         </div>
 
@@ -61,15 +61,12 @@ const Hero = () => {
                
                {/* NOTE: Replace the src below with your actual dashboard image from the public folder */}
                <img
-                 src="/dashboard-image.png" 
+                 src="https://hyperthings.in/wp-content/uploads/2021/12/iot-cloud.png" 
                  alt="Dashboard Interface"
                  className="w-full h-full object-cover"
                />
                
-               {/* Fallback text if the image isn't linked yet */}
-               <div className="absolute inset-0 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm">
-                  <span className="text-slate-300 font-medium tracking-widest text-sm uppercase">Dashboard Mockup</span>
-               </div>
+            
                
             </div>
           </div>
