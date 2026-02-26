@@ -23,7 +23,7 @@ const Hero = () => {
         {/* Headline */}
         <h1 className="text-5xl lg:text-6xl font-extrabold tracking-tight mb-6 leading-tight uppercase">
           Connect more <br />
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">
+          <span className="text-transparent bg-clip-text bg-linear-to-r from-cyan-400 to-blue-500">
             with Sentinel Cloud
           </span>
         </h1>
