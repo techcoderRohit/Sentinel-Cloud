@@ -23,10 +23,10 @@ const Navbar = () => {
 
           {/* Desktop Buttons */}
           <div className="hidden lg:flex items-center space-x-4">
-            <Link href="/login" className="text-slate-300 hover:text-white font-medium">Log in</Link>
-            <Link href="/Signup" className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 hover:scale-95 text-slate-900 px-6 py-3 rounded-lg font-bold transition-all">
-              Sign Up
-            </Link>
+            <button className="text-slate-300 hover:text-white font-medium">Log in</button>
+            <button className="bg-cyan-400 hover:bg-cyan-500 text-slate-900 px-6 py-2.5 rounded-lg text-sm font-bold transition-all shadow-[0_0_15px_rgba(34,211,238,0.3)]">
+              Get started
+            </button>
           </div>
         </div>
       </div>

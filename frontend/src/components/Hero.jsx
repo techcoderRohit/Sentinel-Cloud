@@ -61,7 +61,7 @@ const Hero = () => {
                
                {/* NOTE: Replace the src below with your actual dashboard image from the public folder */}
                <img
-                 src="https://hyperthings.in/wp-content/uploads/2021/12/iot-cloud.png" 
+                 src="/dashboard-image.png" 
                  alt="Dashboard Interface"
                  className="w-full h-full object-cover"
                />
