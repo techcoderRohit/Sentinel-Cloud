@@ -1,78 +1,78 @@
 import React from 'react';
+import { motion } from 'framer-motion';
+import Link from 'next/link';
+
 
 const Hero = () => {
+  // Animation variants for staggered loading
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.2, delayChildren: 0.3 }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
+  };
+
   return (
-    <section className="bg-slate-950 text-white pt-28 pb-20 overflow-hidden text-center relative">
+    <section className="relative min-h-screen bg-[#0B1120] flex items-center justify-center overflow-hidden pt-16">
       
-      {/* Custom CSS for the glowing orb animation moving left and right */}
-      <style>
-        {`
-          @keyframes panGlow {
-            0% { transform: translate(-80%, -50%); }
-            50% { transform: translate(-20%, -50%); }
-            100% { transform: translate(-80%, -50%); }
-          }
-          .animate-pan-glow {
-            animation: panGlow 8s ease-in-out infinite;
-          }
-        `}
-      </style>
-
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-
-        {/* Headline */}
-        <h1 className="text-5xl lg:text-6xl font-extrabold tracking-tight mb-6 leading-tight uppercase">
-          Connect more <br />
-          <span className="text-transparent bg-clip-text bg-linear-to-r from-cyan-400 to-blue-500">
-            with Sentinel Cloud
+      {/* Background Glow Effects */}
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-96 h-96 bg-cyan-900/20 rounded-full blur-[120px] pointer-events-none"></div>
+      
+      <motion.div 
+        className="relative z-10 max-w-5xl py-20 mx-auto px-4 sm:px-6 lg:px-8 text-center"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        {/* Beta Badge */}
+        <motion.div variants={itemVariants} className="mb-8 flex justify-center">
+          <span className="px-4 py-1.5 rounded-full border border-cyan-500/30 bg-cyan-500/10 text-cyan-500 text-sm font-medium flex items-center gap-2 backdrop-blur-sm">
+            🚀 Now in Beta: The Next Generation of IoT Infrastructure
           </span>
-        </h1>
+        </motion.div>
 
-        {/* Subtitle */}
-        <p className="max-w-2xl mx-auto text-lg text-slate-400 mb-10">
-          Lorem ipsum dolor sit amet consectetur, adipisicing elit.<br className="hidden sm:block" />
-          Lorem ipsum dolor sit amet.
-        </p>
+        {/* Main Headline */}
+        <motion.h1 variants={itemVariants} className="text-4xl md:text-5xl lg:text-7xl font-bold text-white leading-tight mb-6">
+          Smart IoT Monitoring <br className="hidden md:block" />
+          <span className="text-transparent lg:text-6xl bg-clip-text bg-linear-to-r from-cyan-500 to-blue-500">
+           with Secure Cloud Intelligence
+          </span>
+        </motion.h1>
 
-        {/* Buttons */}
-        <div className="flex flex-col sm:flex-row justify-center items-center gap-8 mb-20">
-          <button className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 hover:scale-95 text-slate-900 px-6 py-3 rounded-lg font-bold text-lg transition-all">
-            Get started
-          </button>
+        {/* Subheadline */}
+        <motion.p variants={itemVariants} className="mt-4 text-lg md:text-xl text-slate-400 max-w-4xl mx-auto mb-10 leading-relaxed">
+          Monitor your IoT devices in real-time with Sentinel Cloud. Track Temperature, humidity and gas levels securely from anywhere using our scalable cloud-based platform.
+        </motion.p>
+
+        {/* CTA Buttons */}
+        <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+        <Link href='/Signup'>
+          <motion.button 
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="w-full sm:w-auto px-6 py-3 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-lg shadow-[0_0_10px_rgba(6,182,212,0.4)] transition-all"
+            href='/Signup'
+          >
+            Get Started
+          </motion.button>
+          </Link>
           
-          <button className="flex items-center gap-3 text-white hover:text-cyan-400 hover:border-1 hover:scale-95 px-6 py-3 rounded-lg hover:border-white font-medium text-lg transition-all">
-            {/* The small circle icon next to Learn More */}
-            <div className="flex items-center justify-center w-5 h-5 rounded-full border-2 border-cyan-500">
-               <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
-            </div>
-            Live Demo
-          </button>
-        </div>
-
-        {/* Desktop Dashboard Mockup Container */}
-        <div className="relative mx-auto w-full max-w-5xl">
-
-          {/* Animated Glow Effect Behind Dashboard (Reverted to Cyan) */}
-          <div className="absolute top-1/2 left-1/2 w-[60%] h-[70%] bg-cyan-500/20 blur-[120px] rounded-full z-0 animate-pan-glow pointer-events-none"></div>
-
-          {/* Dashboard Image Box */}
-          <div className="rounded-xl border border-slate-700 bg-slate-800 shadow-2xl overflow-hidden aspect-[16/9] flex flex-col relative z-10">
-            <div className="w-full h-full bg-slate-900 flex items-center justify-center relative overflow-hidden">
-               
-               {/* NOTE: Replace the src below with your actual dashboard image from the public folder */}
-               <img
-                 src="/dashboard-image.png" 
-                 alt="Dashboard Interface"
-                 className="w-full h-full object-cover"
-               />
-               
-            
-               
-            </div>
-          </div>
-
-        </div>
-      </div>
+          
+          <motion.button 
+            whileHover={{ scale: 1.05, backgroundColor: "rgba(30, 41, 59, 0.5)" }}
+            whileTap={{ scale: 0.95 }}
+            className="w-full sm:w-auto px-6 py-3 rounded-lg border border-slate-600 text-white font-medium text-lg hover:border-cyan-500 transition-all backdrop-blur-sm"
+          >
+            Live Dashboard
+          </motion.button>
+        </motion.div>
+      </motion.div>
     </section>
   );
 };

@@ -1,48 +1,96 @@
-const Testimonials = () => {
+"use client";
+
+import { motion } from "framer-motion";
+import Image from "next/image";
+
+const testimonials = [
+  {
+    id: 1,
+    name: "Lab Supervisor",
+    image: "/images/1.jpg",
+    message:
+      "Sentinel Cloud helped us monitor environmental conditions in real-time and reduced manual checking by 80%.",
+  },
+  {
+    id: 2,
+    name: "Industrial Safety Officer",
+    image: "/images/2.jpg",
+    message:
+      "The alert system is extremely useful. We get instant notifications when gas levels rise beyond safe limits.",
+  },
+  {
+    id: 3,
+    name: "Engineering Faculty",
+    image: "/images/3.jpg",
+    message:
+      "This platform is perfect for academic IoT projects and real-world implementation.",
+  },
+];
+
+export default function Testimonials() {
   return (
-    <section className="bg-slate-950 py-3">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section
+      id="testimonials"
+      className="py-24 bg-[#0b1120] text-white"
+    >
+      <div className="container mx-auto px-6 lg:px-20 text-center">
         
-        <div className="text-center mb-20">
-          <h2 className="text-4xl lg:text-5xl font-extrabold text-white mb-6">
-            You're in good hands
-          </h2>
-          <p className="text-xl text-slate-400 max-w-3xl mx-auto">
-            See what other developers and founders are saying about SaaSy.
-          </p>
-        </div>
+        {/* Heading */}
+        <motion.h2
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          viewport={{ once: true }}
+          className="text-4xl md:text-5xl font-bold mb-4"
+        >
+          What Users Say About{" "}
+          <span className="text-cyan-500">Sentinel Cloud</span>
+        </motion.h2>
 
-        {/* PC Masonry-style Grid */}
-        <div className="columns-1 md:columns-2 lg:columns-3 gap-8 space-y-8">
-          
-          {[
-            { name: "Trich B", role: "CEO at AMI", quote: "This template saved us weeks of development time. The code is incredibly clean and easy to customize." },
-            { name: "John Doe", role: "CTO at TechCorp", quote: "The integration with Next.js is flawless. Highly recommend to anyone building a modern SaaS." },
-            { name: "Sarah L", role: "Founder", quote: "Absolutely beautiful design. The dark mode implementation is spot on and my users love it." },
-            { name: "Mike R", role: "Lead Engineer", quote: "I was skeptical at first, but the component structure is exactly how I would have built it myself." },
-            { name: "Elena V", role: "Product Manager", quote: "Allowed us to launch our MVP in record time. Best investment we made this year." },
-            { name: "David K", role: "Freelancer", quote: "I use this as the base for all my client projects now. The cyan highlights really make the UI pop." }
-          ].map((testimonial, idx) => (
-            <div key={idx} className="break-inside-avoid bg-slate-800/50 rounded-3xl p-8 border border-slate-700 hover:border-cyan-400/50 hover:shadow-[0_0_30px_rgba(34,211,238,0.1)] transition-all duration-300">
-              <div className="flex items-center gap-4 mb-6">
-                <div className="w-14 h-14 rounded-full bg-cyan-400 flex items-center justify-center text-slate-900 font-bold text-xl">
-                  {testimonial.name.charAt(0)}
-                </div>
-                <div>
-                  <h4 className="text-white font-bold text-lg">{testimonial.name}</h4>
-                  <p className="text-cyan-400 text-sm font-medium">{testimonial.role}</p>
-                </div>
+        {/* Subheading */}
+        <motion.p
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          viewport={{ once: true }}
+          className="text-gray-400 max-w-2xl mx-auto mb-16"
+        >
+          Real feedback from professionals using our IoT cloud monitoring system.
+        </motion.p>
+
+        {/* Testimonials Grid */}
+        <div className="grid md:grid-cols-3 gap-8">
+          {testimonials.map((item, index) => (
+            <motion.div
+              key={item.id}
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: index * 0.2 }}
+              viewport={{ once: true }}
+              whileHover={{ scale: 1.05 }}
+              className="bg-gray-800/60 backdrop-blur-md border border-gray-700 rounded-2xl p-8 shadow-xl"
+            >
+              <div className="flex justify-center mb-4">
+                <Image
+                  src={item.image}
+                  alt={item.name}
+                  width={80}
+                  height={80}
+                  className="rounded-full object-cover border-2 border-cyan-500"
+                />
               </div>
-              <p className="text-slate-300 text-lg leading-relaxed italic">
-                "{testimonial.quote}"
-              </p>
-            </div>
-          ))}
 
+              <p className="text-gray-300 mb-6 text-sm md:text-base leading-relaxed">
+                “{item.message}”
+              </p>
+
+              <h4 className="text-cyan-500 font-semibold">
+                {item.name}
+              </h4>
+            </motion.div>
+          ))}
         </div>
       </div>
     </section>
   );
-};
-
-export default Testimonials;
+}

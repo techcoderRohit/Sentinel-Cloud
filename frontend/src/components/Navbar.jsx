@@ -1,37 +1,116 @@
+"use client";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { Menu, X } from "lucide-react";
 
-const Navbar = () => {
+export default function Navbar() {
+  const [isOpen, setIsOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  // Scroll Effect
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 50);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
-    <nav className="bg-slate-950 text-white w-full border-b border-slate-800 top-0 z-50 sticky">
-      <div className=" px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-20">
-          {/* Logo */}
-          <div className="flex items-center gap-3 cursor-pointer">
-            <div className="w-10 h-10 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-lg flex items-center justify-center font-bold text-slate-900 text-2xl">
-              SC
-            </div>
-            <span className="font-bold text-2xl">Sentinel Cloud</span>
-          </div>
+    <nav
+      className={`fixed w-full z-50 transition-all duration-300 ${
+        scrolled
+          ? "bg-slate-950/95 backdrop-blur-md shadow-lg"
+          : "bg-transparent"
+      }`}
+    >
+      <div className="px-6 lg:px-20 py-4 flex items-center justify-between">
+        
+        {/* LOGO */}
+       <div className="flex items-center gap-2">
+            <img className='w-15 h-15 rounded-full bg-transparent' src="/images/logo.jpeg" alt="logo"  />
+            <Link href="/" className="text-2xl font-bold text-white">
+          Sentinel <span className=" text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-blue-500">Cloud</span>
+        </Link>
+        </div>
 
-          {/* Desktop Navigation */}
-          <div className="hidden lg:flex space-x-10">
-            <Link href="#about" className="text-slate-300 hover:text-cyan-400 hover:underline cursor-pointer ">About us</Link>
-            {/* <a href="#pricing" className="text-slate-300 hover:text-cyan-400 hover:underline cursor-pointer ">Pricing</a> */}
-            <Link href="#solutions" className="text-slate-300 hover:text-cyan-400 hover:underline cursor-pointer ">Solutions</Link>
-            <Link href="#features" className="text-slate-300 hover:text-cyan-400 hover:underline hover:underline-offset-0 cursor-pointer ">Features</Link>
-          </div>
+        
+        
+        {/* DESKTOP MENU */}
+        <div className="hidden lg:flex items-center gap-8">
+          <Link href="#features" className="text-slate-300 hover:text-cyan-500 hover:underline hover:underline-offset-10 transition">
+            Features
+          </Link>
+          <Link href="/dashboard" className=" text-slate-300 hover:text-cyan-500 hover:underline hover:underline-offset-10 transition">
+            Dashboard
+          </Link>
+          <Link href="#alerts" className=" text-slate-300 hover:text-cyan-500 hover:underline hover:underline-offset-10 transition">
+            Alerts
+          </Link>
+          <Link href="#Contact" className=" text-slate-300 hover:text-cyan-500 hover:underline hover:underline-offset-10 transition">
+            Contact
+          </Link>
+        </div>
 
-          {/* Desktop Buttons */}
-          <div className="hidden lg:flex items-center space-x-4">
-            <button className="text-slate-300 hover:text-white font-medium">Log in</button>
-            <button className="bg-cyan-400 hover:bg-cyan-500 text-slate-900 px-6 py-2.5 rounded-lg text-sm font-bold transition-all shadow-[0_0_15px_rgba(34,211,238,0.3)]">
-              Get started
-            </button>
-          </div>
+        {/* DESKTOP BUTTONS */}
+        <div className="hidden lg:flex items-center gap-4">
+          <Link
+            href="/login">
+          <button className="px-5 py-2 hover:border hover:text-cyan-500 hover:border-cyan-500 rounded-lg transition">
+            Login</button>
+          </Link>
+          <Link
+            href="/Signup"
+            className="px-5 py-2 bg-linear-to-r from-cyan-500 to-blue-500 text-white rounded-lg hover:from-cyan-500 hover:to-blue-500 transition"
+          >
+            Get Started
+          </Link>
+        </div>
+
+        {/* MOBILE MENU ICON */}
+        <div className="lg:hidden text-white">
+          <button onClick={() => setIsOpen(!isOpen)}>
+            {isOpen ? <X size={28} /> : <Menu size={28} />}
+          </button>
         </div>
       </div>
+
+      {/* MOBILE DROPDOWN MENU */}
+      {isOpen && (
+        <div className="lg:hidden bg-slate-950/95 backdrop-blur-md px-6 pb-6 space-y-4 ">
+          
+          <Link href="#features" className="block text-slate-300 hover:text-cyan-500">
+            Home
+          </Link>
+          <Link href="#features" className="block text-slate-300 hover:text-cyan-500">
+            Features
+          </Link>
+          <Link href="#monitoring" className="block text-slate-300 hover:text-cyan-500">
+            Monitoring
+          </Link>
+          <Link href="#alerts" className="block text-slate-300 hover:text-cyan-500">
+            Alerts
+          </Link>
+          <Link href="#Contact" className="block text-slate-300 hover:text-cyan-500">
+            Contact
+          </Link>
+
+          <div className="pt-4 flex flex-col gap-3">
+            <Link href="/login"
+            className="px-5 py-2 border border-slate-300 hover:border-cyan-500 hover:text-cyan-500 rounded-lg text-center">
+              Login
+             
+            </Link>
+            <Link
+              href="/Signup"
+              className="px-5 py-2 bg-linear-to-r from-cyan-500 to-blue-500 hover:from-cyan-500 hover:to-blue-500 text-white rounded-lg text-center"
+            >
+              Get Started
+            </Link>
+          </div>
+        </div>
+      )}
     </nav>
   );
-};
-
-export default Navbar;
+}

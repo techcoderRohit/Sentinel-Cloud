@@ -1,53 +1,63 @@
+import React from 'react';
+import { motion } from 'framer-motion';
+
+// --- Footer Section ---
+const footerLinks = [
+  { title: 'Product', links: ['Features', 'Pricing', 'Hardware Compatibility', 'Changelog'] },
+  { title: 'Resources', links: ['Documentation', 'API Reference', 'Community Forum', 'Status'] },
+  { title: 'Company', links: ['About Us', 'Contact', 'Privacy Policy', 'Terms of Service'] },
+];
+
 const Footer = () => {
   return (
-    <footer className="bg-slate-950 pt-24 pb-12 border-t border-slate-800">
+    <footer id="company" className="py-16 bg-[#0B1120] border-t border-slate-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-        {/* Desktop 4-Column Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 lg:gap-8 mb-16">
-          <div className="lg:col-span-2">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 bg-cyan-400 rounded-lg flex items-center justify-center font-bold text-slate-900 text-2xl">S</div>
-              <span className="font-bold text-2xl text-white">Sentinel Cloud</span>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-12 mb-12">
+
+          {/* Brand Column */}
+          <div className="md:col-span-2">
+            <div className="flex items-center gap-2 mb-4">
+
+              <img className='w-15 h-15 rounded-full bg-transparent' src="/images/logo.jpeg" alt="logo" />
+              <h1 className="text-2xl font-bold text-white">
+                Sentinel <span className=" text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-blue-500">Cloud</span>
+              </h1>
             </div>
-            <p className="text-slate-400 text-lg leading-relaxed mb-6 max-w-sm">
-              Building the future of IoT development with powerful, easy-to-use cloud.
+            <p className="text-slate-500 leading-relaxed max-w-xs">
+              Powering the connected world with secure, scalable IoT infrastructure. Build fast, deploy globally.
             </p>
           </div>
 
-          <div>
-            <h4 className="text-white font-bold text-lg mb-6">Product</h4>
-            <ul className="space-y-4">
-              <li><a href="#" className="text-slate-400 hover:text-cyan-400 transition-colors">Features</a></li>
-              <li><a href="#" className="text-slate-400 hover:text-cyan-400 transition-colors">Integrations</a></li>
-              <li><a href="#" className="text-slate-400 hover:text-cyan-400 transition-colors">Pricing</a></li>
-              <li><a href="#" className="text-slate-400 hover:text-cyan-400 transition-colors">Changelog</a></li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="text-white font-bold text-lg mb-6">Company</h4>
-            <ul className="space-y-4">
-              <li><a href="#" className="text-slate-400 hover:text-cyan-400 transition-colors">About Us</a></li>
-              <li><a href="#" className="text-slate-400 hover:text-cyan-400 transition-colors">Careers</a></li>
-              <li><a href="#" className="text-slate-400 hover:text-cyan-400 transition-colors">Blog</a></li>
-              <li><a href="#" className="text-slate-400 hover:text-cyan-400 transition-colors">Contact</a></li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="text-white font-bold text-lg mb-6">Legal</h4>
-            <ul className="space-y-4">
-              <li><a href="#" className="text-slate-400 hover:text-cyan-400 transition-colors">Privacy Policy</a></li>
-              <li><a href="#" className="text-slate-400 hover:text-cyan-400 transition-colors">Terms of Service</a></li>
-            </ul>
-          </div>
+          {/* Link Columns */}
+          {footerLinks.map((section) => (
+            <div key={section.title}>
+              <h4 className="text-white font-semibold mb-5">{section.title}</h4>
+              <ul className="space-y-3">
+                {section.links.map((link) => (
+                  <li key={link}>
+                    <a href="#" className="text-slate-400 hover:text-cyan-400 transition-colors text-sm">
+                      {link}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
 
-        <div className="pt-8 border-t border-slate-800 text-center md:text-left flex flex-col md:flex-row justify-between items-center">
-          <p className="text-slate-500">© 2026 SaaSy Inc. All rights reserved.</p>
+        {/* Bottom Bar */}
+        <div className="pt-8 border-t border-slate-800 flex flex-col md:flex-row items-center justify-between gap-4 text-center">
+          <p className="text-slate-600 text-sm">
+            &copy; 2026 Sentinel Cloud. All rights reserved.
+          </p>
+          <div className="flex items-center gap-6 text-slate-500">
+            {['GitHub', 'Twitter', 'LinkedIn'].map(social => (
+              <a key={social} href="#" className="hover:text-white transition-colors text-sm">
+                {social}
+              </a>
+            ))}
+          </div>
         </div>
-
       </div>
     </footer>
   );

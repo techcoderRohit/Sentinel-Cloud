@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { User, Mail , Lock } from 'lucide-react';
 export default function Signup() {
   return (
-    <div className="flex justify-center items-center min-h-screen bg-slate-950 px-4 py-8">
+    <div className="flex justify-center items-center min-h-screen bg-[#0b1120] px-4 py-8">
       <div className="w-full max-w-md p-8 bg-slate-900 rounded-xl shadow-lg border border-slate-800">
         <div className="text-center mb-8">
           <h2 className="text-3xl font-bold text-cyan-400">Create an Account</h2>
