@@ -51,12 +51,12 @@ const Hero = () => {
         </motion.p>
 
         {/* CTA Buttons */}
-        <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+        <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-4 justify-center items-stretch sm:items-center w-full">
         <Link href='/Signup'>
           <motion.button 
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="w-full sm:w-auto px-6 py-3 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-lg shadow-[0_0_10px_rgba(6,182,212,0.4)] transition-all"
+            className="w-full sm:w-auto px-6 py-3 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-lg transition-all"
             href='/Signup'
           >
             Get Started
@@ -67,7 +67,7 @@ const Hero = () => {
           <motion.button 
             whileHover={{ scale: 1.05, backgroundColor: "rgba(30, 41, 59, 0.5)" }}
             whileTap={{ scale: 0.95 }}
-            className="w-full sm:w-auto px-6 py-3 rounded-lg border border-slate-600 text-white font-medium text-lg hover:border-cyan-500 transition-all backdrop-blur-sm"
+            className=" w-full sm:w-auto px-6 py-3 rounded-lg border border-slate-600 text-white font-medium text-lg hover:border-cyan-500 transition-all backdrop-blur-sm"
           >
             Live Dashboard
           </motion.button>
