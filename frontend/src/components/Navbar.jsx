@@ -56,12 +56,12 @@ export default function Navbar() {
         {/* DESKTOP BUTTONS */}
         <div className="hidden lg:flex items-center gap-4">
           <Link
-            href="/login">
+            href="/auth/login">
           <button className="px-5 py-2 hover:border hover:text-cyan-500 hover:border-cyan-500 rounded-lg transition">
             Login</button>
           </Link>
           <Link
-            href="/Signup"
+            href="/auth/Signup"
             className="px-5 py-2 bg-linear-to-r from-cyan-500 to-blue-500 text-white rounded-lg hover:from-cyan-500 hover:to-blue-500 transition"
           >
             Get Started
@@ -97,13 +97,13 @@ export default function Navbar() {
           </Link>
 
           <div className="pt-4 flex flex-col gap-3">
-            <Link href="/login"
+            <Link href="/auth/login"
             className="px-5 py-2 border border-slate-300 hover:border-cyan-500 hover:text-cyan-500 rounded-lg text-center">
               Login
              
             </Link>
             <Link
-              href="/Signup"
+              href="/auth/Signup"
               className="px-5 py-2 bg-linear-to-r from-cyan-500 to-blue-500 hover:from-cyan-500 hover:to-blue-500 text-white rounded-lg text-center"
             >
               Get Started

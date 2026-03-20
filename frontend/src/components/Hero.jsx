@@ -52,12 +52,12 @@ const Hero = () => {
 
         {/* CTA Buttons */}
         <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-4 justify-center items-stretch sm:items-center w-full">
-        <Link href='/Signup'>
+        <Link href='/auth/Signup'>
           <motion.button 
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className="w-full sm:w-auto px-6 py-3 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-lg transition-all"
-            href='/Signup'
+            
           >
             Get Started
           </motion.button>
