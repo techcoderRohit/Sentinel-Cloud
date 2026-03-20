@@ -1,8 +1,9 @@
-const express = require('express');
+import http from "http";
+import app from "./app.js";
 
-const app = express();
-const port = 5000;
+const server = http.createServer(app);
+const PORT = "5000";
 
-app.listen(port, () => {
-    console.log(('Server is started'));
-});
+server.listen(PORT, ()=>{
+    console.log(`Server running on ${PORT}`);
+})
