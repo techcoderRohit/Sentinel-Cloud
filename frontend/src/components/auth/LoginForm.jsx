@@ -6,7 +6,7 @@ export default function Login() {
       <div className="w-full max-w-md p-8 bg-slate-900 rounded-xl shadow-2xl border border-slate-800">
         <div className="text-center mb-8">
           <h2 className="text-3xl font-bold text-cyan-400">Welcome Back </h2>
-          <p className="text-slate-500 mt-2">Login to Sentinal Cloud account</p>
+          <p className="text-slate-500 mt-2">Login to Sentinel Cloud account</p>
         </div>
 
         <form className="space-y-5">
@@ -38,7 +38,7 @@ export default function Login() {
             <label className="flex items-center">
               <input 
                 type="checkbox" 
-                className="mr-2 rounded text-indigo-600 focus:ring-indigo-700" 
+                className="mr-2 rounded text-blue-600 focus:ring-blue-700" 
               />
               <span className="text-slate-500">Remember me</span>
             </label>
