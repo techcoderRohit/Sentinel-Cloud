@@ -46,7 +46,7 @@ const Hero = () => {
         </motion.h1>
 
         {/* Subheadline */}
-        <motion.p variants={itemVariants} className="mt-4 text-sm sm:text-base md:text-lg text-slate-300 max-w-4xl mx-auto mb-10 leading-relaxed">
+        <motion.p variants={itemVariants} className="mt-4 text-sm sm:text-base md:text-lg text-slate-400 max-w-4xl mx-auto mb-10 leading-relaxed">
           Monitor your IoT devices in real-time with Sentinel Cloud. Track Temperature, humidity and gas levels securely from anywhere using our scalable cloud-based platform.
         </motion.p>
 
