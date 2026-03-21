@@ -46,7 +46,7 @@ const Footer = () => {
         </div>
 
         {/* Bottom Bar */}
-        <div className="pt-8 border-t border-slate-800 flex flex-col md:flex-row items-center justify-between gap-4 text-center">
+        <div className="pt-4 border-t border-slate-800 flex flex-col md:flex-row items-center justify-between gap-4 text-center">
           <p className="text-slate-600 text-sm">
             &copy; 2026 Sentinel Cloud. All rights reserved.
           </p>
