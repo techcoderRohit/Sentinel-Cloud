@@ -25,11 +25,11 @@ export default function Navbar() {
           : "bg-transparent"
       }`}
     >
-      <div className="px-6 lg:px-20 py-1 lg:py-4 flex items-center justify-between">
+      <div className="px-6 md:px-20 h-18 md:h-22 flex items-center justify-between">
         
         {/* LOGO */}
        <div className="flex items-center gap-2">
-            <img className='w-15 h-15 rounded-full bg-transparent' src="/images/logo.jpeg" alt="logo"  />
+            <img className='w-14 h-14 rounded-full ' src="/images/logo.jpeg" alt="logo"  />
             <Link href="/" className="text-2xl font-bold text-white">
           Sentinel <span className=" text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-blue-500">Cloud</span>
         </Link>
@@ -38,7 +38,7 @@ export default function Navbar() {
         
         
         {/* DESKTOP MENU */}
-        <div className="hidden lg:flex items-center gap-8">
+        <div className="hidden md:flex items-center space-x-8">
           <Link href="#features" className="text-slate-300 hover:text-cyan-500 hover:underline hover:underline-offset-10 transition">
             Features
           </Link>
@@ -54,7 +54,7 @@ export default function Navbar() {
         </div>
 
         {/* DESKTOP BUTTONS */}
-        <div className="hidden lg:flex items-center gap-4">
+        <div className="hidden md:flex items-center gap-4">
           <Link
             href="/auth/login">
           <button className="px-5 py-2 hover:border hover:text-cyan-500 hover:border-cyan-500 rounded-lg transition">
@@ -69,7 +69,7 @@ export default function Navbar() {
         </div>
 
         {/* MOBILE MENU ICON */}
-        <div className="lg:hidden text-white">
+        <div className="md:hidden text-white">
           <button onClick={() => setIsOpen(!isOpen)}>
             {isOpen ? <X size={28} /> : <Menu size={28} />}
           </button>
@@ -78,7 +78,7 @@ export default function Navbar() {
 
       {/* MOBILE DROPDOWN MENU */}
       {isOpen && (
-        <div className="lg:hidden bg-slate-950/95 backdrop-blur-md px-6 pb-6 space-y-4 ">
+        <div className="md:hidden bg-slate-950/95 backdrop-blur-md shadow-lg px-6 pb-6 pt-4 space-y-4 ">
           
           <Link href="#features" className="block text-slate-300 hover:text-cyan-500">
             Home
