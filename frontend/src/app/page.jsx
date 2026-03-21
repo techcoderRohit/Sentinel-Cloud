@@ -1,14 +1,14 @@
 "use client"; // Required for Framer Motion animations
 
 import React from 'react';
-import Navbar from '@/components/Navbar';
-import Hero from '@/components/Hero';
-import FeaturesBento from '@/components/FeaturesBento';
-import DeveloperSection from '@/components/DeveloperSection';
-import Testimonials from '@/components/Testimonials';
-import Contact from '@/components/Contact';
-import CTA from '@/components/CTA';
-import Footer from '@/components/Footer';
+import Navbar from '@/components/pages/Navbar';
+import Hero from '@/components/pages/Hero';
+import FeaturesBento from '@/components/pages/FeaturesBento';
+import DeveloperSection from '@/components/pages/DeveloperSection';
+import Testimonials from '@/components/pages/Testimonials';
+import Contact from '@/components/pages/Contact';
+import CTA from '@/components/pages/CTA';
+import Footer from '@/components/pages/Footer';
 
 export default function SentinelLandingPage() {
   return (
