@@ -1,7 +1,26 @@
+"use client";
 import Link from 'next/link';
 import { User, Mail , Lock } from 'lucide-react';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+
 export default function Signup() {
-  return (
+
+  const [formData, setFormData] = useState({
+   name : '',
+   email : '',
+   password : '',
+   confirmPassword : ''
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const router = useRouter();
+
+  const handleChange = (e) => {
+    setFormData({...formData,[e.targe]})
+  }
+
+return (
     <div className="flex justify-center items-center min-h-screen bg-[#0b1120] px-4 py-8">
       <div className="w-full max-w-md p-8 bg-slate-900 rounded-xl shadow-lg border border-slate-800">
         <div className="text-center mb-8">

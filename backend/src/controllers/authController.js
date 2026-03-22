@@ -13,9 +13,9 @@ const generateToken = (id) => {
 //signupUser
 const SignupUser = async (req, res) => {
     try {
-        const { fullname, email, password, confirmPassword } = req.body;
+        const { name, email, password, confirmPassword } = req.body;
         //validation checks 
-        if (!fullname || !email || !password || !confirmPassword) {
+        if (!name || !email || !password || !confirmPassword) {
             return res.status(400).json({ message: "Please fill all Fields" });
         }
 
@@ -29,7 +29,7 @@ const SignupUser = async (req, res) => {
         }
         //create new user
         const user = await User.create({
-            fullname,
+            name,
             email,
             password
         });
@@ -37,7 +37,7 @@ const SignupUser = async (req, res) => {
         res.status(201).json({
             message: "User registered Successfully",
             _id: user._id,
-            fullname: user.name,
+            name: user.name,
             email: user.email,
             role: user.role,
             token: generateToken(user._id)
@@ -71,7 +71,7 @@ const loginUser = async (req,res) => {
          res.status(200).json({
             message:"Login successful",
             _id: user._id,
-            fullname: user.name,
+            name: user.name,
             email: user.email,
             role: user.role,
             token: generateToken(user._id)
