@@ -54,17 +54,7 @@ export default function Signup() {
             />
             </div>
             </div>
-          <div className="flex items-start">
-            <input 
-              type="checkbox" 
-              id="terms" 
-              className="mt-1 mr-2 rounded text-indigo-600 focus:ring-indigo-500" 
-            />
-            <label htmlFor="terms" className="text-sm text-slate-500">
-              I agree to the <Link href="/" className="text-cyan-400 hover:text-cyan-500 hover:underline">Terms of Service</Link> and <Link href="/" className="text-cyan-400 hover:text-cyan-500 hover:underline">Privacy Policy</Link>.
-            </label>
-          </div>
-
+          
           <button 
             type="submit"
             className="w-full px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-semibold rounded-lg hover:from-cyan-400 hover:to-blue-400 transition duration-300 shadow-2xl"
