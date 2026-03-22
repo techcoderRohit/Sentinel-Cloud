@@ -1,6 +1,6 @@
 //import packages
-import express from "express";
-import cors from "cors";
+const express = require('express');
+const cors = require('cors');
 
 //Create app
 const app = express();
@@ -16,5 +16,5 @@ app.get('/', (req,res)=>{
 
 
 // Export app
-export default app;
+module.exports = app;
 
