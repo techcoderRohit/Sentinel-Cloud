@@ -4,6 +4,7 @@ import { User, Mail , Lock } from 'lucide-react';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
+
 export default function Signup() {
 
   const [formData, setFormData] = useState({
@@ -42,15 +43,18 @@ export default function Signup() {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.message || "Registration failed");
+        window.alert (data.message || "Registration failed!");
+        setLoading(false);
+        return;
+      
       }
 
       // ✅ Success: Alert dikhao aur Login page par redirect karo
-      alert("Account created successfully! Please login.");
-      router.push("/auth/login");
+      window.alert("Account created successfully!");
+      router.push("/auth/login"); 
 
     } catch (err) {
-      setError(err.message);
+      setError(err.message)
     } finally {
       setLoading(false);
     }
@@ -76,7 +80,7 @@ return (
               value={formData.name}
               onChange={handleChange}
               placeholder="Enter your name"
-              className="w-full px-4 py-2 text-white placeholder-slate-400 outline-none " 
+              className="w-full px-4 py-2 text-white bg-transparent placeholder-slate-400 outline-none " 
             />
             </div>
             </div>
@@ -129,7 +133,7 @@ return (
           <button 
             type="submit"
             disabled={loading}
-            className="w-full flex justify-center items-center px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-semibold rounded-lg hover:from-cyan-400 hover:to-blue-400 transition duration-300 shadow-2xl disabled:opacity-50"
+            className="w-full flex justify-center items-center px-4 py-2 bg-linear-to-r from-cyan-500 to-blue-500 text-white font-semibold rounded-lg hover:from-cyan-400 hover:to-blue-400 transition duration-300 shadow-2xl disabled:opacity-50"
           >
             Create Account
           </button>

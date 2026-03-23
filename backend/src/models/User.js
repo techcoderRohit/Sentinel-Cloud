@@ -38,10 +38,10 @@ const userSchema = new Schema(
 
 //password hash before save
 
-userSchema.pre("save" , async function () {
+userSchema.pre("save" , async function (next) {
    //agar password change nhi hua toh skip kare
    if(!this.isModified("password"))
-      return ;
+      return next();
    const salt = await bcrypt.genSalt(10);
    this.password = await bcrypt.hash(this.password, salt);
    

@@ -13,6 +13,7 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body className={`${inter.className} selection:bg-indigo-500/30 selection:text-indigo-200`}>
         {children}
+        
       </body>
     </html>
   );

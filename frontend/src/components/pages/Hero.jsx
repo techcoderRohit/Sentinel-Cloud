@@ -63,7 +63,7 @@ const Hero = () => {
           </motion.button>
           </Link>
           
-          {/* <Link href= '/dashboard'> */}
+          <Link href= '/dashboard'>
           <motion.button 
             whileHover={{ scale: 1.05, backgroundColor: "rgba(30, 41, 59, 0.5)" }}
             whileTap={{ scale: 0.95 }}
@@ -71,7 +71,7 @@ const Hero = () => {
           >
             Live Dashboard
           </motion.button>
-          {/* </Link> */}
+          </Link> 
         </motion.div>
       </motion.div>
     </section>
