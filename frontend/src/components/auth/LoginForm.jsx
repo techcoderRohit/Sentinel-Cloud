@@ -62,7 +62,7 @@ export default function Login() {
                 value={formData.email}
                 onChange={handleChange}
                 placeholder="Enter your Email"
-                className="w-full px-4 py-2 text-white bg-transparent placeholder-slate-400 outline-none autofill:shadow-[0_0_0_30px_#1e293b_inset]autofill:text-fill-white"
+                className="w-full px-4 py-2 text-white bg-transparent placeholder-slate-400 outline-none"
               />
             </div>
           </div>
