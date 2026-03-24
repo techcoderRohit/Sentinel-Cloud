@@ -3,6 +3,9 @@ import Link from 'next/link';
 import { Mail, Lock } from 'lucide-react';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
+import API from '@/utils/api';
+API
 export default function Login() {
   const [formData, setFormData] = useState({ email: '', password: '', });
   const [loading, setLoading] = useState(false);
@@ -19,25 +22,29 @@ export default function Login() {
     setError('');
 
     try {
-      const res = await fetch("http://localhost:5000/api/auth/loginUser", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
+      //Axios post request
+      //Axios automatically JSON.stringify kar deta hai
+      const response = await API.post("/auth/loginUser",formData);
+     
+      //Axios mein backend ka data 'response.data' mein deta hai
+      const data = response.data;
+      if(response.status === 200){
+        //1. Token aur Role save karein 
+        localStorage.setItem('token' ,data.token);
+        localStorage.setItem("userRole" ,data.role); // Role check ke liye
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.message || "Something went wrong");
+        toast.success('Login Successful!');
+        //Dashboard par redirect karein
+        router.push("/dashboard");
       }
-
-      // ✅ Success: Alert dikhao aur Login page par redirect karo
-      localStorage.setItem('token', data.token);
-      window.alert("Login successful");
-      router.push("/dashboard")
-    } catch (err) {
-      setError(err.message)
-    } finally {
+    }
+    // Axios errors ko 'err.response' se handle karta hai
+    catch(err){
+      const errorMsg = err.response?.data?.message || "Invalid Credentials!";
+      toast.error(errorMsg);
+      console.error('Login Error:', err);
+    }
+    finally{
       setLoading(false);
     }
   };

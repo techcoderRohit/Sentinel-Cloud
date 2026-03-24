@@ -16,16 +16,16 @@ const SignupUser = async (req, res) => {
         const { name, email, password, confirmPassword } = req.body;
         //validation checks 
         if (!name || !email || !password || !confirmPassword) {
-            return res.status(400).json({ message: "Please fill all Fields" });
+            return res.status(400).json({ message: "Please fill all Fields!" });
         }
 
         if (password !== confirmPassword) {
-            return res.status(400).json({ message: "Passwords do not match" });
+            return res.status(400).json({ message: "Passwords do not match!" });
         }
 
         const userExists = await User.findOne({ email });
         if (userExists) {
-            return res.status(400).json({ message: "User Already exists" });
+            return res.status(400).json({ message: "User Already exists!" });
         }
         //create new user
         const user = await User.create({
@@ -56,16 +56,16 @@ const loginUser = async (req,res) => {
     try{
         const {email , password} = req.body;
         if(!email || !password){
-             return res.status(400).json({message : "Please provide email and password"});
+             return res.status(400).json({message : "Please provide email and password!"});
         }
         const user = await User.findOne({email});
         if(!user){
-             return res.status(401).json({message : "Invalid email or password"});
+             return res.status(401).json({message : "Invalid email or password!"});
         }
         //Password match check karna 
         const isMatch = await user.matchPassword(password);
         if(!isMatch){
-             return res.status(401).json({message : "Invalid email or password"});
+             return res.status(401).json({message : "Invalid email or password!"});
         }
         //response
          res.status(200).json({

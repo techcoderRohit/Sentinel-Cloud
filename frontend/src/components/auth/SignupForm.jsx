@@ -3,7 +3,8 @@ import Link from 'next/link';
 import { User, Mail, Lock } from 'lucide-react';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-
+import toast from 'react-hot-toast';
+import API from '@/utils/api';
 
 export default function Signup() {
 
@@ -34,28 +35,18 @@ export default function Signup() {
     }
 
     try {
-      const res = await fetch("http://localhost:5000/api/auth/SignupUser", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        window.alert(data.message || "Registration failed!");
-        setLoading(false);
-        return;
-
+      const response = await API.post("/auth/SignupUser",formData);
+      if(response.status === 201){
+        toast.success ("User registered successfully!");
+        router.push('/auth/login');
       }
-
-      // ✅ Success: Alert dikhao aur Login page par redirect karo
-      window.alert("Account created successfully!");
-      router.push("/auth/login");
-
-    } catch (err) {
-      setError(err.message)
-    } finally {
+    }
+    // Axios errors ko 'err.response' se handle karta hai
+    catch(err){
+      const errorMsg = err.response ?.data?.message || "Registration Failed!";
+      toast.error(errorMsg);
+    }
+    finally{
       setLoading(false);
     }
   };
