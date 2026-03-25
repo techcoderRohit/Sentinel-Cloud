@@ -2,6 +2,8 @@
 const express = require('express');
 const cors = require('cors');
 const authRoutes = require("./routes/authRoutes");
+const deviceRoutes = require("./routes/deviceRoutes");
+
 
 //Create app
 const app = express();
@@ -10,6 +12,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use("/api/auth",authRoutes);
+app.use("/api/devices",deviceRoutes);
 
 //Test route
 app.get('/', (req,res)=>{
