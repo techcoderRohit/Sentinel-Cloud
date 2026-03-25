@@ -1,6 +1,6 @@
 "use client";
 import Link from 'next/link';
-import { Mail, Lock } from 'lucide-react';
+import { Mail, Lock ,Loader2} from 'lucide-react';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
@@ -55,8 +55,8 @@ export default function Login() {
           <h2 className="text-3xl font-bold text-cyan-400">Welcome Back </h2>
           <p className="text-slate-500 mt-2">Login to Sentinel Cloud account</p>
         </div>
-        {/* Error message display */}
-        {error && <div className='text-red-500 p-2 rounded mb-4 text-sm text-center'>{error}</div>}
+        {/* Error message display 
+        {error && <div className='text-red-500 p-2 rounded mb-4 text-sm text-center'>{error}</div>}*/}
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
             <label className=" text-slate-300 mb-2">Email</label>
@@ -107,7 +107,7 @@ export default function Login() {
             type="submit"
             disabled={loading}
             className="w-full flex items-center justify-center px-4 py-2 bg-linear-to-r from-cyan-500 to-blue-500 text-white font-bold rounded-lg hover:from-cyan-400 hover:to-blue-400 transition duration-300 shadow-2xl disabled:opacity-50">
-            Login
+            {loading ? <Loader2 className='animate-spin mr-2' size={20}/> : "Login"}
           </button>
         </form>
 
