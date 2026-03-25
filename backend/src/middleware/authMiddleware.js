@@ -6,7 +6,7 @@ const protect = async (req, res, next) => {
     try {
         //check karein ki header mein Authorization aur wo 'Bearer' se shuru ho raha h
         if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-            //Token nikalein (Bearer<token>)
+            //Token nikalein (Bearer <token>)
             token = req.headers.authorization.split(" ")[1];
            // console.log(token);
 
@@ -20,13 +20,14 @@ const protect = async (req, res, next) => {
         }
         else {
             res.status(401).json({
-                message: "Not authorized, token missing"
+                message: "Not authorized, No token Found!"
             });
         }
     }
     catch (err) {
+        console.log("Token verification:", error.message);
         res.status(401).json({
-            message: "Not authorized, failed"
+            message: "Not authorized,  Token failed!"
         });
     }
 };
