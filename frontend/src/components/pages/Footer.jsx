@@ -18,7 +18,10 @@ const Footer = () => {
           <div className="md:col-span-2">
             <div className="flex items-center gap-2 mb-4">
 
-              <img className='w-15 h-15 rounded-full bg-transparent' src="/images/logo.jpeg" alt="logo" />
+              {/*<img className='w-15 h-15 rounded-full bg-transparent' src="/images/logo.jpeg" alt="logo" />*/}
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center mr-2">
+                <span className="text-white font-bold">SC</span>
+              </div>
               <h1 className="text-2xl font-bold text-white">
                 Sentinel <span className=" text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-blue-500">Cloud</span>
               </h1>
