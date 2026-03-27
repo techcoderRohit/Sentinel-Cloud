@@ -1,7 +1,5 @@
 const express = require('express');
-const { SignupUser , loginUser} = require('../controllers/authController');
-const {protect,adminOnly} = require('../middleware/authMiddleware');
-
+const { SignupUser , loginUser, refreshToken, logoutUser} = require('../controllers/authController');
 
 const router = express.Router();
 
@@ -9,8 +7,8 @@ router.post("/SignupUser", SignupUser);
 
 router.post("/loginUser", loginUser);
 
-router.get('/all-users',protect,adminOnly ,(req,res) =>{
-    res.json({message : "success!", user:req.user});
-});
+router.post("/logoutUser", logoutUser);
+
+router.post("/refreshToken", refreshToken);
 
 module.exports = router;

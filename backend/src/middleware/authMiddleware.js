@@ -4,16 +4,16 @@ const User = require('../models/User');
 const protect = async (req, res, next) => {
     let token;
     try {
-        //check karein ki header mein Authorization aur wo 'Bearer' se shuru ho raha h
+        //check token in header
         if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-            //Token nikalein (Bearer <token>)
+            //get token
             token = req.headers.authorization.split(" ")[1];
-           // console.log(token);
+            // console.log(token);
 
-            //Token verify karein
+            //verify token
             const decoded = jwt.verify(token, process.env.JWT_SECRET);
-           // console.log(decoded)
-            //Database se user nikalein (password ko chod kar) aur req.user mein save karein
+            // console.log(decoded)
+            //get user from DB(without password)
             req.user = await User.findById(decoded.id).select("-password");
             next(); // Agle route par jane ke liye
 
@@ -31,16 +31,16 @@ const protect = async (req, res, next) => {
         });
     }
 };
-
-const adminOnly = (req , res , next) => {
-    if(req.user && req.user.role === "admin"){
+//Admin only middleware
+const adminOnly = (req, res, next) => {
+    if (req.user && req.user.role === "admin") {
         next();
     }
-    else{
-         res.status(403).json({
+    else {
+        res.status(403).json({
             message: "Admin access only"
         });
     }
 };
 
-module.exports = {protect,adminOnly};
+module.exports = { protect, adminOnly };
