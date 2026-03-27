@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 
-export default function Contact() {
+const Contact = () => {
   return (
     <section
       id="Contact"
@@ -131,3 +131,4 @@ export default function Contact() {
     </section>
   );
 }
+export default Contact;

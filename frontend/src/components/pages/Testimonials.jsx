@@ -27,7 +27,7 @@ const testimonials = [
   },
 ];
 
-export default function Testimonials() {
+const Testimonials = () => {
   return (
     <section
       id="testimonials"
@@ -94,3 +94,4 @@ export default function Testimonials() {
     </section>
   );
 }
+export default Testimonials;
