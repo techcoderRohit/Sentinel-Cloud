@@ -1,13 +1,13 @@
 const express = require('express');
 const {registerDevice, getMyDevices, deleteDevice} = require('../controllers/deviceController');
-const {protect,adminOnly} = require('../middleware/authMiddleware');
-const authorize = require('../middleware/roleMiddleware');
+const {protect} = require('../middleware/authMiddleware');
+const authorizeRoles = require('../middleware/roleMiddleware');
 const router = express.Router();
 
-router.post("/",protect, registerDevice);
+router.post("/",protect,authorizeRoles("user","admin"), registerDevice);
 
-router.get("/",protect , getMyDevices);
+router.get("/",protect ,authorizeRoles("user","admin"), getMyDevices);
 
-router.delete('/:id',protect, authorize('admin','user') , deleteDevice);
+router.delete('/:id',protect, authorizeRoles('admin') , deleteDevice);
 
 module.exports = router;

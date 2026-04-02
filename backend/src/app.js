@@ -4,6 +4,7 @@ const cors = require('cors');
 const authRoutes = require("./routes/authRoutes");
 const deviceRoutes = require("./routes/deviceRoutes");
 const userRoutes = require("./routes/userRoutes");
+const adminRoutes = require("./routes/adminRoutes");
 
 
 //Create app
@@ -15,6 +16,7 @@ app.use(express.json());
 app.use("/api/auth",authRoutes);
 app.use("/api/user",userRoutes);
 app.use("/api/devices",deviceRoutes);
+app.use("/api/admin",adminRoutes);
 
 //Test route
 app.get('/', (req,res)=>{

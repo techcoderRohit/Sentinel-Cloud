@@ -22,12 +22,15 @@ const deviceSchema = new mongoose.Schema({
         ref: 'User',
         required: true
     },
+    location: {
+         type: String
+    },
     status: {
         type: String,
         enum: ['online', 'offline'],
         default: 'offline'
     },
-    lastPulse: {
+    lastActive: {
         type: Date,
         default: Date.now
     },

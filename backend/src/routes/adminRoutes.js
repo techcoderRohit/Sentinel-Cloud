@@ -1,10 +1,15 @@
 const express = require('express');
 const {protect} = require('../middleware/authMiddleware');
-const getUserProfile = require('../controllers/userController');
 const authorizeRoles = require('../middleware/roleMiddleware');
+
 const router = express.Router();
 
-//profile route 
-router.get("/profile",protect,authorizeRoles("user","admin"),getUserProfile);
+//admin dashboard
+
+router.get('/dashboard',protect,authorizeRoles('admin'),(req,res)=>{
+    res.json({
+        message : "Welcome Admin"
+    });
+});
 
 module.exports = router;

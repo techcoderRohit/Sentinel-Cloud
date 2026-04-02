@@ -5,7 +5,7 @@ const crypto = require('crypto'); // API key generate karne ke liye
 // private - Any logged in user
 const registerDevice = async (req,res) => {
     try{
-        const {deviceName , deviceId, deviceType} = req.body;
+        const {deviceName , deviceId, deviceType,location} = req.body;
 
         const deviceExists = await Device.findOne({deviceId});
         if(deviceExists){
@@ -17,10 +17,11 @@ const registerDevice = async (req,res) => {
 
         const apiKey = crypto.randomBytes(16).toString('hex');
 
-        await Device.create({
+     const device = await Device.create({
             deviceName,
             deviceId,
             deviceType,
+            location,
             owner : req.user.id, //Auth middleware se user Id mil rahi h
             apiKey
         });

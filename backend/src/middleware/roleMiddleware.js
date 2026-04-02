@@ -1,4 +1,4 @@
-const authorize = (...roles) => {
+const authorizeRoles = (...roles) => {
     return (req , res , next) => {
         //1. check karein ki req.user exist karta h (protect middleware pehle chalna chahiye)
         if(!req.user){
@@ -9,7 +9,7 @@ const authorize = (...roles) => {
         //2. check karein ki user ka role allowed role ki list mein h ya nhi
         if(!roles.includes(req.user.role)){
             return res.status(403).json({
-                message : `Access Denied: Role (${req.user.role} is not authorized to perform this action) `
+                message : `Access Denied: ${req.user.role} is not allowed`
             });
         }
         //3. agar role match kar gaya, toh agle fuction par bhejein
@@ -17,4 +17,4 @@ const authorize = (...roles) => {
     };
 };
 
-module.exports = authorize;
+module.exports = authorizeRoles;

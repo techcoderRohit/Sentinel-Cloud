@@ -7,7 +7,7 @@ router.post("/SignupUser", SignupUser);
 
 router.post("/loginUser", loginUser);
 
-router.post("/logoutUser", logoutUser);
+router.post("/logout", logoutUser);
 
 router.post("/refreshToken", refreshToken);
 

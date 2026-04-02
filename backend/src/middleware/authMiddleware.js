@@ -24,7 +24,7 @@ const protect = async (req, res, next) => {
             });
         }
     }
-    catch (err) {
+    catch (error) {
         console.log("Token verification:", error.message);
         res.status(401).json({
             message: "Not authorized,  Token failed!"
@@ -32,7 +32,7 @@ const protect = async (req, res, next) => {
     }
 };
 //Admin only middleware
-const adminOnly = (req, res, next) => {
+/*const adminOnly = (req, res, next) => {
     if (req.user && req.user.role === "admin") {
         next();
     }
@@ -41,6 +41,6 @@ const adminOnly = (req, res, next) => {
             message: "Admin access only"
         });
     }
-};
+};*/
 
-module.exports = { protect, adminOnly };
+module.exports = { protect };
