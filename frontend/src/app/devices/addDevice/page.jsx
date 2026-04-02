@@ -12,7 +12,7 @@ export default function AddDevicePage() {
         deviceName: "",
         deviceId: "",
         deviceType: "Sensor",
-        location:""
+        location: ""
     });
 
     const [loading, setLoading] = useState(false);
@@ -120,7 +120,7 @@ export default function AddDevicePage() {
                         className="w-full flex items-center justify-center px-4 py-2 bg-linear-to-r from-cyan-500 to-blue-500 text-white font-bold rounded-lg hover:from-cyan-400 hover:to-blue-400 transition duration-300 shadow-2xl disabled:opacity-50"
                         disabled={loading}
                     >
-                       {loading ? <Loader2 className='animate-spin mr-2' size={20}/> : "Add Device"}
+                        {loading ? <Loader2 className='animate-spin mr-2' size={20} /> : "Add Device"}
                     </button>
                 </form>
             </div>

@@ -1,6 +1,6 @@
 "use client";
 import Link from 'next/link';
-import { User, Mail, Lock,Loader2 } from 'lucide-react';
+import { User, Mail, Lock, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
@@ -35,18 +35,18 @@ export default function Signup() {
     }
 
     try {
-      const response = await API.post("/auth/SignupUser",formData);
-      if(response.status === 201){
-        toast.success ("User registered successfully!");
+      const response = await API.post("/auth/SignupUser", formData);
+      if (response.status === 201) {
+        toast.success("User registered successfully!");
         router.push('/auth/login');
       }
     }
     // Axios errors ko 'err.response' se handle karta hai
-    catch(err){
-      const errorMsg = err.response ?.data?.message || "Registration Failed!";
+    catch (err) {
+      const errorMsg = err.response?.data?.message || "Registration Failed!";
       toast.error(errorMsg);
     }
-    finally{
+    finally {
       setLoading(false);
     }
   };
@@ -125,8 +125,8 @@ export default function Signup() {
             type="submit"
             disabled={loading}
             className="w-full flex justify-center items-center px-4 py-2 bg-linear-to-r from-cyan-500 to-blue-500 text-white font-semibold rounded-lg hover:from-cyan-400 hover:to-blue-400 transition duration-300 shadow-2xl disabled:opacity-50"
-          >{loading ? <Loader2 className='animate-spin mr-2' size={20}/> : "Create Account"}
-            
+          >{loading ? <Loader2 className='animate-spin mr-2' size={20} /> : "Create Account"}
+
           </button>
         </form>
 

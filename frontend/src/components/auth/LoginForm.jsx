@@ -1,6 +1,6 @@
 "use client";
 import Link from 'next/link';
-import { Mail, Lock ,Loader2} from 'lucide-react';
+import { Mail, Lock, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
@@ -24,14 +24,14 @@ export default function Login() {
     try {
       //Axios post request
       //Axios automatically JSON.stringify kar deta hai
-      const response = await API.post("/auth/loginUser",formData);
-     
+      const response = await API.post("/auth/loginUser", formData);
+
       //Axios mein backend ka data 'response.data' mein deta hai
       const data = response.data;
-      if(response.status === 200){
+      if (response.status === 200) {
         //1. Token aur Role save karein 
-        localStorage.setItem('token' ,data.token);
-        localStorage.setItem("userRole" ,data.role); // Role check ke liye
+        localStorage.setItem('token', data.token);
+        localStorage.setItem("userRole", data.role); // Role check ke liye
 
         toast.success('Login Successful!');
         //Dashboard par redirect karein
@@ -39,12 +39,12 @@ export default function Login() {
       }
     }
     // Axios errors ko 'err.response' se handle karta hai
-    catch(err){
+    catch (err) {
       const errorMsg = err.response?.data?.message || "Invalid Credentials!";
       toast.error(errorMsg);
       console.error('Login Error:', err);
     }
-    finally{
+    finally {
       setLoading(false);
     }
   };
@@ -107,7 +107,7 @@ export default function Login() {
             type="submit"
             disabled={loading}
             className="w-full flex items-center justify-center px-4 py-2 bg-linear-to-r from-cyan-500 to-blue-500 text-white font-bold rounded-lg hover:from-cyan-400 hover:to-blue-400 transition duration-300 shadow-2xl disabled:opacity-50">
-            {loading ? <Loader2 className='animate-spin mr-2' size={20}/> : "Login"}
+            {loading ? <Loader2 className='animate-spin mr-2' size={20} /> : "Login"}
           </button>
         </form>
 
