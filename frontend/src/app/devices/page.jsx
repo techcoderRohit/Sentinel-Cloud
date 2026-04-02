@@ -45,14 +45,14 @@ export default function DeviceListPage() {
 
                         <p className="mt-2">
                             Status:
-                            <span className={device.status === "online" ? "text-green-400" : "text-red-400"}>
+                            <span className={device.status === "Online" ? "text-emerlad-400" : "text-rose-400"}>
                                 {" "}{device.status}
                             </span>
                         </p>
 
                         <div className="flex justify-between mt-3 text-sm border-t border-gray-700 pt-2">
                             <span>Type: {device.deviceType}</span>
-                            <span className={device.anomalyDetected ? "text-yellow-400" : "text-green-400"}>
+                            <span className={device.anomalyDetected ? "text-yellow-400" : "text-emerlad-400"}>
                                 {device.anomalyDetected ? "⚠️ Anomaly" : "✅ Normal"}
                             </span>
                         </div>

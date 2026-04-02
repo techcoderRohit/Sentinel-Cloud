@@ -27,8 +27,8 @@ const deviceSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['online', 'offline'],
-        default: 'offline'
+        enum: ['Online', 'Offline'],
+        default: 'Offline'
     },
     lastActive: {
         type: Date,
