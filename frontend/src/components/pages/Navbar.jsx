@@ -29,11 +29,11 @@ export default function Navbar() {
         {/* LOGO */}
         <div className="flex items-center gap-2">
           {/*<img className='w-14 h-14 rounded-full ' src="/images/logo.jpeg" alt="logo"  />*/}
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center mr-2">
+          <div className="w-10 h-10 rounded-full bg-linear-to-br from-cyan-500 to-blue-500 flex items-center justify-center mr-2">
             <span className="text-white font-bold">SC</span>
           </div>
           <Link href="/" className="text-2xl font-bold text-white">
-            Sentinel <span className=" text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-blue-500">Cloud</span>
+            Sentinel <span className=" text-transparent bg-clip-text bg-linear-to-r from-cyan-500 to-blue-500">Cloud</span>
           </Link>
         </div>
         {/* DESKTOP MENU */}
@@ -61,7 +61,7 @@ export default function Navbar() {
           </Link>
           <Link
             href="/auth/Signup"
-            className="px-5 py-2 bg-linear-to-r from-cyan-500 to-blue-500 text-white rounded-lg hover:from-cyan-500 hover:to-blue-500 transition"
+            className="px-5 py-2 bg-linear-to-r from-cyan-500 to-blue-500 text-white rounded-lg hover:from-cyan-600 hover:to-blue-600 transition"
           >
             Get Started
           </Link>
@@ -79,14 +79,14 @@ export default function Navbar() {
       {isOpen && (
         <div className="md:hidden bg-slate-950/95 backdrop-blur-md shadow-lg px-6 pb-6 pt-4 space-y-4 ">
 
-          <Link href="#features" className="block text-slate-300 hover:text-cyan-500">
+          <Link href="/" className="block text-slate-300 hover:text-cyan-500">
             Home
           </Link>
           <Link href="#features" className="block text-slate-300 hover:text-cyan-500">
             Features
           </Link>
-          <Link href="#monitoring" className="block text-slate-300 hover:text-cyan-500">
-            Monitoring
+          <Link href="/dashboard" className="block text-slate-300 hover:text-cyan-500">
+            Dashboard
           </Link>
           <Link href="#alerts" className="block text-slate-300 hover:text-cyan-500">
             Alerts
@@ -103,7 +103,7 @@ export default function Navbar() {
             </Link>
             <Link
               href="/auth/Signup"
-              className="px-5 py-2 bg-linear-to-r from-cyan-500 to-blue-500 hover:from-cyan-500 hover:to-blue-500 text-white rounded-lg text-center"
+              className="px-5 py-2 bg-linear-to-r from-cyan-500 to-blue-600 hover:from-cyan-500 hover:to-blue-600 text-white rounded-lg text-center"
             >
               Get Started
             </Link>
