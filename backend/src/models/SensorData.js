@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const sensorData = new mongoose.Schema({
     deviceId: {
         type: String,
-        required: [true, 'Device ID is required to map data'],
+        required: true, 
         index: true
     },
     sensorData: {

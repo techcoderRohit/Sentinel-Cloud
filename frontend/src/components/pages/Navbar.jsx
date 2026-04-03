@@ -99,12 +99,10 @@ export default function Navbar() {
             <Link href="/auth/login"
               className="px-5 py-2 border border-slate-300 hover:border-cyan-500 hover:text-cyan-500 rounded-lg text-center">
               Login
-
-            </Link>
+           </Link>
             <Link
               href="/auth/Signup"
-              className="px-5 py-2 bg-linear-to-r from-cyan-500 to-blue-600 hover:from-cyan-500 hover:to-blue-600 text-white rounded-lg text-center"
-            >
+              className="px-5 py-2 bg-linear-to-r from-cyan-500 to-blue-600 hover:from-cyan-500 hover:to-blue-600 text-white rounded-lg text-center" >
               Get Started
             </Link>
           </div>
