@@ -38,11 +38,11 @@ export default function Login() {
         router.push("/dashboard");
       }
     }
-    // Axios errors ko 'err.response' se handle karta hai
-    catch (err) {
-      const errorMsg = err.response?.data?.message || "Invalid Credentials!";
+    // Axios errors ko 'error.response' se handle karta hai
+    catch (error) {
+      const errorMsg = error.response?.data?.message || "Invalid Credentials!";
       toast.error(errorMsg);
-      console.error('Login Error:', err);
+      
     }
     finally {
       setLoading(false);
