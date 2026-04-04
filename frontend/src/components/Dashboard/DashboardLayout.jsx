@@ -16,7 +16,7 @@ const DashboardLayout = ({ children }) => {
     window.location.href = "/auth/login"
   }
   return (
-    <div className="min-h-screen bg-[#0B1120] flex text-slate-300 font-sans">
+    <div className="min-h-screen bg-[#0b0f1a] flex text-slate-300 font-sans">
 
       {/* Sidebar */}
       <aside className="w-64 bg-[#0F172A] border-r border-slate-800 flex flex-col fixed h-full z-10">

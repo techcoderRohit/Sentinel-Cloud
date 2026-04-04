@@ -28,7 +28,7 @@ toast.success(res.data.message || "Reset link sent to your email")
 
 
   return (
-    <div className="min-h-screen bg-[#0b1120] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#0b0f1a] flex items-center justify-center p-4">
       <form onSubmit={handleSubmit} className="bg-slate-900 p-8 rounded-xl border border-slate-800 w-96">
         <h2 className="text-2xl text-cyan-500 font-bold mb-4 text-center">Forgot Password</h2>
         <p className='text-slate-400 text-sm mb-6 text-center'>Enter your email and we'll send you a link to reset your password.</p>

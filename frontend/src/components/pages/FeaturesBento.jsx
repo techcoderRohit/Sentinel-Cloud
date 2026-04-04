@@ -42,7 +42,7 @@ const features = [
 
 const FeaturesBento = () => {
   return (
-    <section id="features" className="py-24 bg-[#0B1120] relative">
+    <section id="features" className="py-24 bg-[#0b0f1a] relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <div className="text-center mb-16">
