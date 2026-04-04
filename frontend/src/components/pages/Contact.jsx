@@ -19,8 +19,8 @@ const Contact = () => {
           className="text-center mb-16"
         >
           <h2 className="text-4xl md:text-5xl font-bold mb-4">
-            Get in Touch With{" "}
-            <span className="text-cyan-500">Sentinel Cloud</span>
+            Get in Touch With
+              <span className="text-cyan-500">   Sentinel Cloud</span>
           </h2>
           <p className="text-gray-400 max-w-2xl mx-auto">
             Have questions about our IoT cloud monitoring system? 
@@ -33,7 +33,7 @@ const Contact = () => {
           
           {/* LEFT SIDE CONTENT */}
           <motion.div
-            initial={{ opacity: 0, x: -60 }}
+            initial={{ opacity: 0, x: 60 }}
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.7 }}
             viewport={{ once: true }}

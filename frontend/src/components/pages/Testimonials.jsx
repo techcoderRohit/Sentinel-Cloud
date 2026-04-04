@@ -43,8 +43,8 @@ const Testimonials = () => {
           viewport={{ once: true }}
           className="text-4xl md:text-5xl font-bold mb-4"
         >
-          What Users Say About{" "}
-          <span className="text-cyan-500">Sentinel Cloud</span>
+          What Users Say About
+          <span className="text-cyan-500">   Sentinel Cloud</span>
         </motion.h2>
 
         {/* Subheading */}

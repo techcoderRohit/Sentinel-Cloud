@@ -13,7 +13,7 @@ import Footer from '@/components/pages/Footer';
 export default function SentinelLandingPage() {
   return (
     
-    <div className="bg-[#0B1120] min-h-screen antialiased text-slate-300">
+    <div className="bg-[#0b0f1a] h-screen antialiased text-slate-300">
       <Navbar />
       <main className="flex flex-col">
         <Hero />
