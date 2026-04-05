@@ -1,5 +1,6 @@
+"use client";
+
 import React from 'react';
-import { motion } from 'framer-motion';
 
 const stats = [
   { label: 'Active Devices', value: '1,204', change: '+12%', color: 'text-emerald-400' },
@@ -18,35 +19,19 @@ const recentDevices = [
 const DashboardOverview = () => {
   return (
     <div className="max-w-6xl mx-auto space-y-8">
-      
-      {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat, index) => (
-          <motion.div 
-            key={index}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1 }}
-            className="bg-[#0F172A] border border-slate-800 rounded-xl p-6 shadow-lg"
-          >
+          <div key={index} className="bg-[#0F172A] border border-slate-800 rounded-xl p-6 shadow-lg">
             <h3 className="text-slate-400 text-sm font-medium mb-2">{stat.label}</h3>
             <div className="flex items-end justify-between">
               <span className="text-3xl font-bold text-white">{stat.value}</span>
-              <span className={`text-xs font-medium px-2 py-1 rounded bg-slate-800 ${stat.color}`}>
-                {stat.change}
-              </span>
+              <span className={`text-xs font-medium px-2 py-1 rounded bg-slate-800 ${stat.color}`}>{stat.change}</span>
             </div>
-          </motion.div>
+          </div>
         ))}
       </div>
 
-      {/* Recent Devices Table */}
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4 }}
-        className="bg-[#0F172A] border border-slate-800 rounded-xl shadow-lg overflow-hidden"
-      >
+      <div className="bg-[#0F172A] border border-slate-800 rounded-xl shadow-lg overflow-hidden">
         <div className="px-6 py-5 border-b border-slate-800 flex justify-between items-center">
           <h2 className="text-lg font-semibold text-white">Recent Devices</h2>
           <button className="text-cyan-400 text-sm hover:text-cyan-300 transition-colors">View All →</button>
@@ -74,18 +59,14 @@ const DashboardOverview = () => {
                   </td>
                   <td className="px-6 py-4">{device.lastSeen}</td>
                   <td className="px-6 py-4">{device.firmware}</td>
-                  <td className="px-6 py-4 text-right">
-                    <button className="text-slate-500 hover:text-white transition-colors">•••</button>
-                  </td>
+                  <td className="px-6 py-4 text-right">•••</td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
-      </motion.div>
-
+      </div>
     </div>
   );
 };
-
 export default DashboardOverview;
