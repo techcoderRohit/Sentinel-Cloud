@@ -1,5 +1,5 @@
 "use client";
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import API from '@/utils/api';
@@ -62,4 +62,12 @@ export default function VerifyOTP() {
             </form>
         </div>
     );
+}
+export default function VerifyOtp1(){
+return(
+<Suspense fallback = {<div className='min-h-screen bg-[#0b0f1a] flex items-center justify-center text-white text-xl'>
+    Loading...
+</div>}>
+VerifyOTP</Suspense>
+);
 }
