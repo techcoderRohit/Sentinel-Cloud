@@ -1,5 +1,5 @@
 "use client";
-import { useState, Suspense } from 'react';
+import { useState, Suspense, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import API from '@/utils/api';
@@ -9,8 +9,39 @@ export function VerifyOTP() {
     const email = searchParams.get('email'); // URL se email nikal rahe hain
     const [otp, setOtp] = useState('');
     const [password, setPassword] = useState('');
+    const [timer, setTimer] = useState(60);
+    const [canResend, setCanResend] = useState(false);
     const [loading, setLoading] = useState(false);
     const router = useRouter();
+
+
+    // Timer Logic: Har second ghat-ta rahega
+    useEffect(() => {
+        let interval;
+        if (timer > 0) {
+            interval = setInterval(() => {
+                setTimer((prev) => prev - 1);
+            }, 1000);
+        } else {
+            setCanResend(true); // Jab timer 0 ho jaye, button enable kar do
+            clearInterval(interval);
+        }
+        return () => clearInterval(interval); // Cleanup
+    }, [timer]);
+    const handleResendOTP = async () => {
+        try {
+            setLoading(true);
+            // Aapka backend endpoint yahan aayega
+            await API.post("/auth/forgotPassword", { email });
+            toast.success("New OTP sent to your email!");
+            setTimer(60); // Timer reset karein
+            setCanResend(false);
+        } catch (error) {
+            toast.error("Failed to resend OTP");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleReset = async (e) => {
         e.preventDefault();
@@ -20,7 +51,7 @@ export function VerifyOTP() {
             toast.success("Password Reset Successful!");
             router.push("/auth/login");
         } catch (error) {
-    
+
             toast.error(error.response?.data?.message || "Invalid or Expired OTP!");
         } finally {
             setLoading(false);
@@ -36,7 +67,7 @@ export function VerifyOTP() {
                 <div className="space-y-4">
                     <input
                         type="text"
-                        placeholder='6-Digit OTP'
+                        placeholder='Enter OTP'
                         maxLength="6"
                         className='w-full p-3 bg-slate-800 text-white rounded-lg outline-none border border-slate-700 focus:border-cyan-600'
                         onChange={(e) => setOtp(e.target.value)}
@@ -49,6 +80,21 @@ export function VerifyOTP() {
                         onChange={(e) => setPassword(e.target.value)}
                         required
                     />
+                   
+                    {/* Timer Display */}
+                    <div className="text-center text-sm">
+                        {canResend ? (
+                            <button
+                                type="button"
+                                onClick={handleResendOTP}
+                                className="text-cyan-500 hover:underline font-medium"
+                            >
+                                Resend OTP
+                            </button>
+                        ) : (
+                            <p className="text-slate-500">Resend OTP in <span className="text-cyan-500 font-bold">{timer}s</span></p>
+                        )}
+                    </div>
                     <button
                         disabled={loading}
                         className="w-full flex items-center justify-center px-4 py-2 bg-linear-to-r from-cyan-500 to-blue-500 text-white font-bold rounded-lg hover:from-cyan-400 hover:to-blue-400 transition duration-300 shadow-2xl disabled:opacity-50">
@@ -63,12 +109,12 @@ export function VerifyOTP() {
         </div>
     );
 }
-export default function VerifyOtpPageWrapper(){
-return(
-<Suspense fallback = {<div className='min-h-screen bg-[#0b0f1a] flex items-center justify-center text-white text-xl'>
-    Loading...
-</div>}>
-<VerifyOTP/>
-</Suspense>
-);
+export default function VerifyOtpPageWrapper() {
+    return (
+        <Suspense fallback={<div className='min-h-screen bg-[#0b0f1a] flex items-center justify-center text-white text-xl'>
+            Loading...
+        </div>}>
+            <VerifyOTP />
+        </Suspense>
+    );
 }
