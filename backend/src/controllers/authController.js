@@ -1,7 +1,7 @@
 const User = require("../models/User");
 const jwt = require("jsonwebtoken");
-const crypto = require("crypto");
-const sendEmail = require("../utils/sendEmail");
+const sendEmail = require("../utils/sendEmail")
+
 
 //generate jwt token
 const generateToken = (id) => {
@@ -92,7 +92,6 @@ const loginUser = async (req, res) => {
     }
 
     catch (error) {
-        console.log(error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -131,58 +130,59 @@ const forgotPassword = async (req, res) => {
                 message: "User not found"
             });
         }
-        //generate reset token
-        const resetToken = crypto.randomBytes(20).toString('hex');
-        //Hash and set to user field (Expiry 30 minutes)
-        user.resetPasswordToken = crypto.createHash('sha256').update(resetToken).digest('hex');
-        user.resetPasswordExpire = Date.now() + 30 * 60 * 1000;
-        await user.save({ validateBeforeSave: false });
-
-        //create reset url
-        const resetUrl = `http://localhost:3000/auth/reset-password/${resetToken}`;
-        //send email
-
-        const message = `Aapne password reset ki request ki h . Naya password set karne ke liye link par click karein: \n\n ${resetUrl}`;
+        //generate otp
+        const otp = Math.floor(100000 + Math.random()*900000).toString();
+        //save otp
+        user.resetOTP = otp;
+        user.resetOTPExpire = Date.now() + 5*60*1000; //5 minutes validity
+        await user.save({validateBeforeSave : false});
+//send email
         await sendEmail({
-            email: user.email,
-            subject: "Sentinel Cloud - Password Reset Request",
-            message
+            email : user.email,
+            subject : "Sentinel Cloud -OTP for Password Reset",
+            message : `Aapka Password Reset OTP hai : ${otp}. Ye 5 min tak valid hai.`,
+            otp : otp
         })
 
-      return res.status(200).json({
-            message: "Reset link to sent email"
+       res.status(200).json({
+            message: "OTP sent to your email"
         })
 
 
     } catch (error) {
-       return res.status(500).json({ message: error.message });
+        console.log(error);
+        res.status(500).json({ message: error.message });
     }
 }
 
 //reset password - update in db
 
 const resetPassword = async (req, res) => {
-    const { password } = req.body;
-    const resetPasswordToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
-    try {
-        const user = await User.findOne({ resetPasswordToken, resetPasswordExpire: { $gt: Date.now() } });//Token expired nhi hona chahiye
-        if (!user) {
-            return res.status(400).json({
-                message: "Invalid or expire token"
-            });
-        }
-        //new password set karein (pre-save hook ise hash kar dega)
-        user.password = password;
-        user.resetPasswordToken = undefined;
-        user.resetPasswordExpire = undefined;
-        await user.save();
+    const {email,otp, password } = req.body;
+    try{
+const user = await User.findOne({email,
+    resetOTP: otp,
+    resetOTPExpire: {$gt: Date.now()}
+});
+if(!user){
+   return res.status(400).json({
+            message: "Invalid or Expired OTP"
+        }) 
+}
 
+//agar otp shi h , password update karein
+user.password = password;
+user.resetOTP = undefined;
+user.resetOTPExpire = undefined;
+await user.save();
         res.status(200).json({
-            message: "Password reset sucessful"
+            message: "Password reset sucessful!"
         })
 
     }
     catch (error) {
+        console.log(error);
+        
         res.status(500).json({ message: error.message });
     }
 }
@@ -192,7 +192,8 @@ const resetPassword = async (req, res) => {
 const logoutUser = async (req, res) => {
     try {
         res.status(200).json({
-            message: "User logged out successfully"
+            message: "User logged out successfully",
+            clearToken:true
         })
     } catch (error) {
         res.status(500).json({ message: error.message });

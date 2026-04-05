@@ -19,10 +19,10 @@ const userSchema = new mongoose.Schema(
         required : true,
         minlength : 6
      },
-     resetPasswordToken:{
+     resetOTP:{
       type : String
      },
-     resetPasswordExpire:{
+     resetOTPExpire:{
       type: Date
      },
      role : {
@@ -43,10 +43,10 @@ const userSchema = new mongoose.Schema(
 
 //password hash before save
 
-userSchema.pre("save" , async function (next) {
+userSchema.pre("save" , async function () {
    //agar password change nhi hua toh skip kare
    if(!this.isModified("password"))
-      return next();
+      return;
    const salt = await bcrypt.genSalt(10);
    this.password = await bcrypt.hash(this.password, salt);
 
