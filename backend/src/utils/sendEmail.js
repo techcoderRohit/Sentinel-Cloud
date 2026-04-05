@@ -3,13 +3,14 @@ const nodemailer = require("nodemailer");
 const sendEmail = async (options) => {
   // 1. Transporter banayein
   const transporter = nodemailer.createTransport({
-    service: "gmail", 
+    service: "gmail",
     auth: {
       user: process.env.EMAIL_USER, // Aapka Gmail
       pass: process.env.EMAIL_PASS, // Aapka Gmail "App Password"
     },
   });
-// 2. Email details (OTP ke liye dynamic message)
+
+  // 2. Email details (OTP ke liye dynamic message)
   const mailOptions = {
     from: '"Sentinel Cloud Support" <no-reply@sentinelcloud.com>',
     to: options.email,

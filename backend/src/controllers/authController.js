@@ -131,20 +131,20 @@ const forgotPassword = async (req, res) => {
             });
         }
         //generate otp
-        const otp = Math.floor(100000 + Math.random()*900000).toString();
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
         //save otp
         user.resetOTP = otp;
-        user.resetOTPExpire = Date.now() + 5*60*1000; //5 minutes validity
-        await user.save({validateBeforeSave : false});
-//send email
+        user.resetOTPExpire = Date.now() + 5 * 60 * 1000; //5 minutes validity
+        await user.save({ validateBeforeSave: false });
+        //send email
         await sendEmail({
-            email : user.email,
-            subject : "Sentinel Cloud -OTP for Password Reset",
-            message : `Aapka Password Reset OTP hai : ${otp}. Ye 5 min tak valid hai.`,
-            otp : otp
+            email: user.email,
+            subject: "Sentinel Cloud -OTP for Password Reset",
+            message: `Aapka Password Reset OTP hai : ${otp}. Ye 5 min tak valid hai.`,
+            otp: otp
         })
 
-       res.status(200).json({
+        res.status(200).json({
             message: "OTP sent to your email"
         })
 
@@ -158,23 +158,24 @@ const forgotPassword = async (req, res) => {
 //reset password - update in db
 
 const resetPassword = async (req, res) => {
-    const {email,otp, password } = req.body;
-    try{
-const user = await User.findOne({email,
-    resetOTP: otp,
-    resetOTPExpire: {$gt: Date.now()}
-});
-if(!user){
-   return res.status(400).json({
-            message: "Invalid or Expired OTP"
-        }) 
-}
+    const { email, otp, password } = req.body;
+    try {
+        const user = await User.findOne({
+            email,
+            resetOTP: otp,
+            resetOTPExpire: { $gt: Date.now() }
+        });
+        if (!user) {
+            return res.status(400).json({
+                message: "Invalid or Expired OTP"
+            })
+        }
 
-//agar otp shi h , password update karein
-user.password = password;
-user.resetOTP = undefined;
-user.resetOTPExpire = undefined;
-await user.save();
+        //agar otp shi h , password update karein
+        user.password = password;
+        user.resetOTP = undefined;
+        user.resetOTPExpire = undefined;
+        await user.save();
         res.status(200).json({
             message: "Password reset sucessful!"
         })
@@ -182,7 +183,7 @@ await user.save();
     }
     catch (error) {
         console.log(error);
-        
+
         res.status(500).json({ message: error.message });
     }
 }
@@ -193,7 +194,7 @@ const logoutUser = async (req, res) => {
     try {
         res.status(200).json({
             message: "User logged out successfully",
-            clearToken:true
+            clearToken: true
         })
     } catch (error) {
         res.status(500).json({ message: error.message });
