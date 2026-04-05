@@ -55,6 +55,11 @@ export default function Signup() {
     <div className="flex justify-center items-center min-h-screen bg-[#0b0f1a] px-4 py-8">
       <div className="w-full max-w-md p-8 bg-slate-900 rounded-xl shadow-lg border border-slate-800">
         <div className="text-center mb-8">
+          <div className='flex justify-center mb-4'>
+          <div className="w-14 h-14 rounded-full bg-linear-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/20 border border-cyan-400/30">
+            <span className="text-white text-2xl font-bold tracking-tighter">SC</span>
+          </div>
+          </div>
           <h2 className="text-3xl font-bold text-cyan-500">Create an Account</h2>
           <p className="text-slate-500 mt-2">Start monitoring and managing your IoT devices</p>
         </div>
