@@ -186,47 +186,45 @@ const ControlBoard = () => {
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
   useEffect(() => {
-    const FetchLayout = async () => {
+    const FetchDashboard = async () => {
       const userStored = JSON.parse(localStorage.getItem('user'));
       if (userStored && userStored._id) {
         try {
           const res = await API.get(`/dashboard/get-layout/${userStored._id}`);
-          if (res.data.success) {
+          //Agar backend se widegts milte hai toh state update karein
+          if (res.data.widgets) {
             setCanvasWidgets(res.data.widgets); // Widgets ko state mein set kar dein
           }
-        } catch (err) {
-          console.log("No previous layout found");
+        } catch (error) {
+          console.error("Dashboard load karne mein error aaya:", error.response?.data || error.message);
         }
       }
     };
-    FetchLayout();
-  }, []);
+    FetchDashboard();
+  }, []); //[] ka matlab h ya sirf page load par ek baar chalega
 
-  // ControlBoard component ke andar functions ke sath add karein
+  
   const saveDashboardToDB = async () => {
-
-
-    try {
+try {
       const userStored = localStorage.getItem('user');
-      if (!userStored) {
-        alert("Please login first");
-        return;
-      }
-      const userData = JSON.parse(userStored);
-      const currentUserId = userData._id;
-      console.log("Saving for user:", userData.name, "with id:", currentUserId);
-      const response = await API.post('/dashboard/save-layout',
-        {
-          userId: currentUserId,
-          widgets: canvasWidgets
-        });
-      if (response.data.success) {
-        alert("Layout saved permanently " + userData.name);
-        setIsEditing(false);
-      }
+if (!userStored) {
+      alert("Please login first");
+      return;
     }
-    catch (error) {
-      console.error("Saving failed:", error);
+    const userData = JSON.parse(userStored);
+    const currentUserId = userData._id;
+    console.log("Saving for user:", userData.name, "with id:", currentUserId);
+    const response = await API.post('/dashboard/save-layout',
+        {
+          userId: currentUserId, //Aapki userID
+          widgets: canvasWidgets //Aapka state wala array
+        });
+if (response.data.success) {
+        alert("Layout saved permanently " + userData.name);
+        setIsEditing(false); //save hone ke baad edit mode off kar de
+      }}
+       catch (error) {
+      console.error("Saving failed:", error.response?.data || error.message);
       alert("Kuch gadbad ho gayi!");
     }
   };
