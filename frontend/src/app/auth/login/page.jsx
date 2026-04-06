@@ -9,6 +9,7 @@ import API from '@/utils/api';
 export default function Login() {
   const [formData, setFormData] = useState({ email: '', password: '', });
   const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
 
@@ -25,14 +26,17 @@ export default function Login() {
       //Axios post request
       //Axios automatically JSON.stringify kar deta hai
       const response = await API.post("/auth/login", formData);
+      console.log(response.data);
+      
 
       //Axios mein backend ka data 'response.data' mein deta hai
       const data = response.data;
       if (response.status === 200) {
-        //1. Token aur Role save karein 
+        //1. Token aur Role save kareein
         localStorage.setItem('token', data.token);
         localStorage.setItem("userRole", data.role); // Role check ke liye
-
+localStorage.setItem("user", JSON.stringify(data));
+setUser(data);
         toast.success('Login Successful!');
         //Dashboard par redirect karein
         router.push("/dashboard");

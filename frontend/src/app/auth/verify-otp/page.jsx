@@ -1,6 +1,7 @@
 "use client";
 import { useState, Suspense, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
+import {Eye,EyeOff} from 'lucide-react';
 import toast from 'react-hot-toast';
 import API from '@/utils/api';
 
@@ -9,6 +10,7 @@ export function VerifyOTP() {
     const email = searchParams.get('email'); // URL se email nikal rahe hain
     const [otp, setOtp] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [timer, setTimer] = useState(60);
     const [canResend, setCanResend] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -73,13 +75,24 @@ export function VerifyOTP() {
                         onChange={(e) => setOtp(e.target.value)}
                         required
                     />
-                    <input
-                        type="password"
-                        placeholder='Set New Password'
-                        className='w-full p-3 bg-slate-800 text-white rounded-lg outline-none border border-slate-700 focus:border-cyan-600'
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                    />
+                   
+                    {/* Password Input with Show/Hide */}
+                    <div className="relative">
+                        <input
+                            type={showPassword ? "text" : "password"} // Type toggle logic
+                            placeholder='Set New Password'
+                            className='w-full p-3 bg-slate-800 text-white rounded-lg outline-none border border-slate-700 focus:border-cyan-600 pr-10'
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                        />
+                        <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-cyan-500 transition-colors"
+                        >
+                            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                        </button>
+                    </div>
                    
                     {/* Timer Display */}
                     <div className="text-center text-sm">

@@ -1,14 +1,14 @@
 "use client";
-
-import React, { useState } from 'react';
-import { 
-  DndContext, 
-  PointerSensor, 
-  useSensor, 
-  useSensors, 
-  DragOverlay, 
-  useDraggable, 
-  useDroppable 
+import API from '@/utils/api';
+import React, { useState, useEffect } from 'react';
+import {
+  DndContext,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragOverlay,
+  useDraggable,
+  useDroppable
 } from '@dnd-kit/core';
 import { DraggableWidget } from './DraggableWidget';
 
@@ -22,13 +22,14 @@ const WIDGET_LIBRARY = [
 
 const getDynamicColor = (val, max) => {
   const percent = val / max;
-  if (percent > 0.8) return { stroke: '#f43f5e', shadow: 'rgba(244,63,94,0.6)' }; 
-  if (percent > 0.5) return { stroke: '#eab308', shadow: 'rgba(234,179,8,0.6)' };  
-  return { stroke: '#06b6d4', shadow: 'rgba(6,182,212,0.6)' };                   
+  if (percent > 0.8) return { stroke: '#f43f5e', shadow: 'rgba(244,63,94,0.6)' };
+  if (percent > 0.5) return { stroke: '#eab308', shadow: 'rgba(234,179,8,0.6)' };
+  return { stroke: '#06b6d4', shadow: 'rgba(6,182,212,0.6)' };
 };
 
 const WidgetStyles = () => (
-  <style dangerouslySetInnerHTML={{__html: `
+  <style dangerouslySetInnerHTML={{
+    __html: `
     .widget-box { container-type: size; width: 100%; height: 100%; }
     
     .fluid-slider::-webkit-slider-thumb {
@@ -67,10 +68,10 @@ const renderWidgetUI = (widget, isEditing = false, isPreview = false, updateData
   if (isPreview) {
     switch (widget.type) {
       case 'switch': return <div className="w-10 h-5 bg-slate-800 rounded-full border border-slate-600 flex items-center px-1"><div className="w-3 h-3 bg-cyan-500 rounded-full translate-x-4 shadow-[0_0_5px_cyan]"></div></div>;
-      case 'gauge': return <svg className="h-full w-auto" viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" fill="none" stroke="#1e293b" strokeWidth="4"/><circle cx="18" cy="18" r="15" fill="none" stroke="#06b6d4" strokeWidth="4" strokeDasharray="94.2" strokeDashoffset="24"/></svg>;
+      case 'gauge': return <svg className="h-full w-auto" viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" fill="none" stroke="#1e293b" strokeWidth="4" /><circle cx="18" cy="18" r="15" fill="none" stroke="#06b6d4" strokeWidth="4" strokeDasharray="94.2" strokeDashoffset="24" /></svg>;
       case 'text': return <span className="text-emerald-400 font-black tracking-widest text-sm">SYS OK</span>;
       case 'slider': return <div className="w-3/4 h-2 bg-slate-800 rounded-full border border-slate-600"><div className="w-2/3 h-full bg-cyan-500 rounded-full relative"><div className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full border-2 border-cyan-500"></div></div></div>;
-      case 'lineChart': return <svg className="w-full h-full p-2" viewBox="0 0 100 50" preserveAspectRatio="none"><path d="M0,40 Q25,10 50,30 T100,20" fill="none" stroke="#06b6d4" strokeWidth="4" className="drop-shadow-[0_0_5px_cyan]"/></svg>;
+      case 'lineChart': return <svg className="w-full h-full p-2" viewBox="0 0 100 50" preserveAspectRatio="none"><path d="M0,40 Q25,10 50,30 T100,20" fill="none" stroke="#06b6d4" strokeWidth="4" className="drop-shadow-[0_0_5px_cyan]" /></svg>;
       default: return null;
     }
   }
@@ -82,15 +83,15 @@ const renderWidgetUI = (widget, isEditing = false, isPreview = false, updateData
       return (
         <div className={`widget-box flex flex-col items-center justify-center ${pointerClass}`}>
           <label className={`relative flex items-center justify-center ${isInteractive ? 'cursor-pointer group' : 'cursor-default'}`}>
-            <input type="checkbox" className="sr-only" checked={data.status} onChange={(e) => isInteractive && updateData(widget.id, {...data, status: e.target.checked})} disabled={!isInteractive} />
+            <input type="checkbox" className="sr-only" checked={data.status} onChange={(e) => isInteractive && updateData(widget.id, { ...data, status: e.target.checked })} disabled={!isInteractive} />
             <div style={{ width: 'clamp(80px, 45cqmin, 160px)', height: 'clamp(40px, 22cqmin, 80px)' }} className={`relative rounded-full border-2 transition-all duration-300 ${data.status ? 'bg-slate-900 border-cyan-500/50 shadow-[0_0_20px_rgba(6,182,212,0.2)]' : 'bg-slate-800 border-slate-700 shadow-inner'}`}>
-               <div style={{ 
-                 width: 'clamp(32px, 18cqmin, 68px)', height: 'clamp(32px, 18cqmin, 68px)',
-                 left: data.status ? 'calc(100% - clamp(32px, 18cqmin, 68px) - 2px)' : '2px',
-                 top: '50%', transform: 'translateY(-50%)',
-                 backgroundColor: data.status ? '#06b6d4' : '#64748b',
-                 boxShadow: data.status ? '0 0 15px rgba(6,182,212,0.8), inset 0 0 5px #fff' : 'inset 0 -2px 5px rgba(0,0,0,0.5)'
-               }} className="absolute transition-all duration-400 ease-spring rounded-full"></div>
+              <div style={{
+                width: 'clamp(32px, 18cqmin, 68px)', height: 'clamp(32px, 18cqmin, 68px)',
+                left: data.status ? 'calc(100% - clamp(32px, 18cqmin, 68px) - 2px)' : '2px',
+                top: '50%', transform: 'translateY(-50%)',
+                backgroundColor: data.status ? '#06b6d4' : '#64748b',
+                boxShadow: data.status ? '0 0 15px rgba(6,182,212,0.8), inset 0 0 5px #fff' : 'inset 0 -2px 5px rgba(0,0,0,0.5)'
+              }} className="absolute transition-all duration-400 ease-spring rounded-full"></div>
             </div>
           </label>
           <span style={{ fontSize: 'clamp(0.7rem, 6cqmin, 1.5rem)', marginTop: 'clamp(10px, 5cqmin, 24px)' }} className={`font-bold uppercase tracking-widest transition-colors duration-300 ${data.status ? 'text-cyan-400 drop-shadow-[0_0_5px_rgba(6,182,212,0.8)]' : 'text-slate-500'}`}>
@@ -100,8 +101,8 @@ const renderWidgetUI = (widget, isEditing = false, isPreview = false, updateData
       );
 
     case 'gauge':
-      const r=15, c=2*Math.PI*r, offset=c-(data.value/data.max)*c;
-      const colors = getDynamicColor(data.value, data.max); 
+      const r = 15, c = 2 * Math.PI * r, offset = c - (data.value / data.max) * c;
+      const colors = getDynamicColor(data.value, data.max);
       return (
         <div className={`widget-box flex flex-col items-center justify-center p-[2cqmin] ${pointerClass}`}>
           <div style={{ width: 'clamp(120px, 85cqmin, 300px)', height: 'clamp(120px, 85cqmin, 300px)' }} className="relative flex items-center justify-center">
@@ -117,7 +118,7 @@ const renderWidgetUI = (widget, isEditing = false, isPreview = false, updateData
         </div>
       );
 
-    case 'text': 
+    case 'text':
       return (
         <div className="widget-box flex items-center justify-center p-4">
           <div className="bg-slate-900/50 border border-slate-700/50 rounded-2xl p-4 shadow-inner flex items-center justify-center w-full h-full">
@@ -127,22 +128,22 @@ const renderWidgetUI = (widget, isEditing = false, isPreview = false, updateData
       );
 
     case 'slider':
-      const sliderColors = getDynamicColor(data.value, data.max); 
+      const sliderColors = getDynamicColor(data.value, data.max);
       return (
         <div className="widget-box flex flex-col items-center justify-center px-[8cqmin]" style={{ '--thumb-color': sliderColors.stroke, '--thumb-shadow': sliderColors.shadow }}>
           <div className="flex items-baseline mb-[4cqmin]">
             <span style={{ fontSize: 'clamp(3rem, 25cqmin, 7rem)', color: sliderColors.stroke }} className="font-black leading-none tracking-tighter drop-shadow-md transition-colors duration-300">{data.value}</span>
             <span style={{ fontSize: 'clamp(1.2rem, 10cqmin, 2.5rem)' }} className="text-slate-500 ml-2 font-bold">%</span>
           </div>
-          <input type="range" min={data.min} max={data.max} value={data.value} onChange={(e) => isInteractive && updateData(widget.id, {...data, value: parseInt(e.target.value)})} className={`w-full fluid-slider bg-slate-900 border-2 border-slate-700 rounded-full appearance-none outline-none shadow-inner ${isInteractive ? 'cursor-pointer hover:border-slate-500 transition-colors' : ''}`} style={{ height: 'clamp(10px, 4cqmin, 24px)' }} />
+          <input type="range" min={data.min} max={data.max} value={data.value} onChange={(e) => isInteractive && updateData(widget.id, { ...data, value: parseInt(e.target.value) })} className={`w-full fluid-slider bg-slate-900 border-2 border-slate-700 rounded-full appearance-none outline-none shadow-inner ${isInteractive ? 'cursor-pointer hover:border-slate-500 transition-colors' : ''}`} style={{ height: 'clamp(10px, 4cqmin, 24px)' }} />
         </div>
       );
 
     case 'lineChart':
       return (
         <div className={`widget-box flex flex-col relative p-4 sm:p-6 ${pointerClass} overflow-hidden rounded-xl bg-slate-900/30`}>
-          <div className="absolute inset-0 animated-grid opacity-30 pointer-events-none z-0"></div> 
-          
+          <div className="absolute inset-0 animated-grid opacity-30 pointer-events-none z-0"></div>
+
           <div className="flex justify-between items-end mb-2 shrink-0 z-20">
             <span style={{ fontSize: 'clamp(1.5rem, 12cqmin, 3.5rem)' }} className="text-white font-black tracking-tight drop-shadow-md flex items-baseline gap-1">
               {data.current} <span style={{ fontSize: 'clamp(0.8rem, 6cqmin, 2rem)' }} className="text-cyan-500 font-bold">kW</span>
@@ -151,7 +152,7 @@ const renderWidgetUI = (widget, isEditing = false, isPreview = false, updateData
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> LIVE
             </span>
           </div>
-          
+
           <div className="flex-1 w-full relative mt-2 min-h-0 z-10">
             <svg className="absolute inset-0 w-full h-full overflow-visible" preserveAspectRatio="none" viewBox="0 0 100 100">
               <defs>
@@ -161,12 +162,12 @@ const renderWidgetUI = (widget, isEditing = false, isPreview = false, updateData
               <path d="M 0 80 C 20 60, 40 90, 60 50 C 80 10, 90 40, 100 20" fill="none" stroke="#06b6d4" strokeWidth="4" strokeLinecap="round" className="drop-shadow-[0_0_10px_rgba(6,182,212,0.8)]" />
             </svg>
             <div className="absolute inset-0 pointer-events-none">
-               <div className="absolute bg-slate-900 border-[2px] border-cyan-500 rounded-full" style={{ width: 'clamp(8px, 3cqmin, 16px)', height: 'clamp(8px, 3cqmin, 16px)', left: '20%', bottom: '40%', transform: 'translate(-50%, 50%)' }}></div>
-               <div className="absolute bg-white rounded-full shadow-[0_0_8px_#fff]" style={{ width: 'clamp(10px, 4cqmin, 18px)', height: 'clamp(10px, 4cqmin, 18px)', left: '60%', bottom: '50%', transform: 'translate(-50%, 50%)' }}></div>
-               <div className="absolute bg-cyan-400 border-2 border-white rounded-full shadow-[0_0_15px_#06b6d4] animate-pulse" style={{ width: 'clamp(12px, 5cqmin, 24px)', height: 'clamp(12px, 5cqmin, 24px)', left: '100%', bottom: '80%', transform: 'translate(-50%, 50%)' }}></div>
+              <div className="absolute bg-slate-900 border-[2px] border-cyan-500 rounded-full" style={{ width: 'clamp(8px, 3cqmin, 16px)', height: 'clamp(8px, 3cqmin, 16px)', left: '20%', bottom: '40%', transform: 'translate(-50%, 50%)' }}></div>
+              <div className="absolute bg-white rounded-full shadow-[0_0_8px_#fff]" style={{ width: 'clamp(10px, 4cqmin, 18px)', height: 'clamp(10px, 4cqmin, 18px)', left: '60%', bottom: '50%', transform: 'translate(-50%, 50%)' }}></div>
+              <div className="absolute bg-cyan-400 border-2 border-white rounded-full shadow-[0_0_15px_#06b6d4] animate-pulse" style={{ width: 'clamp(12px, 5cqmin, 24px)', height: 'clamp(12px, 5cqmin, 24px)', left: '100%', bottom: '80%', transform: 'translate(-50%, 50%)' }}></div>
             </div>
           </div>
-          
+
           <div className="flex justify-between mt-3 font-mono font-bold uppercase tracking-widest shrink-0 text-slate-500 z-20" style={{ fontSize: 'clamp(0.6rem, 4.5cqmin, 1.2rem)' }}>
             <span>08:00</span><span>10:00</span><span>12:00</span><span className="text-cyan-400">Now</span>
           </div>
@@ -184,13 +185,58 @@ const ControlBoard = () => {
   const { setNodeRef: setCanvasDropRef } = useDroppable({ id: 'main-canvas' });
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
+  useEffect(() => {
+    const FetchLayout = async () => {
+      const userStored = JSON.parse(localStorage.getItem('user'));
+      if (userStored && userStored._id) {
+        try {
+          const res = await API.get(`/dashboard/get-layout/${userStored._id}`);
+          if (res.data.success) {
+            setCanvasWidgets(res.data.widgets); // Widgets ko state mein set kar dein
+          }
+        } catch (err) {
+          console.log("No previous layout found");
+        }
+      }
+    };
+    FetchLayout();
+  }, []);
+
+  // ControlBoard component ke andar functions ke sath add karein
+  const saveDashboardToDB = async () => {
+
+
+    try {
+      const userStored = localStorage.getItem('user');
+      if (!userStored) {
+        alert("Please login first");
+        return;
+      }
+      const userData = JSON.parse(userStored);
+      const currentUserId = userData._id;
+      console.log("Saving for user:", userData.name, "with id:", currentUserId);
+      const response = await API.post('/dashboard/save-layout',
+        {
+          userId: currentUserId,
+          widgets: canvasWidgets
+        });
+      if (response.data.success) {
+        alert("Layout saved permanently " + userData.name);
+        setIsEditing(false);
+      }
+    }
+    catch (error) {
+      console.error("Saving failed:", error);
+      alert("Kuch gadbad ho gayi!");
+    }
+  };
   const handleDragStart = (e) => setActiveDragItem(e.active);
 
   // 🌟 THE BULLETPROOF SNAP-BACK FIX 🌟
   const handleDragEnd = (e) => {
     setActiveDragItem(null);
     const { active } = e;
-    
+
     if (!active) return;
 
     const canvasElement = document.getElementById('main-canvas');
@@ -198,7 +244,7 @@ const ControlBoard = () => {
 
     const canvasRect = canvasElement.getBoundingClientRect();
     const translated = active.rect.current.translated;
-    
+
     // Agar widget hawa mein hai hi nahi, toh return kar jao
     if (!translated) return;
 
@@ -214,19 +260,19 @@ const ControlBoard = () => {
         }
         return w;
       }));
-    } 
+    }
     else if (active.data.current?.type === 'template') {
       // Naye widgets ke liye bhi absolute drop location
       const template = active.data.current.templateData;
       setCanvasWidgets(prev => [
-        ...prev, 
+        ...prev,
         {
           id: `w_${Date.now()}`,
           type: template.type,
           title: template.title,
           size: template.defaultSize,
           position: { x: Math.max(0, dropX), y: Math.max(0, dropY) },
-          data: { ...template.defaultData } 
+          data: { ...template.defaultData }
         }
       ]);
     }
@@ -239,7 +285,7 @@ const ControlBoard = () => {
   return (
     <div className="w-full h-full flex flex-col space-y-6 relative">
       <WidgetStyles />
-      
+
       {/* HEADER */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-gradient-to-r from-[#0F172A] to-[#1e293b] p-5 rounded-2xl border border-slate-700/50 shadow-lg z-20">
         <div className="flex flex-col gap-1">
@@ -253,19 +299,19 @@ const ControlBoard = () => {
           <div className={`flex items-center gap-3 px-5 py-2.5 rounded-xl border-2 transition-colors ${isEditing ? 'bg-cyan-900/30 border-cyan-500/50 shadow-[0_0_15px_rgba(6,182,212,0.2)]' : 'bg-[#111827] border-slate-700'}`}>
             <span className={`text-xs font-bold uppercase tracking-widest ${isEditing ? 'text-cyan-400' : 'text-slate-400'}`}>Build Mode</span>
             <label className="relative inline-flex items-center cursor-pointer">
-              <input type="checkbox" className="sr-only peer" checked={isEditing} onChange={() => setIsEditing(!isEditing)}/>
+              <input type="checkbox" className="sr-only peer" checked={isEditing} onChange={() => setIsEditing(!isEditing)} />
               <div className="w-12 h-6 bg-slate-800 border border-slate-600 rounded-full peer peer-checked:after:translate-x-6 peer-checked:bg-cyan-500 peer-checked:border-cyan-400 after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-white after:rounded-full after:h-4 after:w-4 transition-all"></div>
             </label>
           </div>
           {isEditing && (
-            <button onClick={() => setIsEditing(false)} className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white px-6 py-2.5 rounded-xl font-bold text-xs shadow-[0_0_20px_rgba(6,182,212,0.4)] hover:shadow-[0_0_25px_rgba(6,182,212,0.6)] hover:scale-105 transition-all uppercase tracking-widest">Save Layout</button>
+            <button onClick={saveDashboardToDB} className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white px-6 py-2.5 rounded-xl font-bold text-xs shadow-[0_0_20px_rgba(6,182,212,0.4)] hover:shadow-[0_0_25px_rgba(6,182,212,0.6)] hover:scale-105 transition-all uppercase tracking-widest">Save Layout</button>
           )}
         </div>
       </div>
 
       <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
         <div className="flex gap-6 min-h-[750px] overflow-hidden">
-          
+
           {/* SIDEBAR */}
           {isEditing && (
             <div className="w-64 bg-[#0F172A]/90 backdrop-blur-md border border-slate-700/50 rounded-2xl p-5 flex flex-col shadow-2xl z-20 overflow-y-auto">
@@ -280,13 +326,13 @@ const ControlBoard = () => {
           )}
 
           {/* MAIN CANVAS */}
-          <div 
-            id="main-canvas" 
-            ref={setCanvasDropRef} 
+          <div
+            id="main-canvas"
+            ref={setCanvasDropRef}
             className={`flex-1 relative overflow-auto bg-[#090e17] rounded-2xl shadow-inner ${isEditing ? 'border-2 border-dashed border-cyan-800/40' : 'border border-slate-800/30'}`}
           >
             {isEditing && <div className="absolute inset-0 pointer-events-none opacity-20" style={{ backgroundImage: 'radial-gradient(#06b6d4 1.5px, transparent 1.5px)', backgroundSize: '40px 40px' }}></div>}
-            
+
             {canvasWidgets.length === 0 && (
               <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-500 pointer-events-none">
                 <div className="w-24 h-24 bg-slate-800/30 rounded-full flex items-center justify-center mb-6 border border-slate-700/50">
@@ -306,12 +352,12 @@ const ControlBoard = () => {
         </div>
 
         {/* DRAG OVERLAY (dropAnimation null ensures NO visual snap back) */}
-        <DragOverlay dropAnimation={null}> 
+        <DragOverlay dropAnimation={null}>
           {activeDragItem && activeDragItem.data.current?.type === 'template' ? (
             <div className="bg-[#0F172A] border border-cyan-500 rounded-xl p-3 shadow-[0_0_40px_rgba(6,182,212,0.6)] w-48 z-50">
-               <div className="h-16 w-full flex items-center justify-center overflow-hidden pointer-events-none">
-                  {renderWidgetUI(activeDragItem.data.current.templateData, true, true)}
-               </div>
+              <div className="h-16 w-full flex items-center justify-center overflow-hidden pointer-events-none">
+                {renderWidgetUI(activeDragItem.data.current.templateData, true, true)}
+              </div>
             </div>
           ) : null}
         </DragOverlay>
