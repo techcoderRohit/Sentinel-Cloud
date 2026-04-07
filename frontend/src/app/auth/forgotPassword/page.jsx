@@ -40,7 +40,7 @@ const router = useRouter();
            <button
             disabled={loading}
             className="w-full py-3 bg-linear-to-r from-cyan-500 to-blue-500 text-white font-bold rounded-lg hover:from-cyan-400 hover:to-blue-400 transition duration-300 shadow-2xl disabled:opacity-50">
-            {loading ? "Sending OTP..." : "Get OTP"}
+            {loading ? "Sending OTP..." : "Send OTP"}
           </button>
      
            <div className='mt-4 text-center'>

@@ -1,19 +1,36 @@
 "use client";
 
-import React from 'react';
+import React,{useState,useRef,useEffect} from 'react';
+import {Home, LayoutDashboard,Cpu,GitBranch,Key,Settings,Bell,User} from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
+
 const DashboardLayout = ({ children }) => {
-  const pathname = usePathname();
+ const [isMenuOpen, setIsMenuOpen] = useState(false);
+ 
+  const menuRef = useRef(null);
+
+  // Bahar click karne par menu band karne ke liye
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setIsMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+  
+const pathname = usePathname();
 
   const sidebarLinks = [
-    { name: 'Home', icon: '🏠', path: "/dashboard" },
-    { name: 'Control Board', icon: '🎛️', path: "/dashboard/control-board" },
-    { name: 'Devices', icon: '📱', path: "/devices" },
-    { name: 'Data Routing', icon: '🔀', path: "/dashboard/routing" },
-    { name: 'API Keys', icon: '🔑', path: "/dashboard/apikeys" },
-    { name: 'Settings', icon: '⚙️', path: "/dashboard/settings" },
+    { name: 'Home', icon: <Home size={20}/>, path: "/dashboard" },
+    { name: 'Control Board', icon: <LayoutDashboard size={20}/>, path: "/dashboard/control-board" },
+    { name: 'Devices', icon: <Cpu size={20}/>, path: "/dashboard/devices" },
+    { name: 'Data Routing', icon: <GitBranch size={20}/>, path: "/dashboard/routing" },
+    { name: 'API Keys', icon: <Key size={20}/>, path: "/dashboard/apikeys" },
+    { name: 'Settings', icon: <Settings size={20}/>, path: "/dashboard/settings" },
   ];
 
   const logout = () => {
@@ -25,7 +42,7 @@ const DashboardLayout = ({ children }) => {
     <div className="min-h-screen bg-[#0B1120] flex text-slate-300 font-sans">
       <aside className="w-64 bg-[#0F172A] border-r border-slate-800 flex flex-col fixed h-full z-10">
         <div className="h-16 flex items-center justify-center px-6 border-b border-slate-800">
-          <div className="w-8 h-8 rounded bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center mr-3">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center mr-3">
             <span className="text-white font-bold">SC</span>
           </div>
           <Link href="/" className="text-xl font-bold text-white">
@@ -48,7 +65,7 @@ const DashboardLayout = ({ children }) => {
 
         <div className="p-4 border-t border-slate-800">
           <div className="flex items-center gap-3 px-4 py-2">
-            <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-sm text-white">SA</div>
+            <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-sm text-white">RM</div>
             <div className="flex flex-col">
               <span className="text-sm text-white font-medium">Developer</span>
               <span className="text-xs text-slate-500">Free Tier</span>
@@ -58,15 +75,67 @@ const DashboardLayout = ({ children }) => {
       </aside>
 
       <main className="flex-1 ml-64 flex flex-col min-h-screen">
-        <header className="h-16 bg-[#0B1120]/80 backdrop-blur-md border-b border-slate-800 flex items-center justify-between px-8 sticky top-0 z-50">
-          <h1 className="text-xl font-semibold text-white">IoT Monitoring Dashboard</h1>
-          <div className='flex gap-4'>
-            <Link href="/dashboard/devices/addDevice">
-              <button className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-lg px-4 py-2 font-bold transition-all">+ Add Device</button>
-            </Link>
-            <button onClick={logout} className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-lg px-4 py-2 font-bold transition-all">Logout</button>
-          </div>
-        </header>
+       <header className="h-16 bg-[#0B1120]/80 border-b border-slate-800 flex items-center justify-between px-8 sticky top-0 z-50">
+      <h1 className="text-xl font-semibold tracking-tight text-white">IoT Monitoring Dashboard</h1>
+
+      <div className="flex items-center gap-6">
+        {/* Add Device Button */}
+        <Link href="/dashboard/devices/addDevice">
+          <button className="hidden md:block bg-linear-to-r from-cyan-500 to-blue-500 text-white rounded-lg hover:from-cyan-600 hover:to-blue-600  px-4 py-2 font-bold transition-all">
+            + Add Device
+          </button>
+        </Link>
+        <button className="p-3 bg-slate-800 rounded-xl hover:bg-slate-700 text-slate-400">
+              <Bell size={20} />
+            </button>
+
+        {/* User Profile Dropdown */}
+        <div className="relative" ref={menuRef}>
+          <button 
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="flex items-center gap-2 p-1 rounded-full hover:bg-slate-800 transition-all border border-transparent hover:border-slate-700"
+          >
+            <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-white font-bold shadow-lg">
+          <User size={20}/>
+        </div>
+            {/* User Icon SVG */}
+            {/* <svg className="w-5 h-5 text-slate-300" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+            </svg> */}
+          </button>
+
+          {/* Dropdown Box */}
+          {isMenuOpen && (
+            <div className="absolute right-0 mt-3 w-48 bg-[#0F172A] border border-slate-800 rounded-xl shadow-2xl py-2 z-50 animate-in fade-in zoom-in duration-200">
+              
+              {/* Option 1: Admin */}
+              <button className="w-full text-left px-4 py-3 text-sm text-slate-300 hover:bg-slate-800 hover:text-cyan-400 flex items-center gap-3 transition-colors">
+                <span className="text-lg">🛡️</span> Admin Panel
+              </button>
+
+              {/* Option 2: Guest User */}
+              <button className="w-full text-left px-4 py-3 text-sm text-slate-300 hover:bg-slate-800 hover:text-cyan-400 flex items-center gap-3 transition-colors">
+                <span className="text-lg">👥</span> Guest View
+              </button>
+
+              <div className="border-t border-slate-800 my-1"></div>
+
+              {/* Option 3: Logout */}
+              <button 
+                onClick={logout}
+                className="w-full text-left px-4 py-3 text-sm text-rose-400 hover:bg-rose-500/10 flex items-center gap-3 transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                Logout
+              </button>
+
+            </div>
+          )}
+        </div>
+      </div>
+    </header>
 
         <div className="p-8 flex-1 overflow-y-auto">{children}</div>
       </main>

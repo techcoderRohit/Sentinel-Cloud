@@ -19,8 +19,8 @@ const Footer = () => {
             <div className="flex items-center gap-2 mb-4">
 
               {/*<img className='w-15 h-15 rounded-full bg-transparent' src="/images/logo.jpeg" alt="logo" />*/}
-              <div className="w-14 h-14 rounded-full bg-linear-to-br from-cyan-500 to-blue-500 flex items-center justify-center mr-2 shadow-lg shadow-cyan-500/20 border border-cyan-400/30">
-                <span className="text-white text-2xl tracking-tighter font-bold">SC</span>
+              <div className="w-10 h-10 lg:w-14 lg:h-14 rounded-full bg-linear-to-br from-cyan-500 to-blue-500 flex items-center justify-center mr-2 shadow-lg shadow-cyan-500/20 border border-cyan-400/30">
+                <span className="text-white text-md lg:text-2xl tracking-tighter font-bold">SC</span>
               </div>
               <h1 className="text-2xl font-bold text-white">
                 Sentinel <span className=" text-transparent bg-clip-text bg-linear-to-r from-cyan-500 to-blue-500">Cloud</span>

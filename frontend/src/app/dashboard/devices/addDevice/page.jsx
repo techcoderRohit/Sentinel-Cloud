@@ -48,7 +48,7 @@ export default function AddDevicePage() {
     };
 
     return (
-        <div className="flex justify-center items-center h-screen bg-[#0b0f1a] px-4 py-8">
+        <div className="flex justify-center items-center min-h-screen bg-[#0b1120] px-4 py-8">
             <div className="w-full max-w-md p-8 bg-slate-900 rounded-xl shadow-2xl border border-slate-800">
                 <h1 className="text-3xl font-bold mb-8 text-cyan-400 text-center">Add New Device</h1>
 

@@ -186,61 +186,59 @@ const ControlBoard = () => {
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
   useEffect(() => {
-    const FetchDashboard = async () => {
-      // const userStored = JSON.parse(localStorage.getItem('user'));
-      const token = localStorage.getItem('token');
-      if (token) {
-        try {
-          const res = await API.get(`/dashboard/get-layout`, {
-            headers: {
-              'Authorization': `Bearer ${token}`
-            }
-          });
-          console.log(res.data);
-
-          //Agar backend se widegts milte hai toh state update karein
-          if (res.data.widgets) {
-            setCanvasWidgets(res.data.widgets); // Widgets ko state mein set kar dein
-          }
-        } catch (error) {
-          console.error("Dashboard load karne mein error aaya:", error.response?.data || error.message);
-        }
-      }
-    };
-    FetchDashboard();
-  }, []); //[] ka matlab h ya sirf page load par ek baar chalega
-
-
-  const saveDashboardToDB = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        alert("Please login first");
-        return;
-      }
-      // const userData = JSON.parse(userStored);
-      // const currentUserId = userData._id;
-      // console.log("Saving for user:", userData.name, "with id:", currentUserId);
-      const response = await API.put('/dashboard/save-layout',
-        {
-          widgets: canvasWidgets //Aapka state wala array
-        },
-        {
+  const FetchDashboard = async () => {
+    const token = localStorage.getItem('token');
+    
+    if (token) {
+      try {
+        const res = await API.get('/dashboard/get-layout', {
           headers: {
-            'Authorization': `Bearer ${token}`
+            Authorization: `Bearer ${token}`
           }
+        });
+
+        // Agar backend se widgets milte hain toh state update karein
+        if (res.data && res.data.widgets) {
+          setCanvasWidgets(res.data.widgets);
         }
-      );
-      if (response.data.success) {
-        alert("Layout saved permanently " + userData.name);
-        setIsEditing(false); //save hone ke baad edit mode off kar de
+      } catch (error) {
+        console.error("Dashboard load karne mein error:", error.response?.data || error.message);
       }
-    }
-    catch (error) {
-      console.error("Saving failed:", error.response?.data || error.message);
-      alert("Kuch gadbad ho gayi!");
     }
   };
+
+  FetchDashboard();
+}, []); // Component load par sirf ek baar chalega
+
+
+const saveDashboardToDB = async () => {
+  try {
+    const token = localStorage.getItem('token');
+    
+    if (!token) {
+      alert("Please login first!");
+      return;
+    }
+
+    // Backend route POST hai, isliye yahan .post use karein
+    const response = await API.post('/dashboard/save-layout', 
+      { widgets: canvasWidgets }, // Request Body
+      {
+        headers: {
+          Authorization: `Bearer ${token}` // Token-based Access
+        }
+      }
+    );
+
+    if (response.data.success) {
+      alert("Layout saved permanently!");
+      setIsEditing(false); 
+    }
+  } catch (error) {
+    console.error("Saving failed:", error.response?.data || error.message);
+    alert("Saving failed: " + (error.response?.data?.message || "Internal Server Error"));
+  }
+};
   const handleDragStart = (e) => setActiveDragItem(e.active);
 
   // 🌟 THE BULLETPROOF SNAP-BACK FIX 🌟
