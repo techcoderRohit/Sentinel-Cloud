@@ -46,9 +46,9 @@ export default function DeviceListPage() {
     return (
         <div className="min-h-screen bg-[#0b1120]">
             <h1 className="text-3xl font-bold mb-4 text-center text-white ">My Devices</h1>
-            
+
             {loading && <p className="text-cyan-400 text-center">Loading devices...</p>}
-            
+
             {error && (
                 <div className="max-w-md mx-auto mb-4">
                     <p className="text-red-500 font-semibold bg-red-100/10 p-3 border border-red-500 rounded-xl text-center">

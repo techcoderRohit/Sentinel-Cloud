@@ -186,59 +186,59 @@ const ControlBoard = () => {
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
   useEffect(() => {
-  const FetchDashboard = async () => {
-    const token = localStorage.getItem('token');
-    
-    if (token) {
-      try {
-        const res = await API.get('/dashboard/get-layout', {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
+    const FetchDashboard = async () => {
+      const token = localStorage.getItem('token');
 
-        // Agar backend se widgets milte hain toh state update karein
-        if (res.data && res.data.widgets) {
-          setCanvasWidgets(res.data.widgets);
+      if (token) {
+        try {
+          const res = await API.get('/dashboard/get-layout', {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
+
+          // Agar backend se widgets milte hain toh state update karein
+          if (res.data && res.data.widgets) {
+            setCanvasWidgets(res.data.widgets);
+          }
+        } catch (error) {
+          console.error("Dashboard load karne mein error:", error.response?.data || error.message);
         }
-      } catch (error) {
-        console.error("Dashboard load karne mein error:", error.response?.data || error.message);
       }
+    };
+
+    FetchDashboard();
+  }, []); // Component load par sirf ek baar chalega
+
+
+  const saveDashboardToDB = async () => {
+    try {
+      const token = localStorage.getItem('token');
+
+      if (!token) {
+        alert("Please login first!");
+        return;
+      }
+
+      // Backend route POST hai, isliye yahan .post use karein
+      const response = await API.post('/dashboard/save-layout',
+        { widgets: canvasWidgets }, // Request Body
+        {
+          headers: {
+            Authorization: `Bearer ${token}` // Token-based Access
+          }
+        }
+      );
+
+      if (response.data.success) {
+        alert("Layout saved permanently!");
+        setIsEditing(false);
+      }
+    } catch (error) {
+      console.error("Saving failed:", error.response?.data || error.message);
+      alert("Saving failed: " + (error.response?.data?.message || "Internal Server Error"));
     }
   };
-
-  FetchDashboard();
-}, []); // Component load par sirf ek baar chalega
-
-
-const saveDashboardToDB = async () => {
-  try {
-    const token = localStorage.getItem('token');
-    
-    if (!token) {
-      alert("Please login first!");
-      return;
-    }
-
-    // Backend route POST hai, isliye yahan .post use karein
-    const response = await API.post('/dashboard/save-layout', 
-      { widgets: canvasWidgets }, // Request Body
-      {
-        headers: {
-          Authorization: `Bearer ${token}` // Token-based Access
-        }
-      }
-    );
-
-    if (response.data.success) {
-      alert("Layout saved permanently!");
-      setIsEditing(false); 
-    }
-  } catch (error) {
-    console.error("Saving failed:", error.response?.data || error.message);
-    alert("Saving failed: " + (error.response?.data?.message || "Internal Server Error"));
-  }
-};
   const handleDragStart = (e) => setActiveDragItem(e.active);
 
   // 🌟 THE BULLETPROOF SNAP-BACK FIX 🌟
@@ -306,14 +306,14 @@ const saveDashboardToDB = async () => {
         </div>
         <div className="flex items-center gap-5 mt-4 sm:mt-0">
           <div className={`flex items-center gap-3 px-5 py-2.5 rounded-xl border-2 transition-colors ${isEditing ? 'bg-cyan-900/30 border-cyan-500/50 shadow-[0_0_15px_rgba(6,182,212,0.2)]' : 'bg-[#111827] border-slate-700'}`}>
-            <span className={`text-xs font-bold uppercase tracking-widest ${isEditing ? 'text-cyan-400' : 'text-slate-400'}`}>Build Mode</span>
+            <span className={`text-xs font-bold tracking-widest ${isEditing ? 'text-cyan-400' : 'text-slate-400'}`}>BUILD MODE</span>
             <label className="relative inline-flex items-center cursor-pointer">
               <input type="checkbox" className="sr-only peer" checked={isEditing} onChange={() => setIsEditing(!isEditing)} />
               <div className="w-12 h-6 bg-slate-800 border border-slate-600 rounded-full peer peer-checked:after:translate-x-6 peer-checked:bg-cyan-500 peer-checked:border-cyan-400 after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-white after:rounded-full after:h-4 after:w-4 transition-all"></div>
             </label>
           </div>
           {isEditing && (
-            <button onClick={saveDashboardToDB} className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white px-6 py-2.5 rounded-xl font-bold text-xs shadow-[0_0_20px_rgba(6,182,212,0.4)] hover:shadow-[0_0_25px_rgba(6,182,212,0.6)] hover:scale-105 transition-all uppercase tracking-widest">Save Layout</button>
+            <button onClick={saveDashboardToDB} className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white px-6 py-2.5 rounded-xl font-bold text-xs hover:scale-105 transition-all tracking-widest">SAVE LAYOUT</button>
           )}
         </div>
       </div>
