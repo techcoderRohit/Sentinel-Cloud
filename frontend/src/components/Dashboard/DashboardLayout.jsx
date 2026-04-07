@@ -10,7 +10,7 @@ const DashboardLayout = ({ children }) => {
   const sidebarLinks = [
     { name: 'Home', icon: '🏠', path: "/dashboard" },
     { name: 'Control Board', icon: '🎛️', path: "/dashboard/control-board" },
-    { name: 'Devices', icon: '📱', path: "/dashboard/devices" },
+    { name: 'Devices', icon: '📱', path: "/devices" },
     { name: 'Data Routing', icon: '🔀', path: "/dashboard/routing" },
     { name: 'API Keys', icon: '🔑', path: "/dashboard/apikeys" },
     { name: 'Settings', icon: '⚙️', path: "/dashboard/settings" },

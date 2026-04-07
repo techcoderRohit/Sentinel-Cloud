@@ -162,7 +162,7 @@ const renderWidgetUI = (widget, isEditing = false, isPreview = false, updateData
               <path d="M 0 80 C 20 60, 40 90, 60 50 C 80 10, 90 40, 100 20" fill="none" stroke="#06b6d4" strokeWidth="4" strokeLinecap="round" className="drop-shadow-[0_0_10px_rgba(6,182,212,0.8)]" />
             </svg>
             <div className="absolute inset-0 pointer-events-none">
-              <div className="absolute bg-slate-900 border-[2px] border-cyan-500 rounded-full" style={{ width: 'clamp(8px, 3cqmin, 16px)', height: 'clamp(8px, 3cqmin, 16px)', left: '20%', bottom: '40%', transform: 'translate(-50%, 50%)' }}></div>
+              <div className="absolute bg-slate-900 border-2 border-cyan-500 rounded-full" style={{ width: 'clamp(8px, 3cqmin, 16px)', height: 'clamp(8px, 3cqmin, 16px)', left: '20%', bottom: '40%', transform: 'translate(-50%, 50%)' }}></div>
               <div className="absolute bg-white rounded-full shadow-[0_0_8px_#fff]" style={{ width: 'clamp(10px, 4cqmin, 18px)', height: 'clamp(10px, 4cqmin, 18px)', left: '60%', bottom: '50%', transform: 'translate(-50%, 50%)' }}></div>
               <div className="absolute bg-cyan-400 border-2 border-white rounded-full shadow-[0_0_15px_#06b6d4] animate-pulse" style={{ width: 'clamp(12px, 5cqmin, 24px)', height: 'clamp(12px, 5cqmin, 24px)', left: '100%', bottom: '80%', transform: 'translate(-50%, 50%)' }}></div>
             </div>
@@ -187,10 +187,17 @@ const ControlBoard = () => {
 
   useEffect(() => {
     const FetchDashboard = async () => {
-      const userStored = JSON.parse(localStorage.getItem('user'));
-      if (userStored && userStored._id) {
+      // const userStored = JSON.parse(localStorage.getItem('user'));
+      const token = localStorage.getItem('token');
+      if (token) {
         try {
-          const res = await API.get(`/dashboard/get-layout/${userStored._id}`);
+          const res = await API.get(`/dashboard/get-layout`, {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          console.log(res.data);
+
           //Agar backend se widegts milte hai toh state update karein
           if (res.data.widgets) {
             setCanvasWidgets(res.data.widgets); // Widgets ko state mein set kar dein
@@ -203,27 +210,33 @@ const ControlBoard = () => {
     FetchDashboard();
   }, []); //[] ka matlab h ya sirf page load par ek baar chalega
 
-  
+
   const saveDashboardToDB = async () => {
-try {
-      const userStored = localStorage.getItem('user');
-if (!userStored) {
-      alert("Please login first");
-      return;
-    }
-    const userData = JSON.parse(userStored);
-    const currentUserId = userData._id;
-    console.log("Saving for user:", userData.name, "with id:", currentUserId);
-    const response = await API.post('/dashboard/save-layout',
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert("Please login first");
+        return;
+      }
+      // const userData = JSON.parse(userStored);
+      // const currentUserId = userData._id;
+      // console.log("Saving for user:", userData.name, "with id:", currentUserId);
+      const response = await API.put('/dashboard/save-layout',
         {
-          userId: currentUserId, //Aapki userID
           widgets: canvasWidgets //Aapka state wala array
-        });
-if (response.data.success) {
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        }
+      );
+      if (response.data.success) {
         alert("Layout saved permanently " + userData.name);
         setIsEditing(false); //save hone ke baad edit mode off kar de
-      }}
-       catch (error) {
+      }
+    }
+    catch (error) {
       console.error("Saving failed:", error.response?.data || error.message);
       alert("Kuch gadbad ho gayi!");
     }

@@ -1,5 +1,6 @@
 //import packages
 const express = require('express');
+const startMQTT = require('./brokers/mqttBroker')
 const cors = require('cors');
 const authRoutes = require("./routes/authRoutes");
 const deviceRoutes = require("./routes/deviceRoutes");
@@ -7,7 +8,7 @@ const userRoutes = require("./routes/userRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const dashboard = require("./routes/dashboard");
 
-
+startMQTT();
 //Create app
 const app = express();
 

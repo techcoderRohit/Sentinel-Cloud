@@ -1,19 +1,14 @@
 const express = require('express');
 const Dashboard = require('../models/Dashboard');
+const { protect } = require('../middleware/authMiddleware');
 const router = express.Router();
 
-router.post('/save-layout', async (req, res) => {
-  const { userId, widgets } = req.body;
+router.put('/save-layout', protect, async (req, res) => {
+  const { widgets } = req.body;
   try {
-    if (!userId) {
-      return res.status(400).json({
-        messsage: "user id is required"
-      });
-    }
-
     // Agar pehle se layout hai toh update karo, nahi toh naya banao
     const updatedDashboard = await Dashboard.findOneAndUpdate(
-      { userId: userId },
+      { userId: req.user._id.toString() },
       { widgets },
       { upsert: true, new: true }
     );
@@ -28,13 +23,25 @@ router.post('/save-layout', async (req, res) => {
 });
 
 // User ka saved dashboard nikalne ke liye
-router.get('/get-layout/:userId', async (req, res) => {
+router.get('/get-layout', protect, async (req, res) => {
   try {
-    const dashboard = await Dashboard.findOne({ userId: req.params.userId });
+    console.log(req.user._id.toString());
+    
+    const dashboard = await Dashboard.findOne({ userId: req.user._id.toString() });
     if (!dashboard) {
       return res.status(404).json({ message: "No layout found" });
     }
     res.json({ success: true, widgets: dashboard.widgets });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.get('/getall', async (req, res) => {
+  try {
+    const dashboard = await Dashboard.find();
+
+    res.json(dashboard);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const DashboardSchema = new mongoose.Schema({
   userId: {
-    type: String,
+    type: mongoose.Types.ObjectId,
     ref: 'User',
     required: true,
     unique: true
