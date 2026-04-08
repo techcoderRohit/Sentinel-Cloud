@@ -29,7 +29,7 @@ const DashboardLayout = ({ children }) => {
     { name: 'Control Board', icon: <LayoutDashboard size={20} />, path: "/dashboard/control-board" },
     { name: 'Devices', icon: <Cpu size={20} />, path: "/dashboard/devices" },
     { name: 'Data Routing', icon: <GitBranch size={20} />, path: "/dashboard/routing" },
-    { name: 'API Keys', icon: <Key size={20} />, path: "/dashboard/apikeys" },
+    { name: 'API Keys', icon: <Key size={20} />, path: "/dashboard/apikeymanager" },
     { name: 'Settings', icon: <Settings size={20} />, path: "/dashboard/settings" },
   ];
 

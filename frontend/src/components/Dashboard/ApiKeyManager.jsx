@@ -1,0 +1,147 @@
+"use client";
+
+import React, { useState } from 'react';
+
+export default function ApiKeyManager() {
+  // 1. STATE (Data Memory)
+  // Dummy keys jo shuru mein dikhengi (Asli app mein ye database se aayengi)
+  const [apiKeys, setApiKeys] = useState([
+    { id: 1, name: 'Production Backend', key: 'sk-gemini-8f7d6e5c4b3a2109', createdAt: '2026-04-01' },
+    { id: 2, name: 'IoT Edge Device #1', key: 'sk-gemini-1a2b3c4d5e6f7089', createdAt: '2026-04-05' }
+  ]);
+
+  const [visibleKeys, setVisibleKeys] = useState({}); // Kaunsi key dikhni hai aur kaunsi hide (***)
+  const [copiedId, setCopiedId] = useState(null);     // Copy hone par tick (✔️) dikhane ke liye
+
+  // 2. LOGIC FUNCTIONS
+  
+  // Nayi Key Generate Karne ka function
+  const generateNewKey = () => {
+    const randomString = Math.random().toString(36).substring(2, 15);
+    const newKey = {
+      id: Date.now(),
+      name: `New Device Key ${apiKeys.length + 1}`,
+      key: `sk-gemini-${randomString}`,
+      createdAt: new Date().toISOString().split('T')[0] // Aaj ki date
+    };
+    setApiKeys([newKey, ...apiKeys]); // Nayi key ko list mein sabse upar daal do
+  };
+
+  // Key Delete (Revoke) Karne ka function
+  const deleteKey = (id) => {
+    setApiKeys(apiKeys.filter(k => k.id !== id));
+  };
+
+  // Hide/Show Toggle
+  const toggleVisibility = (id) => {
+    setVisibleKeys(prev => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  // Copy to Clipboard function
+  const copyToClipboard = (id, keyString) => {
+    navigator.clipboard.writeText(keyString);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000); // 2 second baad wapas copy icon dikhao
+  };
+
+  // 3. UI RENDER
+  return (
+    <div className="w-full max-w-4xl mx-auto p-6 bg-[#090e17] rounded-2xl border border-slate-800/50 shadow-xl">
+      
+      {/* --- HEADER SECTION --- */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+        <div>
+          <h2 className="text-2xl font-black text-white tracking-tight flex items-center gap-3">
+            <svg className="w-7 h-7 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg>
+            API Key Management
+          </h2>
+          <p className="text-slate-400 text-sm mt-1">Manage your Gemini API keys for Sentinel Cloud integrations.</p>
+        </div>
+        
+        <button 
+          onClick={generateNewKey}
+          className="bg-cyan-500/10 border border-cyan-500/50 text-cyan-400 hover:bg-cyan-500 hover:text-slate-900 px-5 py-2.5 rounded-xl font-bold text-sm shadow-[0_0_15px_rgba(6,182,212,0.2)] hover:shadow-[0_0_20px_rgba(6,182,212,0.5)] transition-all flex items-center gap-2"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4"></path></svg>
+          Create New Key
+        </button>
+      </div>
+
+      {/* --- KEYS LIST SECTION --- */}
+      <div className="space-y-4">
+        {apiKeys.length === 0 ? (
+          <div className="text-center py-10 bg-[#0F172A]/50 rounded-xl border border-slate-800 border-dashed">
+            <p className="text-slate-500 font-medium">No API keys found. Create one to get started.</p>
+          </div>
+        ) : (
+          apiKeys.map((item) => (
+            <div key={item.id} className="bg-[#0F172A] border border-slate-700/60 rounded-xl p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 transition-all hover:border-slate-600">
+              
+              {/* Left Side: Name aur Key */}
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-2">
+                  <h3 className="text-white font-bold text-base">{item.name}</h3>
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest bg-slate-800 px-2 py-0.5 rounded-md border border-slate-700">Created: {item.createdAt}</span>
+                </div>
+                
+                <div className="flex items-center gap-3 font-mono text-sm">
+                  <span className={`${visibleKeys[item.id] ? 'text-emerald-400' : 'text-slate-400'} tracking-wider`}>
+                    {visibleKeys[item.id] ? item.key : 'sk-gemini-************************'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Right Side: Action Buttons */}
+              <div className="flex items-center gap-2">
+                
+                {/* 1. Show/Hide Button */}
+                <button 
+                  onClick={() => toggleVisibility(item.id)} 
+                  className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white rounded-lg transition-colors border border-slate-700"
+                  title={visibleKeys[item.id] ? "Hide Key" : "View Key"}
+                >
+                  {visibleKeys[item.id] ? (
+                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path></svg>
+                  ) : (
+                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                  )}
+                </button>
+
+                {/* 2. Copy Button */}
+                <button 
+                  onClick={() => copyToClipboard(item.id, item.key)} 
+                  className={`p-2 rounded-lg transition-colors border ${copiedId === item.id ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/50' : 'bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white border-slate-700'}`}
+                  title="Copy Key"
+                >
+                  {copiedId === item.id ? (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7"></path></svg>
+                  ) : (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                  )}
+                </button>
+
+                {/* 3. Delete (Revoke) Button */}
+                <button 
+                  onClick={() => deleteKey(item.id)} 
+                  className="p-2 bg-slate-800 hover:bg-rose-500 hover:text-white text-rose-400 rounded-lg transition-colors border border-slate-700 hover:border-rose-500 ml-2"
+                  title="Revoke Key"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                </button>
+              </div>
+
+            </div>
+          ))
+        )}
+      </div>
+      
+      <div className="mt-6 p-4 bg-cyan-900/10 border border-cyan-800/30 rounded-xl">
+        <p className="text-xs text-cyan-500/80 font-medium">
+          <strong className="text-cyan-400 uppercase tracking-widest mr-1">Security Tip:</strong> 
+          Do not share your Gemini API keys in public repositories. Sentinel Cloud uses these keys to process IoT logic.
+        </p>
+      </div>
+
+    </div>
+  );
+}
