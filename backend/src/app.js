@@ -1,14 +1,14 @@
 //import packages
 const express = require('express');
-const startMQTT = require('./brokers/mqttBroker')
+//const startMQTT = require('./brokers/mqttBroker')
 const cors = require('cors');
 const authRoutes = require("./routes/authRoutes");
 const deviceRoutes = require("./routes/deviceRoutes");
 const userRoutes = require("./routes/userRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const dashboard = require("./routes/dashboard");
-
-startMQTT();
+const ApiKeysRoutes = require('./routes/ApiKeysRoutes');
+//startMQTT();
 //Create app
 const app = express();
 
@@ -20,11 +20,27 @@ app.use("/api/user",userRoutes);
 app.use('/api/dashboard', dashboard);
 app.use("/api/devices",deviceRoutes);
 app.use("/api/admin",adminRoutes);
+app.use('/api/apikeys', ApiKeysRoutes);
 
 //Test route
 app.get('/', (req,res)=>{
     res.send("API is running...");
 })
+
+// app.post('/sensor-data', (req, res) => {
+//     const data = req.body;
+//     console.log("Data received from ESP32:", data);
+    
+//     // Yahan aap Database mein save kar sakte hain
+//     // res.send se ESP32 ko confirmation milti hai
+//     res.status(200).send({ status: "Success", message: "Data received" });
+// });
+
+// app.listen(5000, '0.0.0.0', () => {
+//     console.log('HTTP Cloud Server running on port 3000');
+// });
+
+
 
 
 // Export app

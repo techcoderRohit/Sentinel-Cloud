@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const ApiKey = require('../models/ApiKey');
 
 const protect = async (req, res, next) => {
     let token;
@@ -31,6 +32,28 @@ const protect = async (req, res, next) => {
         });
     }
 };
+
+const validateApiKey = async (req, res, next) => {
+  const providedKey = req.headers['x-api-key'];
+
+  if (!providedKey) {
+    return res.status(401).json({ message: "API Key missing" });
+  }
+
+  const apiKeyDoc = await ApiKey.findOne({ key: providedKey, isActive: true });
+
+  if (!apiKeyDoc) {
+    return res.status(403).json({ message: "Invalid or inactive API Key" });
+  }
+
+  // Last used update karein
+  apiKeyDoc.lastUsed = new Date();
+  await apiKeyDoc.save();
+
+  req.user = apiKeyDoc.owner; // Request mein user ID attach kar di
+  next();
+};
+
 //Admin only middleware
 /*const adminOnly = (req, res, next) => {
     if (req.user && req.user.role === "admin") {
@@ -43,4 +66,5 @@ const protect = async (req, res, next) => {
     }
 };*/
 
-module.exports = { protect };
+
+module.exports = { protect, validateApiKey };

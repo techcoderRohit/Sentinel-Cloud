@@ -1,48 +1,76 @@
 "use client";
-
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
+import API from '@/utils/api';
 
 export default function ApiKeyManager() {
   // 1. STATE (Data Memory)
   // Dummy keys jo shuru mein dikhengi (Asli app mein ye database se aayengi)
-  const [apiKeys, setApiKeys] = useState([
-    { id: 1, name: 'Production Backend', key: 'sk-gemini-8f7d6e5c4b3a2109', createdAt: '2026-04-01' },
-    { id: 2, name: 'IoT Edge Device #1', key: 'sk-gemini-1a2b3c4d5e6f7089', createdAt: '2026-04-05' }
-  ]);
-
+  const [apiKeys, setApiKeys] = useState([]);
+const [loading, setLoading] = useState(true);
   const [visibleKeys, setVisibleKeys] = useState({}); // Kaunsi key dikhni hai aur kaunsi hide (***)
   const [copiedId, setCopiedId] = useState(null);     // Copy hone par tick (✔️) dikhane ke liye
 
   // 2. LOGIC FUNCTIONS
-  
-  // Nayi Key Generate Karne ka function
-  const generateNewKey = () => {
-    const randomString = Math.random().toString(36).substring(2, 15);
-    const newKey = {
-      id: Date.now(),
-      name: `New Device Key ${apiKeys.length + 1}`,
-      key: `sk-gemini-${randomString}`,
-      createdAt: new Date().toISOString().split('T')[0] // Aaj ki date
-    };
-    setApiKeys([newKey, ...apiKeys]); // Nayi key ko list mein sabse upar daal do
+// 1. Database se keys fetch karna (Mount hone par)
+  useEffect(() => {
+    fetchKeys();
+  }, []);
+
+  const fetchKeys = async () => {
+    try {
+      const config = { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } };
+      const { data } = await API.get('/apikeys', config);
+      setApiKeys(data);
+      setLoading(false);
+    } catch (err) {
+      console.error("Error fetching keys", err);
+    }
   };
 
-  // Key Delete (Revoke) Karne ka function
-  const deleteKey = (id) => {
-    setApiKeys(apiKeys.filter(k => k.id !== id));
+  // 2. Real API Key Generate karna
+  const generateNewKey = async () => {
+
+    //user se devicename puchein
+    const deviceName = window.prompt("Enter Device Name:",`Device-${apiKeys.length+1}`);
+    if(!deviceName) return; //Agar user cancel kar dein
+    try {
+      const config = { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } };
+      const { data } = await API.post('/apikeys/generate', { 
+        name: deviceName // Ab user ka diya hua naam jayega 
+      }, config);
+      
+      setApiKeys([data, ...apiKeys]); // UI mein add karein
+    } catch (error) {
+      console.log("Generation error:", error.response?.data || error.message);
+      alert("Failed to generate key");
+    }
   };
 
-  // Hide/Show Toggle
+  // 3. Key Delete (Revoke) from DB
+  const deleteKey = async (id) => {
+    if(window.confirm("Are you sure? This key will stop working immediately!")) {
+        try {
+            const config = { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } };
+            await API.delete(`/apikeys/${id}`, config);
+            setApiKeys(apiKeys.filter(k => k._id !== id));
+        } catch (err) {
+            alert("Error deleting key");
+        }
+    }
+  };
+
   const toggleVisibility = (id) => {
     setVisibleKeys(prev => ({ ...prev, [id]: !prev[id] }));
   };
 
-  // Copy to Clipboard function
   const copyToClipboard = (id, keyString) => {
     navigator.clipboard.writeText(keyString);
     setCopiedId(id);
-    setTimeout(() => setCopiedId(null), 2000); // 2 second baad wapas copy icon dikhao
+    setTimeout(() => setCopiedId(null), 2000);
   };
+
+  if (loading) return <div className="text-white text-center p-10">Loading Keys...</div>;
+
 
   // 3. UI RENDER
   return (
@@ -75,18 +103,18 @@ export default function ApiKeyManager() {
           </div>
         ) : (
           apiKeys.map((item) => (
-            <div key={item.id} className="bg-[#0F172A] border border-slate-700/60 rounded-xl p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 transition-all hover:border-slate-600">
+            <div key={item._id} className="bg-[#0F172A] border border-slate-700/60 rounded-xl p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 transition-all hover:border-slate-600">
               
               {/* Left Side: Name aur Key */}
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-2">
                   <h3 className="text-white font-bold text-base">{item.name}</h3>
-                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest bg-slate-800 px-2 py-0.5 rounded-md border border-slate-700">Created: {item.createdAt}</span>
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest bg-slate-800 px-2 py-0.5 rounded-md border border-slate-700">Created: {new Date(item.createdAt).toLocaleDateString('en-GB',{day : '2-digit', month:'short',year:'numeric'})}</span>
                 </div>
                 
                 <div className="flex items-center gap-3 font-mono text-sm">
-                  <span className={`${visibleKeys[item.id] ? 'text-emerald-400' : 'text-slate-400'} tracking-wider`}>
-                    {visibleKeys[item.id] ? item.key : 'sk-gemini-************************'}
+                  <span className={`${visibleKeys[item._id] ? 'text-emerald-400' : 'text-slate-400'} tracking-wider`}>
+                    {visibleKeys[item._id] ? item.key : 'sk-sentinel-************************'}
                   </span>
                 </div>
               </div>
@@ -96,11 +124,11 @@ export default function ApiKeyManager() {
                 
                 {/* 1. Show/Hide Button */}
                 <button 
-                  onClick={() => toggleVisibility(item.id)} 
+                  onClick={() => toggleVisibility(item._id)} 
                   className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white rounded-lg transition-colors border border-slate-700"
-                  title={visibleKeys[item.id] ? "Hide Key" : "View Key"}
+                  title={visibleKeys[item._id] ? "Hide Key" : "View Key"}
                 >
-                  {visibleKeys[item.id] ? (
+                  {visibleKeys[item._id] ? (
                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path></svg>
                   ) : (
                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
@@ -109,11 +137,11 @@ export default function ApiKeyManager() {
 
                 {/* 2. Copy Button */}
                 <button 
-                  onClick={() => copyToClipboard(item.id, item.key)} 
-                  className={`p-2 rounded-lg transition-colors border ${copiedId === item.id ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/50' : 'bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white border-slate-700'}`}
+                  onClick={() => copyToClipboard(item._id, item.key)} 
+                  className={`p-2 rounded-lg transition-colors border ${copiedId === item._id ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/50' : 'bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white border-slate-700'}`}
                   title="Copy Key"
                 >
-                  {copiedId === item.id ? (
+                  {copiedId === item._id ? (
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7"></path></svg>
                   ) : (
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
@@ -122,7 +150,7 @@ export default function ApiKeyManager() {
 
                 {/* 3. Delete (Revoke) Button */}
                 <button 
-                  onClick={() => deleteKey(item.id)} 
+                  onClick={() => deleteKey(item._id)} 
                   className="p-2 bg-slate-800 hover:bg-rose-500 hover:text-white text-rose-400 rounded-lg transition-colors border border-slate-700 hover:border-rose-500 ml-2"
                   title="Revoke Key"
                 >

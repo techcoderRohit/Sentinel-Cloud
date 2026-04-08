@@ -13,3 +13,10 @@ server.listen(PORT, ()=>{
     console.log(`Server running in ${process.env.Node_ENV || 'development'} node on port ${PORT}`);
 })
 
+// server.listen(PORT, '192.168.18.248', ()=>{
+//     console.log(`Server running in ${process.env.Node_ENV || 'development'} node on port ${PORT}`);
+// })
+
+
+
+
