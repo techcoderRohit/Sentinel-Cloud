@@ -41,14 +41,14 @@ export default function Navbar() {
           <Link href="#features" className="text-slate-300 hover:text-cyan-500 hover:underline hover:underline-offset-10 transition">
             Features
           </Link>
-          <Link href="/dashboard" className=" text-slate-300 hover:text-cyan-500 hover:underline hover:underline-offset-10 transition">
-            Dashboard
-          </Link>
-          <Link href="#alerts" className=" text-slate-300 hover:text-cyan-500 hover:underline hover:underline-offset-10 transition">
-            Alerts
+          <Link href="/blog" className=" text-slate-300 hover:text-cyan-500 hover:underline hover:underline-offset-10 transition">
+            Blog
           </Link>
           <Link href="#Contact" className=" text-slate-300 hover:text-cyan-500 hover:underline hover:underline-offset-10 transition">
             Contact
+          </Link>
+          <Link href="#About" className=" text-slate-300 hover:text-cyan-500 hover:underline hover:underline-offset-10 transition">
+            About Us
           </Link>
         </div>
 
