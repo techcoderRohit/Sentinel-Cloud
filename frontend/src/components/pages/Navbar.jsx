@@ -38,13 +38,13 @@ export default function Navbar() {
         </div>
         {/* DESKTOP MENU */}
         <div className="hidden md:flex items-center space-x-8">
-          <Link href="/#features" className="text-slate-300 hover:text-cyan-500 hover:underline hover:underline-offset-10 transition">
+          <Link href="#features" className="text-slate-300 hover:text-cyan-500 hover:underline hover:underline-offset-10 transition">
             Features
           </Link>
           <Link href="/blog" className=" text-slate-300 hover:text-cyan-500 hover:underline hover:underline-offset-10 transition">
             Blog
           </Link>
-          <Link href="/#Contact" className=" text-slate-300 hover:text-cyan-500 hover:underline hover:underline-offset-10 transition">
+          <Link href="#Contact" className=" text-slate-300 hover:text-cyan-500 hover:underline hover:underline-offset-10 transition">
             Contact
           </Link>
           <Link href="#About" className=" text-slate-300 hover:text-cyan-500 hover:underline hover:underline-offset-10 transition">
@@ -85,14 +85,14 @@ export default function Navbar() {
           <Link href="#features" className="block text-slate-300 hover:text-cyan-500">
             Features
           </Link>
-          <Link href="/dashboard" className="block text-slate-300 hover:text-cyan-500">
-            Dashboard
-          </Link>
-          <Link href="#alerts" className="block text-slate-300 hover:text-cyan-500">
-            Alerts
+          <Link href="/blog" className="block text-slate-300 hover:text-cyan-500">
+            Blog
           </Link>
           <Link href="#Contact" className="block text-slate-300 hover:text-cyan-500">
             Contact
+          </Link>
+          <Link href="#About" className="block text-slate-300 hover:text-cyan-500">
+            About Us
           </Link>
 
           <div className="pt-4 flex flex-col gap-3">
