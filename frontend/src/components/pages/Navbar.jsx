@@ -47,7 +47,7 @@ export default function Navbar() {
           <Link href="#Contact" className=" text-slate-300 hover:text-cyan-500 hover:underline hover:underline-offset-10 transition">
             Contact
           </Link>
-          <Link href="#About" className=" text-slate-300 hover:text-cyan-500 hover:underline hover:underline-offset-10 transition">
+          <Link href="/about" className=" text-slate-300 hover:text-cyan-500 hover:underline hover:underline-offset-10 transition">
             About Us
           </Link>
         </div>
