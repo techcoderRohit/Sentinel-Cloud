@@ -4,12 +4,8 @@ import { motion } from "framer-motion";
 
 const Contact = () => {
   return (
-    <section
-      id="Contact"
-      className="py-24 bg-[#0b0f1a] text-white"
-    >
+    <section id="Contact" className="py-24 bg-[#0b0f1a] text-white">
       <div className="container mx-auto px-6 lg:px-20">
-        
         {/* Section Heading */}
         <motion.div
           initial={{ opacity: 0, y: 40 }}
@@ -20,17 +16,16 @@ const Contact = () => {
         >
           <h2 className="text-4xl md:text-5xl font-bold mb-4">
             Get in Touch With
-              <span className="text-cyan-500">   Sentinel Cloud</span>
+            <span className="text-cyan-500"> Sentinel Cloud</span>
           </h2>
           <p className="text-gray-400 max-w-2xl mx-auto">
-            Have questions about our IoT cloud monitoring system? 
-            Our team is ready to assist you.
+            Have questions about our IoT cloud monitoring system? Our team is
+            ready to assist you.
           </p>
         </motion.div>
 
         {/* Main Content */}
         <div className="grid lg:grid-cols-2 gap-12 items-center">
-          
           {/* LEFT SIDE CONTENT */}
           <motion.div
             initial={{ opacity: 0, x: 60 }}
@@ -44,14 +39,14 @@ const Contact = () => {
             </h3>
 
             <p className="text-gray-400 leading-relaxed">
-              Sentinel Cloud provides secure, scalable, and intelligent IoT 
-              monitoring solutions. Whether you are integrating devices or 
+              Sentinel Cloud provides secure, scalable, and intelligent IoT
+              monitoring solutions. Whether you are integrating devices or
               building a monitoring dashboard, we are here to help.
             </p>
 
             <div className="space-y-4 text-gray-300">
               <p>📍 Location: Lucknow, India</p>
-              <p>📧 Email: support@sentinelcloud.com</p>
+              <p>📧 Email: sentinelcloudSupport@gmail.com</p>
               <p>📞 Phone: +91 XXXXX XXXXX</p>
             </div>
           </motion.div>
@@ -65,7 +60,6 @@ const Contact = () => {
             className="bg-gray-800/60 backdrop-blur-md border border-gray-700 p-8 rounded-2xl shadow-xl"
           >
             <form className="space-y-6">
-              
               {/* Name */}
               <div>
                 <label className="block text-sm mb-2 text-gray-300">
@@ -123,12 +117,11 @@ const Contact = () => {
               >
                 Send Message
               </motion.button>
-
             </form>
           </motion.div>
         </div>
       </div>
     </section>
   );
-}
+};
 export default Contact;

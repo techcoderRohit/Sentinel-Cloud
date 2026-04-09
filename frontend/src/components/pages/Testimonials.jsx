@@ -29,12 +29,8 @@ const testimonials = [
 
 const Testimonials = () => {
   return (
-    <section
-      id="testimonials"
-      className="py-24 bg-[#0b0f1a] text-white"
-    >
+    <section id="testimonials" className="py-24 bg-[#0b0f1a] text-white">
       <div className="container mx-auto px-6 lg:px-20 text-center">
-        
         {/* Heading */}
         <motion.h2
           initial={{ opacity: 0, y: 40 }}
@@ -44,7 +40,7 @@ const Testimonials = () => {
           className="text-4xl md:text-5xl font-bold mb-4"
         >
           What Users Say About
-          <span className="text-cyan-500">   Sentinel Cloud</span>
+          <span className="text-cyan-500"> Sentinel Cloud</span>
         </motion.h2>
 
         {/* Subheading */}
@@ -55,7 +51,8 @@ const Testimonials = () => {
           viewport={{ once: true }}
           className="text-gray-400 max-w-2xl mx-auto mb-16"
         >
-          Real feedback from professionals using our IoT cloud monitoring system.
+          Real feedback from professionals using our IoT cloud monitoring
+          system.
         </motion.p>
 
         {/* Testimonials Grid */}
@@ -84,14 +81,12 @@ const Testimonials = () => {
                 “{item.message}”
               </p>
 
-              <h4 className="text-cyan-500 font-semibold">
-                {item.name}
-              </h4>
+              <h4 className="text-cyan-500 font-semibold">{item.name}</h4>
             </motion.div>
           ))}
         </div>
       </div>
     </section>
   );
-}
+};
 export default Testimonials;

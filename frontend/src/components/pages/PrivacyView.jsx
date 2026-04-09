@@ -93,7 +93,7 @@ export default function PrivacyView() {
         <>
           <p className="mb-4">If you have any questions about this Privacy Policy, please contact our Data Protection Officer:</p>
           <div className="bg-[#0B1120] p-4 rounded-xl border border-slate-800 text-slate-300">
-            <p><strong>Email:</strong> privacy@sentinelcloud.io</p>
+            <p><strong>Email:</strong> sentinelcloudSupport@gmail.com</p>
             <p><strong>Address:</strong> Sentinel Cloud HQ, Tech Park, Lucknow, India</p>
           </div>
         </>
