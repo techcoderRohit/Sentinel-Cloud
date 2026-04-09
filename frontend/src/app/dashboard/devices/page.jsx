@@ -1,92 +1,73 @@
-"use client"
-import { useEffect, useState } from "react";
-import API from '@/utils/api';
+"use client";
+import React, { useEffect, useState } from 'react';
+import API from '@/utils/api'; // Aapka axios instance
 
-export default function DeviceListPage() {
+const DevicesMonitor = () => {
     const [devices, setDevices] = useState([]);
-    const [loading, setloading] = useState(true);
-    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(true);
+
+    const fetchStatus = async () => {
+        try {
+            const config = { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } };
+            const { data } = await API.get('/iot/monitor-all', config);
+            setDevices(data);
+            setLoading(false);
+        } catch (err) {
+            console.error("Monitoring error", err);
+        }
+    };
 
     useEffect(() => {
-        const fetchDevices = async () => {
-            try {
-                // 1. Get token from local storage
-                const token = localStorage.getItem('token');
-
-                if (!token) {
-                    setError("Please login to see your devices.");
-                    setloading(false);
-                    return;
-                }
-
-                // 2. Pass token in Headers (Sabse important step)
-                const res = await API.get('/devices', {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                });
-
-                // Check karein ki data res.data.data mein hai ya sirf res.data mein
-                // Backend ke response structure ke hisab se set karein
-                const deviceData = res.data.data || res.data;
-                setDevices(Array.isArray(deviceData) ? deviceData : []);
-
-            }
-            catch (error) {
-                console.error("Fetch Error:", error);
-                setError(error.response?.data?.message || "Error fetching Devices");
-            }
-            finally {
-                setloading(false);
-            }
-        };
-        fetchDevices();
+        fetchStatus();
+        const interval = setInterval(fetchStatus, 3000); // 3 sec auto-refresh
+        return () => clearInterval(interval);
     }, []);
 
+    const isOnline = (lastUsed) => {
+        if (!lastUsed) return false;
+        const diff = (new Date() - new Date(lastUsed)) / 1000;
+        return diff < 60; // 60 seconds threshold
+    };
+
+    if (loading) return <div className="p-10 text-white">Loading Sentinel Nodes...</div>;
+
     return (
-        <div className="min-h-screen bg-[#0b1120]">
-            <h1 className="text-3xl font-bold mb-4 text-center text-white ">My Devices</h1>
-
-            {loading && <p className="text-cyan-400 text-center">Loading devices...</p>}
-
-            {error && (
-                <div className="max-w-md mx-auto mb-4">
-                    <p className="text-red-500 font-semibold bg-red-100/10 p-3 border border-red-500 rounded-xl text-center">
-                        {error}
-                    </p>
-                </div>
-            )}
-
-            {!loading && !error && devices.length === 0 && (
-                <p className="text-white text-center">No devices found.</p>
-            )}
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="p-6 bg-[#0B1120] min-h-screen">
+            <h2 className="text-2xl font-bold text-white mb-6">Live Device Monitor</h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {devices.map((device) => (
-                    <div key={device._id} className="border border-slate-800 bg-slate-900 p-4 rounded-xl shadow-lg text-white">
-                        <h2 className="font-semibold text-lg text-cyan-400">{device.deviceName}</h2>
-                        <p className="text-sm text-slate-400">ID: {device.deviceId}</p>
+                    <div key={device._id} className="bg-[#151F32] border border-slate-800 rounded-2xl p-5 shadow-lg relative overflow-hidden">
+                        {/* Status Light */}
+                        <div className={`absolute top-4 right-4 h-3 w-3 rounded-full ${isOnline(device.lastUsed) ? 'bg-green-500 shadow-[0_0_10px_#22c55e]' : 'bg-red-500'}`} />
+                        
+                        <h3 className="text-lg font-semibold text-slate-200 mb-1">{device.name}</h3>
+                        <p className="text-xs text-slate-500 mb-4 font-mono">{device._id}</p>
 
-                        <p className="mt-2">
-                            Status:
-                            <span className={device.status === "Online" ? "text-emerald-400" : "text-rose-400"}>
-                                {" "}{device.status}
-                            </span>
-                        </p>
-
-                        <div className="flex justify-between mt-3 text-sm border-t border-gray-700 pt-2">
-                            <span>Type: {device.deviceType}</span>
-                            <span className={device.anomalyDetected ? "text-yellow-400" : "text-emerald-400"}>
-                                {device.anomalyDetected ? "⚠️ Anomaly" : "✅ Normal"}
-                            </span>
-                        </div>
-
-                        <p className="text-xs text-gray-500 mt-2">
-                            Last Active: {new Date(device.updatedAt || device.lastActive).toLocaleString()}
-                        </p>
+                        {device.data ? (
+                            <div className="space-y-4">
+                                <div className="flex justify-between items-center bg-black/20 p-3 rounded-xl border border-white/5">
+                                    <span className="text-slate-400 text-sm">Temperature</span>
+                                    <span className="text-cyan-400 text-xl font-bold">{device.data.temperature}°C</span>
+                                </div>
+                                <div className="flex justify-between items-center bg-black/20 p-3 rounded-xl border border-white/5">
+                                    <span className="text-slate-400 text-sm">Humidity</span>
+                                    <span className="text-blue-400 text-xl font-bold">{device.data.humidity}%</span>
+                                </div>
+                                <div className="text-[10px] text-slate-600 text-right">
+                                    Last Sync: {new Date(device.lastUsed).toLocaleTimeString()}
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="py-10 text-center text-slate-600 italic text-sm">
+                                No data received yet
+                            </div>
+                        )}
                     </div>
                 ))}
             </div>
         </div>
     );
-}
+};
+
+export default DevicesMonitor;

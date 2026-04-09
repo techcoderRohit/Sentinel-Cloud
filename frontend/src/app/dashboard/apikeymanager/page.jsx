@@ -1,6 +1,6 @@
 import ApiKeyManager from "@/components/Dashboard/ApiKeyManager";
 
-export default function SettingsPage() {
+export default function ApiKeyManagerPage() {
   return (
       <ApiKeyManager/>
   );

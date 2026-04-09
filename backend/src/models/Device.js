@@ -35,8 +35,9 @@ const deviceSchema = new mongoose.Schema({
         default: Date.now
     },
     apiKey: {
-        type: String,
-        required: true
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+        unique: true
     }
 },
     {

@@ -16,6 +16,7 @@ router.post('/generate', protect, async (req, res) => {
             owner: req.user._id,
             name: req.body.name || `Device-${Date.now()}`
         });
+        
         res.status(201).json(newKey);
     } catch (err) {
         console.log("Server error:",err);

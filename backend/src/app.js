@@ -6,8 +6,9 @@ const authRoutes = require("./routes/authRoutes");
 const deviceRoutes = require("./routes/deviceRoutes");
 const userRoutes = require("./routes/userRoutes");
 const adminRoutes = require("./routes/adminRoutes");
-const dashboard = require("./routes/dashboard");
+const dashboard = require("./routes/dashboardRoutes");
 const ApiKeysRoutes = require('./routes/ApiKeysRoutes');
+const SensorDataRoutes = require('./routes/SensorDataRoutes');
 //startMQTT();
 //Create app
 const app = express();
@@ -21,6 +22,7 @@ app.use('/api/dashboard', dashboard);
 app.use("/api/devices",deviceRoutes);
 app.use("/api/admin",adminRoutes);
 app.use('/api/apikeys', ApiKeysRoutes);
+app.use('/api/iot',SensorDataRoutes);
 
 //Test route
 app.get('/', (req,res)=>{
@@ -37,7 +39,7 @@ app.post('/sensor-data', (req, res) => {
 });
 
 app.listen(5000, '0.0.0.0', () => {
-    console.log('HTTP Cloud Server running on port 3000');
+    console.log('HTTP Cloud Server running on port 5000');
 });
 
 
