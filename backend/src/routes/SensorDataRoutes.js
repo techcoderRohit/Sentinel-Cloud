@@ -43,6 +43,29 @@ router.get('/latest/:apiKeyId', async (req, res) => {
     }
 });
 
+router.get('/dashboard-stats', protect, async (req, res) => {
+    try {
+        // 1. Total Keys (Devices) kitne hain
+        const totalDevices = await ApiKey.countDocuments({ owner: req.user._id });
+
+        // 2. Total kitna data points jama hue hain
+        const totalDataPoints = await SensorData.countDocuments({ 
+            apiKey: { $in: await ApiKey.find({ owner: req.user._id }).distinct('_id') } 
+        });
+
+        // 3. Active Devices (Jo pichle 10 min mein active the)
+        const tenMinsAgo = new Date(Date.now() - 10 * 60 * 1000);
+        const activeDevices = await ApiKey.countDocuments({ 
+            owner: req.user._id, 
+            lastUsed: { $gt: tenMinsAgo } 
+        });
+
+        res.json({ totalDevices, totalDataPoints, activeDevices });
+    } catch (err) {
+        res.status(500).json({ message: "Stats fetch failed" });
+    }
+});
+
 router.get('/monitor-all', protect, async (req, res) => {
     try {
         const keys = await ApiKey.find({ owner: req.user._id });
@@ -74,6 +97,22 @@ router.get('/stats/:keyId', protect, async (req, res) => {
         totalDataPoints: dataCount,
         lastActive: key.lastUsed 
     });
+});
+
+// GET /api/iot/history/:apiKeyId
+router.get('/history/:apiKeyId', protect, async (req, res) => {
+    try {
+        // Hum pichle 50 records mangwa rahe hain (Charts ke liye kaafi hain)
+        const history = await SensorData.find({ apiKey: req.params.apiKeyId })
+            .sort({ timestamp: -1 }) // Naya data pehle
+            .limit(50);
+
+        // Chart ke liye data ko "Old to New" order mein reverse karna hoga
+        res.json(history.reverse());
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "History fetch failed" });
+    }
 });
 
 module.exports = router;

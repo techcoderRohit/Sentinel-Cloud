@@ -85,9 +85,9 @@ const DashboardLayout = ({ children }) => {
                 + Add Device
               </button>
             </Link>
-            <button className="p-3 bg-slate-800 rounded-xl hover:bg-slate-700 text-slate-400">
+            <div className="h-10 w-10 bg-cyan-500/20 border border-cyan-500/50 rounded-lg flex items-center justify-center text-cyan-400">
               <Bell size={20} />
-            </button>
+            </div>
 
             {/* User Profile Dropdown */}
             <div className="relative" ref={menuRef}>
@@ -98,10 +98,6 @@ const DashboardLayout = ({ children }) => {
                 <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-white font-bold shadow-lg">
                   <User size={20} />
                 </div>
-                {/* User Icon SVG */}
-                {/* <svg className="w-5 h-5 text-slate-300" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-            </svg> */}
               </button>
 
               {/* Dropdown Box */}
