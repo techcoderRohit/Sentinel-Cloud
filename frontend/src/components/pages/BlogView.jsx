@@ -94,7 +94,7 @@ export default function BlogView() {
             Sentinel Insights
           </span>
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white tracking-tight mb-4 md:mb-6 leading-tight">
-            The <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">Tech & IoT</span> Blog
+            The <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-blue-500">Tech & IoT</span> Blog
           </h1>
           <p className="text-sm sm:text-base md:text-lg text-slate-400 max-w-2xl mb-8 md:mb-10 px-2">
             Stay updated with the latest news in Edge Computing, Cloud Security, and Sentinel Cloud product updates.
