@@ -38,13 +38,13 @@ export default function Navbar() {
         </div>
         {/* DESKTOP MENU */}
         <div className="hidden md:flex items-center space-x-8">
-          <Link href="#features" className="text-slate-300 hover:text-cyan-500 hover:underline hover:underline-offset-10 transition">
+          <Link href="/#features" className="text-slate-300 hover:text-cyan-500 hover:underline hover:underline-offset-10 transition">
             Features
           </Link>
           <Link href="/blog" className=" text-slate-300 hover:text-cyan-500 hover:underline hover:underline-offset-10 transition">
             Blog
           </Link>
-          <Link href="#Contact" className=" text-slate-300 hover:text-cyan-500 hover:underline hover:underline-offset-10 transition">
+          <Link href="/#Contact" className=" text-slate-300 hover:text-cyan-500 hover:underline hover:underline-offset-10 transition">
             Contact
           </Link>
           <Link href="#About" className=" text-slate-300 hover:text-cyan-500 hover:underline hover:underline-offset-10 transition">

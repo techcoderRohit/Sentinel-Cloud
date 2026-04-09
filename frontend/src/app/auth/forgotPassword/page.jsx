@@ -27,7 +27,7 @@ const router = useRouter();
 
 
   return (
-    <div className="min-h-screen bg-[#0b0f1a] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#0b1120] flex items-center justify-center p-4">
       <form onSubmit={handleSendOTP} className="bg-slate-900 p-8 rounded-xl border border-slate-800 w-96 shadow-2xl text-center">
         <h2 className="text-2xl text-cyan-500 font-bold mb-4 ">Forgot Password</h2>
         <p className='text-slate-400 text-sm mb-6 '>Enter email to receive a 6-digit OTP.</p>

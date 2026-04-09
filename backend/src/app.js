@@ -27,18 +27,18 @@ app.get('/', (req,res)=>{
     res.send("API is running...");
 })
 
-// app.post('/sensor-data', (req, res) => {
-//     const data = req.body;
-//     console.log("Data received from ESP32:", data);
+app.post('/sensor-data', (req, res) => {
+    const data = req.body;
+    console.log("Data received from ESP32:", data);
     
-//     // Yahan aap Database mein save kar sakte hain
-//     // res.send se ESP32 ko confirmation milti hai
-//     res.status(200).send({ status: "Success", message: "Data received" });
-// });
+    // Yahan aap Database mein save kar sakte hain
+    // res.send se ESP32 ko confirmation milti hai
+    res.status(200).send({ status: "Success", message: "Data received" });
+});
 
-// app.listen(5000, '0.0.0.0', () => {
-//     console.log('HTTP Cloud Server running on port 3000');
-// });
+app.listen(5000, '0.0.0.0', () => {
+    console.log('HTTP Cloud Server running on port 3000');
+});
 
 
 

@@ -61,7 +61,7 @@ export function VerifyOTP() {
     };
 
     return (
-        <div className="min-h-screen bg-[#0b0f1a] flex items-center justify-center p-4">
+        <div className="min-h-screen bg-[#0b1120] flex items-center justify-center p-4">
             <form onSubmit={handleReset} className="bg-slate-900 p-8 rounded-xl border border-slate-800 w-96 shadow-2xl">
                 <h2 className="text-2xl text-cyan-500 font-bold mb-2 text-center">Verify OTP</h2>
                 <p className='text-slate-400 text-xs mb-6 text-center italic'>OTP sent to: {email}</p>
