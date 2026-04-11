@@ -28,9 +28,9 @@ const DashboardLayout = ({ children }) => {
     { name: 'Home', icon: <Home size={20} />, path: "/dashboard" },
     { name: 'Control Board', icon: <LayoutDashboard size={20} />, path: "/dashboard/control-board" },
     { name: 'Devices', icon: <Cpu size={20} />, path: "/dashboard/devices" },
-    { name: 'Data Routing', icon: <GitBranch size={20} />, path: "/dashboard/routing" },
     { name: 'Web Repl Console', icon: <Terminal size={20} />, path: "/dashboard/webRepl" },
     { name: 'API Keys', icon: <Key size={20} />, path: "/dashboard/apikeymanager" },
+    { name: 'Data Routing', icon: <GitBranch size={20} />, path: "/dashboard/routing" },
     { name: 'Settings', icon: <Settings size={20} />, path: "/dashboard/settings" },
   ];
 
