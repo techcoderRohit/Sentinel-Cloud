@@ -9,8 +9,7 @@ const deviceSchema = new mongoose.Schema({
     deviceId: {
         type: String,
         required: [true, 'Unique Device Id is required'],
-        unique: true,
-        trim: true
+        unique: true
     },
     deviceType: {
         type: String,
@@ -23,21 +22,21 @@ const deviceSchema = new mongoose.Schema({
         required: true
     },
     location: {
-         type: String
+        type: String
     },
     status: {
         type: String,
         enum: ['Online', 'Offline'],
         default: 'Offline'
     },
-    lastActive: {
-        type: Date,
-        default: Date.now
-    },
     apiKey: {
         type: mongoose.Schema.Types.ObjectId,
         required: true,
         unique: true
+    },
+    lastActive: {
+        type: Date,
+        default: Date.now
     }
 },
     {

@@ -41,13 +41,13 @@ export default function Navbar() {
           <Link href="/#features" className="text-slate-300 hover:text-cyan-500 hover:underline hover:underline-offset-10 transition">
             Features
           </Link>
-          <Link href="/NavBar/blog" className=" text-slate-300 hover:text-cyan-500 hover:underline hover:underline-offset-10 transition">
+          <Link href="/blog" className=" text-slate-300 hover:text-cyan-500 hover:underline hover:underline-offset-10 transition">
             Blog
           </Link>
           <Link href="/#Contact" className=" text-slate-300 hover:text-cyan-500 hover:underline hover:underline-offset-10 transition">
             Contact
           </Link>
-          <Link href="/NavBar/about" className=" text-slate-300 hover:text-cyan-500 hover:underline hover:underline-offset-10 transition">
+          <Link href="/about" className=" text-slate-300 hover:text-cyan-500 hover:underline hover:underline-offset-10 transition">
             About Us
           </Link>
         </div>
@@ -82,16 +82,16 @@ export default function Navbar() {
           <Link href="/" className="block text-slate-300 hover:text-cyan-500">
             Home
           </Link>
-          <Link href="#features" className="block text-slate-300 hover:text-cyan-500">
+          <Link href="/#features" className="block text-slate-300 hover:text-cyan-500">
             Features
           </Link>
           <Link href="/blog" className="block text-slate-300 hover:text-cyan-500">
             Blog
           </Link>
-          <Link href="#Contact" className="block text-slate-300 hover:text-cyan-500">
+          <Link href="/#Contact" className="block text-slate-300 hover:text-cyan-500">
             Contact
           </Link>
-          <Link href="#About" className="block text-slate-300 hover:text-cyan-500">
+          <Link href="/about" className="block text-slate-300 hover:text-cyan-500">
             About Us
           </Link>
 

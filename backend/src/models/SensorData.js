@@ -6,6 +6,12 @@ const sensorDataSchema = new mongoose.Schema({
     ref: 'ApiKey', // Kis API Key se data aaya
     required: true
   },
+  deviceId: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+    unique: true,
+
+  },
   owner: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User', // Kis user ka device hai

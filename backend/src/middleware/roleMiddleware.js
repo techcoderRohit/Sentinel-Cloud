@@ -9,6 +9,7 @@ const authorizeRoles = (...roles) => {
         //2. check karein ki user ka role allowed role ki list mein h ya nhi
         if(!roles.includes(req.user.role)){
             return res.status(403).json({
+                success : false,
                 message : `Access Denied: ${req.user.role} is not allowed`
             });
         }

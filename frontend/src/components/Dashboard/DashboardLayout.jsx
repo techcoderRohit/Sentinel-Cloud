@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Home, LayoutDashboard, Cpu, GitBranch, Key, Settings, Bell, User } from 'lucide-react';
+import { Home, LayoutDashboard, Cpu, GitBranch, Key, Settings, Bell, User, Terminal } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -29,6 +29,7 @@ const DashboardLayout = ({ children }) => {
     { name: 'Control Board', icon: <LayoutDashboard size={20} />, path: "/dashboard/control-board" },
     { name: 'Devices', icon: <Cpu size={20} />, path: "/dashboard/devices" },
     { name: 'Data Routing', icon: <GitBranch size={20} />, path: "/dashboard/routing" },
+    { name: 'Web Repl Console', icon: <Terminal size={20} />, path: "/dashboard/webRepl" },
     { name: 'API Keys', icon: <Key size={20} />, path: "/dashboard/apikeymanager" },
     { name: 'Settings', icon: <Settings size={20} />, path: "/dashboard/settings" },
   ];

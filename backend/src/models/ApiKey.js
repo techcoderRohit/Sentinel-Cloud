@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 
-
 const apiKeySchema = new mongoose.Schema({
   key: { 
     type: String, 

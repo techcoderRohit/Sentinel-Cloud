@@ -5,26 +5,22 @@ const userSchema = new mongoose.Schema(
    {
       name: {
          type: String,
-         required: true,
+         required: [true, 'Name is required'],
          trim: true
       },
       email: {
          type: String,
-         required: true,
+         required: [true, 'Email is required'],
          unique: true,
          lowercase: true
       },
       password: {
          type: String,
-         required: true,
-         minlength: 6
+         required: [true, 'Password is required'],
+         minlength: [6, 'Password must be at least 6 characters'],
+         //Don't return password in queries by default
       },
-      resetOTP: {
-         type: String
-      },
-      resetOTPExpire: {
-         type: Date
-      },
+
       role: {
          type: String,
          enum: ["user", "admin"],
@@ -33,6 +29,16 @@ const userSchema = new mongoose.Schema(
       isActive: {
          type: Boolean,
          default: true
+      },
+      createdAt : {
+         type: Date,
+         default: Date.now
+      },
+      resetOTP: {
+         type: String
+      },
+      resetOTPExpire: {
+         type: Date
       }
    },
    {

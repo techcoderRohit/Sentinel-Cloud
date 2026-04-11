@@ -79,7 +79,7 @@ const handleGenerate = async () => {
 
   // 3. UI RENDER
   return (
-    <div className="w-full max-w-4xl mx-auto p-6 bg-[#090e17] rounded-2xl border border-slate-800/50 shadow-xl">
+    <div className="w-full max-w-4xl mx-auto p-6 bg-[#0b1120]">
       
       {/* --- HEADER SECTION --- */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
