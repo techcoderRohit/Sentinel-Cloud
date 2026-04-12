@@ -30,7 +30,7 @@ const deviceSchema = new mongoose.Schema({
         default: 'Offline'
     },
     apiKey: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: String,
         required: true,
         unique: true
     },

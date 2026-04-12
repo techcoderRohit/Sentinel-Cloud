@@ -1,0 +1,151 @@
+import React, { useState, useRef, useEffect } from 'react';
+import { Bell, ChevronDown, User } from 'lucide-react';
+import Link from 'next/link';
+import API from '@/utils/api';
+import { jwtDecode } from 'jwt-decode';
+
+const Topbar = () => {
+const [userId,setUserId] = useState(null);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const menuRef = useRef(null);
+  const notifRef = useRef(null);
+  
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) setIsMenuOpen(false);
+      if (notifRef.current && !notifRef.current.contains(event.target)) setIsNotifOpen(false);
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+//   const createTestNotification = async () => {
+//   const userId = localStorage.getItem("userId"); // Actual logged-in ID
+  
+//   if (!userId) {
+//     alert("User ID nahi mili! Pehle login karein.");
+//     return;
+//   }
+
+//   try {
+//     const res = await API.post("/notifications/create", {
+//       userId: userId,
+//       title: "Device Alert",
+//       message: "Temperature exceeded 50°C",
+//       type: "critical" // options: info, warning, critical
+//     });
+
+//     if (res.data.success) {
+//       alert("Notification create ho gayi! Ab bell icon check karein.");
+//       // Optional: Page refresh kar sakte hain data dekhne ke liye
+//       window.location.reload();
+//     }
+//   } catch (err) {
+//     console.error("Test creation error:", err);
+//     alert("Error: " + err.response?.data?.error);
+//   }
+// };
+
+
+  useEffect(()=>{
+    const token = localStorage.getItem('token');
+    if(token){
+        try{
+            //token ko decode karo
+            const decoded = jwtDecode(token);
+            setUserId(decoded.id || decoded._id || decoded.userId);
+        }catch(error){
+            console.log("Invalid token", error);
+            
+        }
+    }
+  },[]);
+
+  //Jab userId mil jaaye tab api call karo
+  useEffect(() => {
+    if(!userId) return;
+    const fetchNotifications = async () => {
+      try {
+        const response = await API.get(`/notifications/${userId}`);
+        if (response.data.success) {
+            setNotifications(response.data.data);
+        }
+      } catch (error) {
+        console.error('Alerts fetch error:', error);
+      }
+    };
+    fetchNotifications();
+  }, [userId]);
+
+  const unreadCount = notifications.filter(n => !n.isRead).length;
+
+  const logout = () => {
+    localStorage.removeItem("token");
+    window.location.href = "/auth/login";
+  };
+
+  return (
+    <header className="h-16 bg-[#0B1120]/80 border-b border-slate-800 flex items-center justify-between px-8 sticky top-0 z-50">
+      <h1 className="text-xl font-semibold tracking-tight text-white">IoT Monitoring Dashboard</h1>
+
+      <div className="flex items-center gap-6">
+        {/* <Link href="/dashboard/devices/addDevice">
+          <button className="hidden md:block bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-lg hover:from-cyan-600 hover:to-blue-600 px-4 py-2 font-bold transition-all">
+            + Add Device
+          </button>
+        </Link>
+         */}
+        {/* Notification Bell */}
+        <div className="relative" ref={notifRef}>
+          <div onClick={() => setIsNotifOpen(!isNotifOpen)} className="h-10 w-10 bg-cyan-500/20 border border-cyan-500/50 rounded-lg flex items-center justify-center text-cyan-400 cursor-pointer relative hover:bg-cyan-500/30">
+            <Bell size={20} />
+            {unreadCount > 0 && (
+              <span className="absolute -top-1.5 -right-1.5 inline-flex items-center justify-center w-5 h-5 text-[10px] font-bold text-white bg-red-500 border-2 border-[#0B1120] rounded-full">
+                {unreadCount}
+              </span>
+            )}
+          </div>
+          {isNotifOpen && (
+            <div className="absolute right-0 mt-3 w-80 bg-[#0F172A] border border-slate-800 rounded-xl shadow-2xl overflow-hidden z-50">
+               {/* ... Notification List Map (Jo aapke original code mein tha) ... */}
+               <div className="bg-[#0B1120]/50 px-4 py-3 border-b border-slate-800 flex justify-between items-center text-sm">
+                  <span className="text-slate-200 font-semibold">System Alerts</span>
+               </div>
+               <div className="max-h-80 overflow-y-auto">
+                  {notifications.length === 0 ? (
+                    <div className="px-4 py-6 text-sm text-slate-400 text-center">No alerts</div>
+                  ) : (
+                    notifications.map(alert => (
+                      <div key={alert._id} className="px-4 py-3 border-b border-slate-800/50">
+                        <p className="text-xs text-white">{alert.title}</p>
+                        <p className="text-[10px] text-slate-400">{alert.message}</p>
+                      </div>
+                    ))
+                  )}
+               </div>
+            </div>
+          )}
+        </div>
+
+        {/* Profile Dropdown */}
+        <div className="relative" ref={menuRef}>
+          <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="flex items-center gap-2 p-1 rounded-full border border-transparent hover:border-slate-700 transition-all">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-white font-bold"><User size={20} /></div>
+          </button>
+          {isMenuOpen && (
+            <div className="absolute right-0 mt-3 w-48 bg-[#0F172A] border border-slate-800 rounded-xl shadow-2xl py-2 z-50">
+              <button className="w-full text-left px-4 py-2 text-sm text-slate-300 hover:bg-slate-800">Admin Panel</button>
+              <div className="border-t border-slate-800 my-1"></div>
+              <button onClick={logout} className="w-full text-left px-4 py-2 text-sm text-rose-400 hover:bg-rose-500/10">Logout</button>
+            </div>
+          )}
+        </div>
+      </div>
+    </header>
+  );
+};
+
+export default Topbar;

@@ -4,23 +4,53 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Home, LayoutDashboard, Cpu, GitBranch, Key, Settings, Bell, User, Terminal } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-
+import API from '@/utils/api';
 
 const DashboardLayout = ({ children }) => {
+  // --- Profile Menu State ---
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-
   const menuRef = useRef(null);
 
-  // Bahar click karne par menu band karne ke liye
+  // --- Notification State ---
+  const [notifications, setNotifications] = useState([]);
+  const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const notifRef = useRef(null);
+  
+  // Dummy userId for testing (baad mein isko actual logged-in user se replace karna)
+  const userId = "test_user_id";
+
+  // Bahar click karne par dono menus (Profile aur Notification) band karne ke liye
   useEffect(() => {
     const handleClickOutside = (event) => {
+      // Profile menu close logic
       if (menuRef.current && !menuRef.current.contains(event.target)) {
         setIsMenuOpen(false);
+      }
+      // Notification menu close logic
+      if (notifRef.current && !notifRef.current.contains(event.target)) {
+        setIsNotifOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  // Backend se notifications fetch karna
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        const response = await API.get(`/notifications/${userId}`);
+        if (response.data.success) {
+          setNotifications(response.data.data);
+        }
+      } catch (error) {
+        console.error('Alerts fetch error:', error);
+      }
+    };
+    fetchNotifications();
+  }, [userId]);
+
+  const unreadCount = notifications.filter(n => !n.isRead).length;
 
   const pathname = usePathname();
 
@@ -28,7 +58,7 @@ const DashboardLayout = ({ children }) => {
     { name: 'Home', icon: <Home size={20} />, path: "/dashboard" },
     { name: 'Control Board', icon: <LayoutDashboard size={20} />, path: "/dashboard/control-board" },
     { name: 'Devices', icon: <Cpu size={20} />, path: "/dashboard/devices" },
-    { name: 'Web Repl Console', icon: <Terminal size={20} />, path: "/dashboard/webRepl" },
+    { name: 'Web Repl Console', icon: <Terminal size={20} />, path: "/dashboard/webRepl"},
     { name: 'API Keys', icon: <Key size={20} />, path: "/dashboard/apikeymanager" },
     { name: 'Data Routing', icon: <GitBranch size={20} />, path: "/dashboard/routing" },
     { name: 'Settings', icon: <Settings size={20} />, path: "/dashboard/settings" },
@@ -80,15 +110,63 @@ const DashboardLayout = ({ children }) => {
           <h1 className="text-xl font-semibold tracking-tight text-white">IoT Monitoring Dashboard</h1>
 
           <div className="flex items-center gap-6">
-            {/* Add Device Button */}
+            Add Device Button
             <Link href="/dashboard/devices/addDevice">
               <button className="hidden md:block bg-linear-to-r from-cyan-500 to-blue-500 text-white rounded-lg hover:from-cyan-600 hover:to-blue-600  px-4 py-2 font-bold transition-all">
                 + Add Device
               </button>
             </Link>
-            <div className="h-10 w-10 bg-cyan-500/20 border border-cyan-500/50 rounded-lg flex items-center justify-center text-cyan-400">
-              <Bell size={20} />
+            
+            {/* --- UPDATED NOTIFICATION BELL --- */}
+            <div className="relative" ref={notifRef}>
+              <div 
+                onClick={() => setIsNotifOpen(!isNotifOpen)}
+                className="h-10 w-10 bg-cyan-500/20 border border-cyan-500/50 rounded-lg flex items-center justify-center text-cyan-400 cursor-pointer transition hover:bg-cyan-500/30 relative"
+              >
+                <Bell size={20} />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 inline-flex items-center justify-center w-5 h-5 text-[10px] font-bold text-white bg-red-500 border-2 border-[#0B1120] rounded-full">
+                    {unreadCount}
+                  </span>
+                )}
+              </div>
+
+              {/* Notification Dropdown Menu */}
+              {isNotifOpen && (
+                <div className="absolute right-0 mt-3 w-80 bg-[#0F172A] border border-slate-800 rounded-xl shadow-2xl overflow-hidden z-50 animate-in fade-in zoom-in duration-200">
+                  <div className="bg-[#0B1120]/50 px-4 py-3 border-b border-slate-800 flex justify-between items-center">
+                    <h3 className="text-sm font-semibold text-slate-200">System Alerts</h3>
+                    <span className="text-xs text-cyan-400 cursor-pointer hover:underline">Mark all as read</span>
+                  </div>
+
+                  <div className="max-h-80 overflow-y-auto">
+                    {notifications.length === 0 ? (
+                      <div className="px-4 py-6 text-sm text-slate-400 text-center">Koi naya alert nahi hai</div>
+                    ) : (
+                      notifications.map((alert) => (
+                        <div
+                          key={alert._id}
+                          className={`px-4 py-3 border-b border-slate-800/50 hover:bg-slate-800/50 transition ${alert.isRead ? 'opacity-50' : 'bg-[#0F172A]'}`}
+                        >
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-sm font-medium text-slate-200">{alert.title}</span>
+                            <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded ${
+                              alert.type === 'critical' ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' :
+                              alert.type === 'warning' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' :
+                              'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20'
+                            }`}>
+                              {alert.type}
+                            </span>
+                          </div>
+                          <p className="text-xs text-slate-400">{alert.message}</p>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
+            {/* --- END NOTIFICATION BELL --- */}
 
             {/* User Profile Dropdown */}
             <div className="relative" ref={menuRef}>

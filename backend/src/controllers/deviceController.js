@@ -15,7 +15,7 @@ const registerDevice = async (req,res) => {
         }
         // Auto generate a secure api key for the hardware
 
-       // const apiKey = crypto.randomBytes(16).toString('hex');
+       const apiKey = crypto.randomBytes(16).toString('hex');
 
      const device = await Device.create({
             deviceName,
@@ -27,7 +27,8 @@ const registerDevice = async (req,res) => {
         });
         res.status(201).json({
             success : true,
-            message : 'Device Registered Successfully'
+            message : 'Device Registered Successfully',
+            data: device
         });
 }catch (error){
 res.status(500).json({
