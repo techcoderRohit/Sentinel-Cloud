@@ -30,9 +30,10 @@ const userSchema = new mongoose.Schema(
          type: Boolean,
          default: true
       },
-      createdAt : {
-         type: Date,
-         default: Date.now
+      telegramChatId:{
+         type: String,
+         trim: true,
+         default: null
       },
       resetOTP: {
          type: String

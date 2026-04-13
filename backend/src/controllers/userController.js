@@ -12,13 +12,9 @@ const getUserProfile = async (req, res) => {
             });
         }
         res.status(200).json({
-            _id : user._id,
-            name : user.name,
-            email : user.email,
-            role : user.role,
-            isActive : user.isActive,
-            createdAt : user.createdAt
-        })
+            success:true,
+            data:user
+        });
     }
     catch(error){
           return res.status(500).json({

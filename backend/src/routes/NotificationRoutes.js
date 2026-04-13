@@ -1,17 +1,26 @@
-const express = require('express'); 
+const express = require('express');
 const router = express.Router();
-const Notification = require('../models/Notification'); 
-const {protect} = require('../middleware/authMiddleware');
+const sendAlerts = require('../utils/alertService');
+const Notification = require('../models/Notification');
+const { protect } = require('../middleware/authMiddleware');
 
 // 1. Naya Alert Save Karne Ka API (POST)
 router.post('/create', protect, async (req, res) => {
     try {
         const { title, message, type } = req.body;
-const userId = req.user.id;  //middleware se user id nikelegi
+        const userId = req.user.id;  //middleware se user id nikelegi
 
         const newNotification = new Notification({ userId, title, message, type });
         await newNotification.save();
-        
+        // --- Naya logic yahan add karein ---
+        // Maan lijiye user ke model mein email aur telegramId saved hai
+        const userEmail = req.user.email; 
+        const telegramId = req.user.telegramChatId; // User model mein ye field honi chahiye
+
+        if (userEmail || telegramId) {
+            await sendAlerts(userEmail, telegramId, `${title}: ${message}`);
+        }
+
         res.status(201).json({ success: true, data: newNotification });
     } catch (error) {
         console.error(" Error:", error); // Terminal mein error dekhne ke liye
@@ -23,9 +32,9 @@ const userId = req.user.id;  //middleware se user id nikelegi
 router.get('/', protect, async (req, res) => {
     try {
         const notifications = await Notification.find({ userId: req.user.id }).sort({ createdAt: -1 });
-         
-        res.status(200).json({ 
-            success: true, 
+
+        res.status(200).json({
+            success: true,
             count: notifications.length,
             data: notifications || [] // Agar null ho toh empty array bhejein
         });
