@@ -1,17 +1,15 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Bell, ChevronDown, User } from 'lucide-react';
-import Link from 'next/link';
 import API from '@/utils/api';
-import { jwtDecode } from 'jwt-decode';
+
 
 const Topbar = () => {
-const [userId,setUserId] = useState(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const menuRef = useRef(null);
   const notifRef = useRef(null);
-  
+
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -22,63 +20,26 @@ const [userId,setUserId] = useState(null);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-//   const createTestNotification = async () => {
-//   const userId = localStorage.getItem("userId"); // Actual logged-in ID
-  
-//   if (!userId) {
-//     alert("User ID nahi mili! Pehle login karein.");
-//     return;
-//   }
 
-//   try {
-//     const res = await API.post("/notifications/create", {
-//       userId: userId,
-//       title: "Device Alert",
-//       message: "Temperature exceeded 50°C",
-//       type: "critical" // options: info, warning, critical
-//     });
-
-//     if (res.data.success) {
-//       alert("Notification create ho gayi! Ab bell icon check karein.");
-//       // Optional: Page refresh kar sakte hain data dekhne ke liye
-//       window.location.reload();
-//     }
-//   } catch (err) {
-//     console.error("Test creation error:", err);
-//     alert("Error: " + err.response?.data?.error);
-//   }
-// };
-
-
-  useEffect(()=>{
-    const token = localStorage.getItem('token');
-    if(token){
-        try{
-            //token ko decode karo
-            const decoded = jwtDecode(token);
-            setUserId(decoded.id || decoded._id || decoded.userId);
-        }catch(error){
-            console.log("Invalid token", error);
-            
-        }
-    }
-  },[]);
-
-  //Jab userId mil jaaye tab api call karo
-  useEffect(() => {
-    if(!userId) return;
-    const fetchNotifications = async () => {
-      try {
-        const response = await API.get(`/notifications/${userId}`);
-        if (response.data.success) {
-            setNotifications(response.data.data);
-        }
-      } catch (error) {
-        console.error('Alerts fetch error:', error);
+  const fetchNotifications = async () => {
+    try {
+      const response = await API.get("/notifications/");
+      console.log(response.data);
+      if (response.data.success) {
+        setNotifications(response.data.data);
       }
-    };
+    } catch (error) {
+      console.error('Alerts fetch error:', error);
+    }
+  };
+
+  useEffect(() => {
+
     fetchNotifications();
-  }, [userId]);
+    //Har 30 seconds mein refresh karne ke liye(real-time feel)
+    const interval = setInterval(fetchNotifications, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   const unreadCount = notifications.filter(n => !n.isRead).length;
 
@@ -110,22 +71,22 @@ const [userId,setUserId] = useState(null);
           </div>
           {isNotifOpen && (
             <div className="absolute right-0 mt-3 w-80 bg-[#0F172A] border border-slate-800 rounded-xl shadow-2xl overflow-hidden z-50">
-               {/* ... Notification List Map (Jo aapke original code mein tha) ... */}
-               <div className="bg-[#0B1120]/50 px-4 py-3 border-b border-slate-800 flex justify-between items-center text-sm">
-                  <span className="text-slate-200 font-semibold">System Alerts</span>
-               </div>
-               <div className="max-h-80 overflow-y-auto">
-                  {notifications.length === 0 ? (
-                    <div className="px-4 py-6 text-sm text-slate-400 text-center">No alerts</div>
-                  ) : (
-                    notifications.map(alert => (
-                      <div key={alert._id} className="px-4 py-3 border-b border-slate-800/50">
-                        <p className="text-xs text-white">{alert.title}</p>
-                        <p className="text-[10px] text-slate-400">{alert.message}</p>
-                      </div>
-                    ))
-                  )}
-               </div>
+              {/* ... Notification List Map (Jo aapke original code mein tha) ... */}
+              <div className="bg-[#0B1120]/50 px-4 py-3 border-b border-slate-800 flex justify-between items-center text-sm">
+                <span className="text-slate-200 font-semibold">System Alerts</span>
+              </div>
+              <div className="max-h-80 overflow-y-auto">
+                {notifications.length === 0 ? (
+                  <div className="px-4 py-6 text-sm text-slate-400 text-center">No alerts</div>
+                ) : (
+                  notifications.map(alert => (
+                    <div key={alert._id} className="px-4 py-3 border-b border-slate-800/50">
+                      <p className="text-xs text-white">{alert.title}</p>
+                      <p className="text-[10px] text-slate-400">{alert.message}</p>
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
           )}
         </div>
