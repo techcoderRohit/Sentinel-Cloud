@@ -23,8 +23,6 @@ const userId = req.user.id;  //middleware se user id nikelegi
 router.get('/', protect, async (req, res) => {
     try {
         const notifications = await Notification.find({ userId: req.user.id }).sort({ createdAt: -1 });
-         //console.log(req.params.userId);
-         //console.log(notifications.length);
          
         res.status(200).json({ 
             success: true, 
