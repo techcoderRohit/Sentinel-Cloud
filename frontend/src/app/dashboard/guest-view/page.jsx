@@ -1,5 +1,5 @@
-// import GuestView from '@/components/Dashboard/GuestView';
+import GuestView from '@/components/Dashboard/GuestView';
 
-// export default function GuestViewPage() {
-//   return <GuestView />;
-// }
+export default function GuestViewPage() {
+  return <GuestView />;
+}
