@@ -102,7 +102,7 @@ app.post('/sensor-data', (req, res) => {
     res.status(200).send({ status: "Success", message: "Data received" });
 });
 
-app.listen(5100, '0.0.0.0', () => {
+app.listen(5000, '0.0.0.0', () => {
     console.log('HTTP Cloud Server running on port 5000');
 });
 
