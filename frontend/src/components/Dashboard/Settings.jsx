@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import API from '@/utils/api';
 import {
   Settings as SettingsIcon,
+  Bell,
   User,
   Users,
   Mail,
@@ -238,6 +239,7 @@ export default function Settings() {
   const sidebarItems = [
     { id: 'profile', label: 'Profile', icon: <User className="w-4 h-4" /> },
     { id: 'security', label: 'Security', icon: <Lock className="w-4 h-4" /> },
+    { id: 'notifications', label: 'Notifications', icon: <Bell className="w-4 h-4" /> },
     // Only show Access Control if user is NOT a guest
     ...(profile.role !== 'guest' ? [{ id: 'access', label: 'Access Control', icon: <Users className="w-4 h-4" /> }] : []),
     { id: 'danger', label: 'Danger Zone', icon: <AlertTriangle className="w-4 h-4" /> },
@@ -597,6 +599,119 @@ export default function Settings() {
                     <strong className="text-cyan-400 uppercase tracking-widest mr-1">Security Tip:</strong>
                     Use a strong password with a mix of uppercase, lowercase, numbers, and special characters. Never reuse passwords across platforms.
                   </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ========== NOTIFICATIONS SECTION ========== */}
+          {activeSection === 'notifications' && (
+            <div className="animate-in fade-in duration-300">
+              <div className="bg-[#0F172A] border border-slate-700/60 rounded-2xl p-6">
+                <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-6 flex items-center gap-2">
+                  <Bell className="w-4 h-4 text-cyan-500" />
+                  Notification Preferences
+                </h3>
+                <p className="text-xs text-slate-500 mb-6">Configure how you receive alerts when anomalies are detected in your IoT devices.</p>
+
+                <div className="space-y-4">
+                  {/* Browser Push Toggle */}
+                  <div className="flex items-center justify-between p-4 bg-slate-900 border border-slate-700 rounded-xl">
+                    <div>
+                      <h4 className="text-sm font-medium text-white">Browser Push Notifications</h4>
+                      <p className="text-xs text-slate-500 mt-0.5">Get native browser alerts for critical events</p>
+                    </div>
+                    <button
+                      onClick={() => {
+                        if ('Notification' in window) {
+                          if (Notification.permission === 'default') {
+                            Notification.requestPermission().then(p => {
+                              if (p === 'granted') toast.success('Browser notifications enabled!');
+                            });
+                          } else if (Notification.permission === 'granted') {
+                            toast.success('Browser notifications are already enabled');
+                          } else {
+                            toast.error('Notifications blocked. Enable in browser settings.');
+                          }
+                        }
+                      }}
+                      className="px-4 py-2 bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 rounded-lg text-xs font-bold hover:bg-cyan-500/20 transition-all"
+                    >
+                      {typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted' ? '✓ Enabled' : 'Enable'}
+                    </button>
+                  </div>
+
+                  {/* Telegram Setup */}
+                  <div className="p-4 bg-slate-900 border border-slate-700 rounded-xl">
+                    <div className="flex items-center justify-between mb-3">
+                      <div>
+                        <h4 className="text-sm font-medium text-white">Telegram Alerts</h4>
+                        <p className="text-xs text-slate-500 mt-0.5">Receive critical alerts via Telegram bot</p>
+                      </div>
+                      <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded border ${
+                        profile.telegramChatId ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' : 'text-slate-500 bg-slate-800 border-slate-700'
+                      }`}>
+                        {profile.telegramChatId ? 'Connected' : 'Not Set'}
+                      </span>
+                    </div>
+
+                    <div className="bg-slate-800/50 border border-slate-700/50 rounded-lg p-3 mt-2">
+                      <p className="text-[11px] text-slate-400 leading-relaxed">
+                        <strong className="text-cyan-400">Setup Steps:</strong><br />
+                        1. Open Telegram and search for <strong>@BotFather</strong><br />
+                        2. Send <code className="bg-slate-700 px-1 rounded text-cyan-300">/newbot</code> and follow instructions<br />
+                        3. Copy the bot token to your backend <code className="bg-slate-700 px-1 rounded text-cyan-300">.env</code> file<br />
+                        4. Start a chat with your bot, then get your Chat ID from <strong>@userinfobot</strong><br />
+                        5. Save your Chat ID below
+                      </p>
+                    </div>
+
+                    <div className="mt-3">
+                      <label className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 block">Telegram Chat ID</label>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={profile.telegramChatId || ''}
+                          onChange={(e) => setProfile(prev => ({ ...prev, telegramChatId: e.target.value }))}
+                          className="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-white outline-none focus:border-cyan-500/50 text-sm font-mono"
+                          placeholder="e.g. 123456789"
+                        />
+                        <button
+                          onClick={async () => {
+                            try {
+                              await API.put('/user/profile', { telegramChatId: profile.telegramChatId });
+                              toast.success('Telegram Chat ID saved!');
+                            } catch (err) {
+                              toast.error('Failed to save');
+                            }
+                          }}
+                          className="px-4 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold text-xs rounded-xl hover:from-cyan-600 hover:to-blue-600 transition-all"
+                        >
+                          Save
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Email Alerts Info */}
+                  <div className="flex items-center justify-between p-4 bg-slate-900 border border-slate-700 rounded-xl">
+                    <div>
+                      <h4 className="text-sm font-medium text-white">Email Alerts</h4>
+                      <p className="text-xs text-slate-500 mt-0.5">Critical alerts sent to <span className="text-cyan-400">{profile.email}</span></p>
+                    </div>
+                    <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded border text-emerald-400 bg-emerald-500/10 border-emerald-500/20">
+                      Auto-enabled
+                    </span>
+                  </div>
+
+                  {/* Alert Thresholds Info */}
+                  <div className="p-4 bg-cyan-900/10 border border-cyan-800/30 rounded-xl">
+                    <p className="text-xs text-cyan-500/80 font-medium">
+                      <strong className="text-cyan-400 uppercase tracking-widest mr-1">Default Thresholds:</strong>
+                      Temperature Warning: 35°C / Critical: 45°C &nbsp;|&nbsp; Humidity Warning: 85% / Critical: 95%
+                    </p>
+                    <p className="text-[10px] text-slate-600 mt-1">Alerts fire automatically when sensor data breaches these thresholds.</p>
+                  </div>
                 </div>
               </div>
             </div>

@@ -1,5 +1,6 @@
 "use client";
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { io } from 'socket.io-client';
 import {
   Cpu,
   Activity,
@@ -10,32 +11,42 @@ import {
 } from 'lucide-react';
 
 const DashboardOverview = () => {
-  // 1. Stats Data (Future: Fetch from MongoDB/Express API)
+  const [liveNodes, setLiveNodes] = useState({});
+  const [totalDataPoints, setTotalDataPoints] = useState(14204);
+
+  useEffect(() => {
+    // Connect to the unified Socket.io telemetry bridge
+    const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:5100');
+
+    socket.on('telemetry_update', (data) => {
+      setLiveNodes(prev => ({
+        ...prev,
+        [data.apiKey]: {
+          name: data.deviceName,
+          apiKey: data.apiKey,
+          val: `${data.payload.temperature || '--'}°C / ${data.payload.humidity || '--'}%`,
+          time: new Date().toLocaleTimeString(),
+          status: 'Online'
+        }
+      }));
+      setTotalDataPoints(prev => prev + 1);
+    });
+
+    return () => socket.disconnect();
+  }, []);
+
+  const liveNodeList = Object.values(liveNodes);
+
+  // 1. Stats Data 
   const stats = [
-    { label: 'Total Devices', value: '12', sub: 'Provisioned', icon: <Cpu className="text-blue-400" />, color: 'bg-blue-500/10' },
-    { label: 'Live Nodes', value: '05', sub: 'Active Now', icon: <Activity className="text-emerald-400" />, color: 'bg-emerald-500/10' },
-    { label: 'Data Points', value: '14,204', sub: 'Total Logs', icon: <Database className="text-purple-400" />, color: 'bg-purple-500/10' },
+    { label: 'Total Devices', value: liveNodeList.length, sub: 'Active Sessions', icon: <Cpu className="text-blue-400" />, color: 'bg-blue-500/10' },
+    { label: 'Live Nodes', value: liveNodeList.filter(n => n.status === 'Online').length.toString().padStart(2, '0'), sub: 'Streaming Now', icon: <Activity className="text-emerald-400" />, color: 'bg-emerald-500/10' },
+    { label: 'Data Points', value: totalDataPoints.toLocaleString(), sub: 'Total Logs', icon: <Database className="text-purple-400" />, color: 'bg-purple-500/10' },
     { label: 'System Health', value: '99.9%', sub: 'Backend Up', icon: <ShieldCheck className="text-cyan-400" />, color: 'bg-cyan-500/10' },
   ];
 
   return (
     <div className="p-6 space-y-6 animate-in fade-in duration-500">
-
-      {/* A. Header Section
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">Welcome Back,     <span className="text-cyan-400">Rohit</span>
-          </h1>
-
-        </div>
-        <div className="flex gap-3">
-          <button className="flex items-center gap-2 px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-xs font-bold hover:bg-gray-700 transition-all">
-            <TerminalIcon size={14} /> Developer Mode
-          </button>
-
-        </div>
-      </div>*/}
-
       {/* B. Stats Cards Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat, i) => (
@@ -57,7 +68,7 @@ const DashboardOverview = () => {
         <div className="lg:col-span-2 bg-[#0d1421] border border-gray-800 rounded-2xl overflow-hidden">
           <div className="p-5 border-b border-gray-800 flex justify-between items-center">
             <h3 className="text-sm font-bold text-gray-400 tracking-wider">LIVE STREAMING NODES</h3>
-            <span className="text-[10px] bg-emerald-500/10 text-emerald-500 px-2 py-1 rounded border border-emerald-500/20 uppercase font-black">Real-Time Sync</span>
+            <span className="text-[10px] bg-emerald-500/10 text-emerald-500 px-2 py-1 rounded border border-emerald-500/20 uppercase font-black animate-pulse">Real-Time Sync</span>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left">
@@ -71,9 +82,15 @@ const DashboardOverview = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-800/50 text-sm">
-                <DeviceRow name="ESP32-Room1" apiKey="sk-sent...7c" val="28°C / 55%" time="2s ago" status="Online" />
-                <DeviceRow name="Warehouse-Gate" apiKey="sk-sent...b2" val="--" time="4h ago" status="Offline" />
-                <DeviceRow name="DHT-Sensor-X" apiKey="sk-sent...p9" val="24°C / 60%" time="15s ago" status="Online" />
+                {liveNodeList.length > 0 ? liveNodeList.map((node, i) => (
+                  <DeviceRow key={i} name={node.name} apiKey={node.apiKey} val={node.val} time={node.time} status={node.status} />
+                )) : (
+                  <tr>
+                    <td colSpan="5" className="px-6 py-10 text-center text-gray-500">
+                      Plug in a device to start seeing real-time telemetry instantly...
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
@@ -86,9 +103,8 @@ const DashboardOverview = () => {
             <span className="text-cyan-400 text-xs cursor-pointer hover:underline">Clear</span>
           </h3>
           <div className="space-y-4">
-            <AlertItem type="warning" text="Room 1 Temp exceeded 40°C" time="14:20" />
-            <AlertItem type="success" text="New Device Registered: Warehouse-Gate" time="12:05" />
-            <AlertItem type="info" text="API Key sk-sent...7c refreshed" time="10:45" />
+            <AlertItem type="success" text="WebSocket Telemetry Pipeline Active" time="Just Now" />
+            <AlertItem type="info" text="Waiting for device connections..." time="System" />
           </div>
 
           {/* Storage Summary - Minimalistic */}
@@ -111,7 +127,7 @@ const DashboardOverview = () => {
 const DeviceRow = ({ name, apiKey, val, time, status }) => (
   <tr className="hover:bg-gray-800/20 transition-all group">
     <td className="px-6 py-4 font-bold text-white">{name}</td>
-    <td className="px-6 py-4 font-mono text-xs text-gray-600">{apiKey}</td>
+    <td className="px-6 py-4 font-mono text-xs text-gray-600">{(apiKey || '').substring(0,18)}...</td>
     <td className="px-6 py-4 text-center font-bold text-cyan-400">{val}</td>
     <td className="px-6 py-4 text-xs text-gray-500">{time}</td>
     <td className="px-6 py-4">
