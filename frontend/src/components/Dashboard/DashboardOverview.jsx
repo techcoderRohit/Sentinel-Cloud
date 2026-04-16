@@ -16,7 +16,7 @@ const DashboardOverview = () => {
 
   useEffect(() => {
     // Connect to the unified Socket.io telemetry bridge
-    const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:5100');
+    const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:5000');
 
     socket.on('telemetry_update', (data) => {
       setLiveNodes(prev => ({

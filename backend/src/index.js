@@ -33,7 +33,7 @@ const connectDB = require('./config/db');
 //database connection
 connectDB();
 
-const PORT = process.env.PORT || 5100;
+const PORT = process.env.PORT || 5000;
 const server = http.createServer(app);
 
 // initialize Socket.io
