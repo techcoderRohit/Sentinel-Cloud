@@ -1,7 +1,7 @@
 require('dotenv').config();
 const http = require('http');
 const app = require('./app');
-//require("./brokers/mqttClient");
+require("./brokers/broker");
 //const connectMQTT = require('./mqtt/mqttHandler')
 
 const connectDB = require('./config/db');
@@ -15,7 +15,7 @@ const server = http.createServer(app);
 //     console.log(`Server running in ${process.env.Node_ENV || 'development'} node on port ${PORT}`);
 // })
 
-server.listen(PORT, () => {
+server.listen(PORT,  () => {
     console.log(`Server running in ${process.env.Node_ENV || 'development'} node on port ${PORT}`);
     //connectMQTT();
 })

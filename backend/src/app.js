@@ -68,6 +68,7 @@ const dashboard = require("./routes/dashboardRoutes");
 const ApiKeysRoutes = require('./routes/ApiKeysRoutes');
 const SensorDataRoutes = require('./routes/SensorDataRoutes');
 const terminalRoutes = require('./routes/terminalRoutes');
+const notificationRoutes = require('./routes/NotificationRoutes')
 //startMQTT();
 //Create app
 const app = express();
@@ -87,6 +88,7 @@ app.use("/api/admin", adminRoutes);
 app.use('/api/apikeys', ApiKeysRoutes);
 app.use('/api/iot', SensorDataRoutes);
 app.use('/api/terminal', terminalRoutes);
+app.use('/api/notifications', notificationRoutes)
 
 //Test route
 app.get('/', (req, res) => {

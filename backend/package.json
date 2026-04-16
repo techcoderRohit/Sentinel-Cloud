@@ -5,16 +5,18 @@
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
-    "dev": "nodemon src/index.js"
+    "subscriber": "node subscriber.js",
+    "dev": "npx concurrently \"nodemon src/index.js\" \"npm run subscriber\""
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "aedes": "^1.0.2",
+    "aedes": "^0.46.3",
     "axios": "^1.15.0",
     "bcrypt": "^6.0.0",
+    "chalk": "^4.1.2",
     "cors": "^2.8.6",
     "dotenv": "^17.3.1",
     "express": "^5.2.1",
@@ -23,7 +25,8 @@
     "mqtt": "^5.15.0",
     "multer": "^2.1.1",
     "nodemailer": "^8.0.4",
-    "socket.io": "^4.8.3"
+    "socket.io": "^4.8.3",
+    "websocket-stream": "^5.5.2"
   },
   "devDependencies": {
     "nodemon": "^3.1.14"

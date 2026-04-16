@@ -139,8 +139,7 @@ const Topbar = () => {
                 
               />
               <button className="w-full text-left px-4 py-2 text-sm text-slate-300 hover:bg-slate-800">Admin Panel</button>
-              <Link href="/guest-view">
-                <button className="w-full text-left px-4 py-2 text-sm text-slate-300 hover:bg-slate-800">Guest View</button>
+              <Link href="/dashboard/guest-view" className="w-full text-left px-4 py-2 text-sm text-slate-300 hover:bg-slate-800">Guest View
               </Link>
               <div className="border-t border-slate-800 my-1"></div>
               <button onClick={logout} className="w-full text-left px-4 py-2 text-sm text-rose-400 hover:bg-rose-500/10">Logout</button>
