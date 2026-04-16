@@ -1,8 +1,9 @@
 
-import WebRep1 from "@/components/Dashboard/WebRepl";
+import WebRepl from "@/components/Dashboard/WebRepl";
+
 
 export default function WebReplPage() {
   return (
-      <WebRep1/>
+      <WebRepl/>
   );
 }

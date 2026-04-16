@@ -6,17 +6,19 @@
   "scripts": {
     "start": "node src/index.js",
     "subscriber": "node subscriber.js",
-    "dev": "npx concurrently \"nodemon src/index.js\" \"npm run subscriber\""
-  },
+    "dev": "concurrently --kill-others \"nodemon src/index.js\" \"node subscriber.js\""
+},
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "aedes": "^0.46.3",
     "axios": "^1.15.0",
     "bcrypt": "^6.0.0",
     "chalk": "^4.1.2",
+    "concurrently": "^9.2.1",
     "cors": "^2.8.6",
     "dotenv": "^17.3.1",
     "express": "^5.2.1",
