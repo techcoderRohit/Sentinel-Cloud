@@ -129,9 +129,9 @@ const dashboard = require("./routes/dashboardRoutes");
 const ApiKeysRoutes = require('./routes/ApiKeysRoutes');
 const SensorDataRoutes = require('./routes/SensorDataRoutes');
 const terminalRoutes = require('./routes/terminalRoutes');
-const dataRouteRoutes = require('./routes/DataRouteRoutes');
+//const dataRouteRoutes = require('./routes/DataRouteRoutes');
 const aiRoutes = require('./routes/aiRoutes');
-const otaRoutes = require('./routes/otaRoutes');
+//const otaRoutes = require('./routes/otaRoutes');
 //startMQTT();
 //Create app
 const app = express();
@@ -168,7 +168,7 @@ app.post('/sensor-data', (req, res) => {
     res.status(200).send({ status: "Success", message: "Data received" });
 });
 
-app.listen(5100, '0.0.0.0', () => {
+app.listen(5000, '0.0.0.0', () => {
     console.log('HTTP Cloud Server running on port 5000');
 });
 
