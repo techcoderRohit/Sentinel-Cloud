@@ -1,45 +1,153 @@
+// const express = require('express');
+// const router = express.Router();
+// const sendAlerts = require('../utils/alertService');
+// const Notification = require('../models/Notification');
+// const { protect } = require('../middleware/authMiddleware');
+
+// // 1. Naya Alert Save Karne Ka API (POST)
+// router.post('/create', protect, async (req, res) => {
+//     try {
+//         const { title, message, type } = req.body;
+//         const userId = req.user.id;  //middleware se user id nikelegi
+
+//         const newNotification = new Notification({ userId, title, message, type });
+//         await newNotification.save();
+//         // --- Naya logic yahan add karein ---
+//         // Maan lijiye user ke model mein email aur telegramId saved hai
+//         const userEmail = req.user.email; 
+//         const telegramId = req.user.telegramChatId; // User model mein ye field honi chahiye
+
+//         if (userEmail || telegramId) {
+//             await sendAlerts(userEmail, telegramId, `${title}: ${message}`);
+//         }
+
+//         res.status(201).json({ success: true, data: newNotification });
+//     } catch (error) {
+//         console.error(" Error:", error); // Terminal mein error dekhne ke liye
+//         res.status(500).json({ success: false, error: error.message });
+//     }
+// });
+
+// // 2. Logged-in users ke alerts fetch karna
+// router.get('/', protect, async (req, res) => {
+//     try {
+//         const notifications = await Notification.find({ userId: req.user.id }).sort({ createdAt: -1 });
+
+//         res.status(200).json({
+//             success: true,
+//             count: notifications.length,
+//             data: notifications || [] // Agar null ho toh empty array bhejein
+//         });
+//     } catch (error) {
+//         console.error("GET Error:", error.message);
+//         res.status(500).json({ success: false, error: error.message });
+//     }
+// });
+
+// module.exports = router;
+
+
 const express = require('express');
 const router = express.Router();
-const sendAlerts = require('../utils/alertService');
+const SendAlert = require('../utils/alertService');
 const Notification = require('../models/Notification');
 const { protect } = require('../middleware/authMiddleware');
 
-// 1. Naya Alert Save Karne Ka API (POST)
+// 1. Create a new alert (POST /api/notifications/create)
 router.post('/create', protect, async (req, res) => {
     try {
         const { title, message, type } = req.body;
-        const userId = req.user.id;  //middleware se user id nikelegi
+        const userId = req.user._id;
 
         const newNotification = new Notification({ userId, title, message, type });
         await newNotification.save();
-        // --- Naya logic yahan add karein ---
-        // Maan lijiye user ke model mein email aur telegramId saved hai
-        const userEmail = req.user.email; 
-        const telegramId = req.user.telegramChatId; // User model mein ye field honi chahiye
 
-        if (userEmail || telegramId) {
-            await sendAlerts(userEmail, telegramId, `${title}: ${message}`);
-        }
+        // Dispatch external alerts (Telegram + Email) — fire and forget
+        SendAlert(req.user, { title, message }).catch(err => {
+            console.error('[NotificationRoutes] External alert dispatch failed:', err.message);
+        });
 
         res.status(201).json({ success: true, data: newNotification });
     } catch (error) {
-        console.error(" Error:", error); // Terminal mein error dekhne ke liye
+        console.error("Create notification error:", error);
         res.status(500).json({ success: false, error: error.message });
     }
 });
 
-// 2. Logged-in users ke alerts fetch karna
+// 2. Get all notifications for logged-in user (GET /api/notifications/)
 router.get('/', protect, async (req, res) => {
     try {
-        const notifications = await Notification.find({ userId: req.user.id }).sort({ createdAt: -1 });
+        const notifications = await Notification.find({ userId: req.user._id })
+            .sort({ createdAt: -1 })
+            .limit(50);
 
         res.status(200).json({
             success: true,
             count: notifications.length,
-            data: notifications || [] // Agar null ho toh empty array bhejein
+            data: notifications || []
         });
     } catch (error) {
-        console.error("GET Error:", error.message);
+        console.error("GET notifications error:", error.message);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// 3. Get unread count (GET /api/notifications/unread-count)
+router.get('/unread-count', protect, async (req, res) => {
+    try {
+        const count = await Notification.countDocuments({ userId: req.user._id, isRead: false });
+        res.json({ success: true, count });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// 4. Mark single notification as read (PUT /api/notifications/read/:id)
+router.put('/read/:id', protect, async (req, res) => {
+    try {
+        const notification = await Notification.findOneAndUpdate(
+            { _id: req.params.id, userId: req.user._id },
+            { isRead: true },
+            { new: true }
+        );
+
+        if (!notification) {
+            return res.status(404).json({ success: false, message: 'Notification not found' });
+        }
+
+        res.json({ success: true, data: notification });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// 5. Mark all notifications as read (PUT /api/notifications/read-all)
+router.put('/read-all', protect, async (req, res) => {
+    try {
+        await Notification.updateMany(
+            { userId: req.user._id, isRead: false },
+            { isRead: true }
+        );
+        res.json({ success: true, message: 'All notifications marked as read' });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// 6. Delete a notification (DELETE /api/notifications/:id)
+router.delete('/:id', protect, async (req, res) => {
+    try {
+        const notification = await Notification.findOneAndDelete({
+            _id: req.params.id,
+            userId: req.user._id
+        });
+
+        if (!notification) {
+            return res.status(404).json({ success: false, message: 'Notification not found' });
+        }
+
+        res.json({ success: true, message: 'Notification deleted' });
+    } catch (error) {
         res.status(500).json({ success: false, error: error.message });
     }
 });
