@@ -447,7 +447,7 @@ const generateRefreshToken = (id) => {
 //signupUser
 const SignupUser = async (req, res) => {
     try {
-        const { name, email, password, confirmPassword } = req.body;
+        const { name, email, password, confirmPassword, role } = req.body;
         //validation checks 
         if (!name || !email || !password || !confirmPassword) {
             return res.status(400).json({ message: "Please fill all Fields!" });
@@ -465,7 +465,8 @@ const SignupUser = async (req, res) => {
         const user = await User.create({
             name,
             email,
-            password
+            password,
+            role: role || 'user'
         });
         //response
         res.status(201).json({
@@ -498,6 +499,11 @@ const loginUser = async (req, res) => {
             return res.status(401).json({ message: "Invalid email or password!" });
         }
 
+        // Check if user is blocked by admin
+        if (user.isBlocked) {
+            return res.status(403).json({ message: "Your account has been blocked. Please contact admin." });
+        }
+
         // Validate loginType vs actual role and check guest name
         if (loginType === 'guest') {
             if (!name) return res.status(400).json({ message: "Please provide assigned name for guest access!" });
@@ -515,6 +521,10 @@ const loginUser = async (req, res) => {
         if (!isMatch) {
             return res.status(401).json({ message: "Invalid email or password!" });
         }
+        // Update lastLogin timestamp
+        user.lastLogin = new Date();
+        await user.save({ validateBeforeSave: false });
+
         //response
         res.status(200).json({
             message: "Login successful",

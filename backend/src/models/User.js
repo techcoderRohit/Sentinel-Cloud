@@ -30,6 +30,14 @@ const userSchema = new mongoose.Schema(
          type: Boolean,
          default: true
       },
+      isBlocked: {
+         type: Boolean,
+         default: false
+      },
+      lastLogin: {
+         type: Date,
+         default: null
+      },
       telegramChatId:{
          type: String,
          trim: true,

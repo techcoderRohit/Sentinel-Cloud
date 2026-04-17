@@ -9,8 +9,7 @@ const anomalySchema = new mongoose.Schema({
 
 const anomalyReportSchema = new mongoose.Schema({
   apiKey: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'ApiKey',
+    type: String,
     required: true
   },
   owner: {

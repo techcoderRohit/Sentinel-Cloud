@@ -200,20 +200,18 @@
 
 const express = require('express');
 const SensorData = require('../models/SensorData');
-const ApiKey = require('../models/ApiKey');
+const Device = require('../models/Device');
 const { validateApiKey, protect } = require('../middleware/authMiddleware');
 const router = express.Router();
 // POST /api/iot/update
 router.post('/update', validateApiKey, async (req, res) => {
     try {
-        // req.user aur req.apiKeyDoc hume 'validateApiKey' middleware se milenge
+        // req.user aur req.device hume 'validateApiKey' middleware se milenge
         const { temperature, humidity, status } = req.body;
-        //console.log("Data received from device:",req.body);
-
 
         const newData = await SensorData.create({
-            apiKey: req.apiKey._id, // validateApiKey mein isse attach karna hoga
-            owner: req.user, // validateApiKey ne owner ID attach ki hai
+            deviceId: req.device.deviceId,
+            owner: req.device.owner,
             payload: { temperature, humidity, status }
         });
 
@@ -230,7 +228,12 @@ router.post('/update', validateApiKey, async (req, res) => {
 // GET /api/iot/latest/:apiKeyId
 router.get('/latest/:apiKeyId', async (req, res) => {
     try {
-        const latestData = await SensorData.findOne({ apiKey: req.params.apiKeyId })
+        const device = await Device.findOne({ apiKey: req.params.apiKeyId });
+        if (!device) {
+            return res.status(404).json({ message: "Device not found" });
+        }
+
+        const latestData = await SensorData.findOne({ deviceId: device.deviceId })
             .sort({ timestamp: -1 }); // Sabse naya data upar
 
         if (!latestData) {
@@ -255,19 +258,20 @@ router.get('/dashboard-stats', protect, async (req, res) => {
             return res.json({ totalDevices: 0, totalDataPoints: 0, activeDevices: 0 });
         }
 
-        // 1. Total Keys (Devices) kitne hain
-        const totalDevices = await ApiKey.countDocuments(deviceQuery);
+        // 1. Total Devices kitne hain
+        const totalDevices = await Device.countDocuments(deviceQuery);
 
         // 2. Total kitna data points jama hue hain
+        const deviceIds = await Device.find(deviceQuery).distinct('deviceId');
         const totalDataPoints = await SensorData.countDocuments({
-            apiKey: { $in: await ApiKey.find(deviceQuery).distinct('_id') }
+            deviceId: { $in: deviceIds }
         });
 
         // 3. Active Devices (Jo pichle 10 min mein active the)
         const tenMinsAgo = new Date(Date.now() - 10 * 60 * 1000);
-        const activeDevices = await ApiKey.countDocuments({
+        const activeDevices = await Device.countDocuments({
             ...deviceQuery,
-            lastUsed: { $gt: tenMinsAgo }
+            lastActive: { $gt: tenMinsAgo }
         });
 
         res.json({ totalDevices, totalDataPoints, activeDevices });
@@ -287,15 +291,15 @@ router.get('/monitor-all', protect, async (req, res) => {
             return res.json([]);
         }
 
-        const keys = await ApiKey.find(deviceQuery);
+        const devices = await Device.find(deviceQuery);
 
-        // Har key ke liye latest data map karein
-        const deviceStatus = await Promise.all(keys.map(async (key) => {
-            const latest = await SensorData.findOne({ apiKey: key._id }).sort({ timestamp: -1 });
+        // Har device ke liye latest data map karein
+        const deviceStatus = await Promise.all(devices.map(async (device) => {
+            const latest = await SensorData.findOne({ deviceId: device.deviceId }).sort({ timestamp: -1 });
             return {
-                _id: key._id,
-                name: key.name,
-                lastUsed: key.lastUsed,
+                _id: device._id,
+                name: device.deviceName || device.name || device.apiKey,
+                lastUsed: device.lastActive,
                 data: latest ? latest.payload : null
             };
         }));
@@ -324,26 +328,26 @@ router.post('/control/:deviceId', protect, async (req, res) => {
 
         // Validate Key Existence
         const targetId = req.user.role === 'guest' ? req.user.managedBy : req.user._id;
-        const key = await ApiKey.findOne({ _id: deviceId, owner: targetId });
-
-        if (!key) {
-            return res.status(404).json({ success: false, message: 'Device not found' });
+const device = await Device.findOne({ _id: deviceId, owner: targetId });
+        
+        if (!device) {
+             return res.status(404).json({ success: false, message: 'Device not found' });
         }
 
         // We fetch the latest payload and create a new record mimicking an action update 
         // to propagate the command status forward
-        const latest = await SensorData.findOne({ apiKey: key._id }).sort({ timestamp: -1 });
+        const latest = await SensorData.findOne({ deviceId: device.deviceId }).sort({ timestamp: -1 });
         const newPayload = latest ? { ...latest.payload, status: status } : { temperature: 0, humidity: 0, status: status };
 
         await SensorData.create({
-            apiKey: key._id,
+            deviceId: device.deviceId,
             owner: targetId,
             payload: newPayload
         });
 
-        // Note: In a fully distributed MQTT environment, you would also use mqttClient.publish(`sentinel/device/${key.key}/command`, JSON.stringify({status}))
+        // Note: In a fully distributed MQTT environment, you would also use mqttClient.publish(`sentinel/device/${device.apiKey}/command`, JSON.stringify({status}))
 
-        res.status(200).json({ success: true, message: `Device ${key.name} turned ${status ? 'ON' : 'OFF'}`, data: newPayload });
+        res.status(200).json({ success: true, message: `Device ${device.deviceName || device.name || device.apiKey} turned ${status ? 'ON' : 'OFF'}`, data: newPayload });
 
     } catch (err) {
         console.error("Control mapping error:", err);
@@ -354,20 +358,27 @@ router.post('/control/:deviceId', protect, async (req, res) => {
 //Monitor API KEY USAGE ROUTE
 // Get stats for a specific key
 router.get('/stats/:keyId', protect, async (req, res) => {
-    const key = await ApiKey.findById(req.params.keyId);
-    const dataCount = await SensorData.countDocuments({ apiKey: req.params.keyId });
+    const device = await Device.findOne({ apiKey: req.params.keyId, owner: req.user._id });
+    if (!device) {
+        return res.status(404).json({ message: 'Device not found' });
+    }
+    const dataCount = await SensorData.countDocuments({ deviceId: device.deviceId });
     res.json({
-        usageCount: key.usageCount,
+        usageCount: device.usageCount || 0,
         totalDataPoints: dataCount,
-        lastActive: key.lastUsed
+        lastActive: device.lastActive
     });
 });
 
 // GET /api/iot/history/:apiKeyId
 router.get('/history/:apiKeyId', protect, async (req, res) => {
     try {
-        // Hum pichle 50 records mangwa rahe hain (Charts ke liye kaafi hain)
-        const history = await SensorData.find({ apiKey: req.params.apiKeyId })
+        const device = await Device.findOne({ apiKey: req.params.apiKeyId, owner: req.user._id });
+        if (!device) {
+            return res.status(404).json({ message: "Device not found" });
+        }
+
+        const history = await SensorData.find({ deviceId: device.deviceId })
             .sort({ timestamp: -1 }) // Naya data pehle
             .limit(50);
 
@@ -387,9 +398,13 @@ router.get('/analytics/:apiKeyId', protect, async (req, res) => {
         const { range } = req.query; // '1H', '24H', '7D', '1M', '1Y'
         const apiKeyId = req.params.apiKeyId;
 
-        // Note: Owner check can also be added here for security
+        const device = await Device.findOne({ apiKey: apiKeyId, owner: req.user._id });
+        if (!device) {
+            return res.status(404).json({ message: 'Device not found' });
+        }
+
         let matchStage = {
-            apiKey: new mongoose.Types.ObjectId(apiKeyId)
+            deviceId: device.deviceId
         };
 
         const now = new Date();

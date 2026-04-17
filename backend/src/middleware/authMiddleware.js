@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
-const ApiKey = require('../models/ApiKey');
+const Device = require('../models/Device');
 
 const protect = async (req, res, next) => {
     let token;
@@ -48,19 +48,18 @@ const validateApiKey = async (req, res, next) => {
     return res.status(401).json({ message: "API Key missing" });
   }
 
-  const apiKeyDoc = await ApiKey.findOne({ key: providedKey, isActive: true });
+  const device = await Device.findOne({ apiKey: providedKey });
 
-  if (!apiKeyDoc) {
+  if (!device) {
     return res.status(403).json({ message: "Invalid or inactive API Key" });
   }
 
   // Last used update karein
-  apiKeyDoc.lastUsed = new Date();
-  apiKeyDoc.usageCount = (apiKeyDoc.usagecount || 0) + 1;
-  await apiKeyDoc.save();
+  device.lastActive = new Date();
+  await device.save();
 
-  req.user = apiKeyDoc.owner; // Request mein user ID attach kar di
-  req.apiKey = apiKeyDoc; //ye line route mein id dhoondne ke liye h
+  req.user = device.owner; // Request mein user ID attach kar di
+  req.device = device;
   next();
 }catch(error){
     console.log("API key middleware error:",error);

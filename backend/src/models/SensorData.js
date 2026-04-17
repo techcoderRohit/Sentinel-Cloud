@@ -1,16 +1,11 @@
 const mongoose = require('mongoose');
 
 const sensorDataSchema = new mongoose.Schema({
-  apiKey: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'ApiKey', // Kis API Key se data aaya
-    required: true,
-    index: true   //History charts ke liye indexing jaruri h
-  },
   deviceId: {
     type: String,
     required: true,
-},
+    index: true
+  },
   owner: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User', // Kis user ka device hai

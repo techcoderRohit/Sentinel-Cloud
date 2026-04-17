@@ -1,13 +1,13 @@
 const SensorData = require('../models/SensorData');
-const ApiKey = require('../models/ApiKey');
+const Device = require('../models/Device');
 
 // 1. Update Sensor Data
 const updateSensorData = async (req, res) => {
     try {
         const { temperature, humidity, status } = req.body;
         const newData = await SensorData.create({
-            apiKey: req.apiKey._id, 
-            owner: req.user, 
+            owner: req.device.owner,
+            deviceId: req.device.deviceId,
             payload: { temperature, humidity, status }
         });
         res.status(201).json({ success: true, message: "Data synced to Sentinel Cloud" });
@@ -19,7 +19,10 @@ const updateSensorData = async (req, res) => {
 // 2. Get Latest Data
 const getLatestData = async (req, res) => {
     try {
-        const latestData = await SensorData.findOne({ apiKey: req.params.apiKeyId }).sort({ timestamp: -1 });
+        const device = await Device.findOne({ apiKey: req.params.apiKeyId, owner: req.user._id });
+        if (!device) return res.status(404).json({ message: "Device not found" });
+
+        const latestData = await SensorData.findOne({ deviceId: device.deviceId }).sort({ timestamp: -1 });
         if (!latestData) return res.status(404).json({ message: "No data found" });
         res.json(latestData);
     } catch (err) {
@@ -31,11 +34,11 @@ const getLatestData = async (req, res) => {
 const getDashboardStats = async (req, res) => {
     try {
         const userId = req.user._id;
-        const totalDevices = await ApiKey.countDocuments({ owner: userId });
-        const userApiKeys = await ApiKey.find({ owner: userId }).distinct('_id');
-        const totalDataPoints = await SensorData.countDocuments({ apiKey: { $in: userApiKeys } });
+        const totalDevices = await Device.countDocuments({ owner: userId });
+        const userDeviceIds = await Device.find({ owner: userId }).distinct('deviceId');
+        const totalDataPoints = await SensorData.countDocuments({ deviceId: { $in: userDeviceIds } });
         const tenMinsAgo = new Date(Date.now() - 10 * 60 * 1000);
-        const activeDevices = await ApiKey.countDocuments({ owner: userId, lastUsed: { $gt: tenMinsAgo } });
+        const activeDevices = await Device.countDocuments({ owner: userId, lastActive: { $gt: tenMinsAgo } });
 
         res.json({ totalDevices, totalDataPoints, activeDevices });
     } catch (err) {
@@ -46,10 +49,10 @@ const getDashboardStats = async (req, res) => {
 // 4. Monitor All Devices
 const monitorAll = async (req, res) => {
     try {
-        const keys = await ApiKey.find({ owner: req.user._id });
-        const deviceStatus = await Promise.all(keys.map(async (key) => {
-            const latest = await SensorData.findOne({ apiKey: key._id }).sort({ timestamp: -1 });
-            return { _id: key._id, name: key.name, lastUsed: key.lastUsed, data: latest ? latest.payload : null };
+        const devices = await Device.find({ owner: req.user._id });
+        const deviceStatus = await Promise.all(devices.map(async (device) => {
+            const latest = await SensorData.findOne({ deviceId: device.deviceId }).sort({ timestamp: -1 });
+            return { _id: device._id, deviceId: device.deviceId, name: device.deviceName || device.name, lastActive: device.lastActive, data: latest ? latest.payload : null };
         }));
         res.json(deviceStatus);
     } catch (err) {
@@ -60,7 +63,10 @@ const monitorAll = async (req, res) => {
 // 5. Get History (For Charts)
 const getHistory = async (req, res) => {
     try {
-        const history = await SensorData.find({ apiKey: req.params.apiKeyId }).sort({ timestamp: -1 }).limit(50);
+        const device = await Device.findOne({ apiKey: req.params.apiKeyId, owner: req.user._id });
+        if (!device) return res.status(404).json({ message: "Device not found" });
+
+        const history = await SensorData.find({ deviceId: device.deviceId }).sort({ timestamp: -1 }).limit(50);
         res.json(history.reverse());
     } catch (err) {
         res.status(500).json({ message: "History fetch failed" });
