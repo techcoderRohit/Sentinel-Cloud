@@ -139,8 +139,8 @@ import toast from 'react-hot-toast';
 import API from '@/utils/api';
 
 export default function Login() {
-  const [formData, setFormData] = useState({ email: '', password: '', name: '' });
-  const [loginType, setLoginType] = useState('user'); // 'user', 'admin', 'guest'
+  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [loginType, setLoginType] = useState('user'); // 'user' | 'admin'
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState(false);
   const [error, setError] = useState('');
@@ -158,22 +158,18 @@ export default function Login() {
     try {
       //Axios post request
       //Axios automatically JSON.stringify kar deta hai
-      const payload = { ...formData, loginType: loginType === 'user' ? 'owner' : loginType };
-      const response = await API.post("/auth/login", payload);
+      const response = await API.post("/auth/login", formData);
       console.log(response.data);
       
 
       //Axios mein backend ka data 'response.data' mein deta hai
       const data = response.data;
       if (response.status === 200) {
-        //1. Token aur Role save kareein
         localStorage.setItem('token', data.token);
-        localStorage.setItem("userRole", data.role); // Role check ke liye
-localStorage.setItem("user", JSON.stringify(data));
-setUser(data);
+        localStorage.setItem('userRole', data.role);
+        localStorage.setItem('user', JSON.stringify(data));
         toast.success('Login Successful!');
-        //Dashboard par redirect karein
-        router.push(data.role === "admin" ? "/admin" : "/dashboard");
+        router.push(data.role === 'admin' ? '/admin' : '/dashboard');
       }
     }
     // Axios errors ko 'error.response' se handle karta hai
@@ -198,46 +194,26 @@ setUser(data);
           <h2 className="text-3xl font-bold text-cyan-500">Welcome Back </h2>
           <p className="text-slate-500 mt-2">Login to Sentinel Cloud account</p>
         </div>
-        {/* Error message display 
-        {error && <div className='text-red-500 p-2 rounded mb-4 text-sm text-center'>{error}</div>}*/}
-        
+
         {/* Login Type Tabs */}
         <div className="flex p-1 bg-slate-800 rounded-lg mb-6">
-          {['user', 'admin', 'guest'].map((type) => (
+          {['user', 'admin'].map((type) => (
             <button
               key={type}
               type="button"
               onClick={() => setLoginType(type)}
               className={`flex-1 py-2 text-sm font-medium rounded-md capitalize transition-all ${
-                loginType === type 
-                  ? type === 'admin' ? 'bg-red-500/20 text-red-400 shadow-md border border-red-500/20' 
-                    : type === 'guest' ? 'bg-amber-500/20 text-amber-400 shadow-md border border-amber-500/20'
-                    : 'bg-cyan-500 text-white shadow-md'
+                loginType === type
+                  ? 'bg-cyan-500 text-white shadow-md'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
-              {type}
+              {type === 'user' ? 'User' : 'Admin'}
             </button>
           ))}
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
-          {loginType === 'guest' && (
-            <div>
-              <label className=" text-slate-300 mb-2">Guest Assigned Name</label>
-              <div className='flex items-center bg-slate-800 border border-slate-700 rounded-lg mt-1 mb-2 px-2 focus-within:ring-2 focus-within:ring-cyan-500 transition duration-200 '>
-                <input
-                  name='name'
-                  type="text"
-                  required={loginType === 'guest'}
-                  value={formData.name}
-                  onChange={handleChange}
-                  placeholder="Enter assigned name"
-                  className="w-full px-4 py-2 text-white bg-transparent placeholder-slate-400 outline-none"
-                />
-              </div>
-            </div>
-          )}
           <div>
             <label className=" text-slate-300 mb-2">Email</label>
             <div className='flex items-center bg-slate-800 border border-slate-700 rounded-lg mt-1 mb-2 px-2 focus-within:ring-2 focus-within:ring-cyan-500 transition duration-200 '>

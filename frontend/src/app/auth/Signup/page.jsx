@@ -223,7 +223,7 @@ export default function Signup() {
               onClick={() => setRoleType(type)}
               className={`flex-1 py-2 text-sm font-medium rounded-md capitalize transition-all ${
                 roleType === type 
-                  ? type === 'admin' ? 'bg-red-500/20 text-red-400 shadow-md border border-red-500/20' 
+                  ? type === 'admin' ? 'bg-cyan-500 text-white shadow-md border border-cyan-500/20' 
                     : 'bg-cyan-500 text-white shadow-md'
                   : 'text-slate-400 hover:text-white'
               }`}
@@ -236,7 +236,7 @@ export default function Signup() {
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
             <label className=" text-slate-300 mb-2">Full Name</label>
-            <div className='flex items-center bg-slate-800 border border-slate-700 rounded-lg mt-1 mb-2 px-2 focus-within:ring-2 focus-within:ring-cyan-500 transition duration-200 '>
+            <div className='flex items-center bg-slate-800 border border-slate-700 rounded-lg mt-1 px-2 focus-within:ring-2 focus-within:ring-cyan-500 transition duration-200 '>
               <User className='text-cyan-500 size={18}' />
               <input
                 name="name"
@@ -251,7 +251,7 @@ export default function Signup() {
           </div>
           <div>
             <label className=" text-slate-300 mb-2">Email</label>
-            <div className='flex items-center bg-slate-800 border border-slate-700 rounded-lg mt-1 mb-2 px-2 focus-within:ring-2 focus-within:ring-cyan-500 transition duration-200 '>
+            <div className='flex items-center bg-slate-800 border border-slate-700 rounded-lg mt-1  px-2 focus-within:ring-2 focus-within:ring-cyan-500 transition duration-200 '>
               <Mail className='text-cyan-500 size={18}' />
               <input
                 name="email"
@@ -266,7 +266,7 @@ export default function Signup() {
           </div>
           <div>
             <label className=" text-slate-300 mb-2">Password</label>
-            <div className='flex items-center bg-slate-800 border border-slate-700 rounded-lg mt-1 mb-2 px-2 focus-within:ring-2 focus-within:ring-cyan-500 transition duration-200 '>
+            <div className='flex items-center bg-slate-800 border border-slate-700 rounded-lg mt-1 px-2 focus-within:ring-2 focus-within:ring-cyan-500 transition duration-200 '>
               <Lock className='text-cyan-500 size={18}' />
               <input
                 name="password"
@@ -281,7 +281,7 @@ export default function Signup() {
           </div>
           <div>
             <label className=" text-slate-300 mb-2">Confirm Password</label>
-            <div className='flex items-center bg-slate-800 border border-slate-700 rounded-lg mt-2 px-2 focus-within:ring-1 focus-within:ring-cyan-500 transition duration-200 '>
+            <div className='flex items-center bg-slate-800 border border-slate-700 rounded-lg mt-1 px-2 focus-within:ring-1 focus-within:ring-cyan-500 transition duration-200 '>
               <Lock className='text-cyan-500 size={18}' />
               <input
                 name="confirmPassword"

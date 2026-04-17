@@ -15,10 +15,10 @@ const AdminSidebar = () => {
   ];
 
   return (
-    <aside className="w-64 bg-[#0F172A] border-r border-slate-800 flex flex-col fixed h-full z-10">
+    <aside className="w-64 bg-[#0b1120] border-r border-slate-800 flex flex-col fixed h-full z-10">
       <div className="h-16 flex items-center justify-center px-6 border-b border-slate-800">
-        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-600 to-cyan-400 flex items-center justify-center mr-3 shadow-lg shadow-cyan-400/20">
-          <Shield className="text-white" size={20} />
+        <div className="w-10 h-10 font-bold rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center mr-3 shadow-lg ">
+          SC
         </div>
         <Link href="/admin" className="text-xl font-bold text-white">
           Sentinel <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400">Admin</span>
@@ -26,14 +26,14 @@ const AdminSidebar = () => {
       </div>
 
       {/* Admin Badge */}
-      <div className="px-4 py-3 mx-4 mt-4 mb-2 bg-gradient-to-r from-blue-600/10 to-cyan-400/10 border border-cyan-400/20 rounded-lg">
+      {/* <div className="px-4 py-3 mx-4 mt-4 mb-2 bg-gradient-to-r from-blue-600/10 to-cyan-400/10 border border-cyan-400/20 rounded-lg">
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></div>
           <span className="text-xs font-semibold text-cyan-400 uppercase tracking-wider">Admin Panel</span>
         </div>
-      </div>
+      </div> */}
 
-      <nav className="flex-1 py-4 px-4 space-y-2">
+      <nav className="flex-1 py-10 px-4 space-y-2">
         {sidebarLinks.map((item) => (
           <Link
             key={item.name}

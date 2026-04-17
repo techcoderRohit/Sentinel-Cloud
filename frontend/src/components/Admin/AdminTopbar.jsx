@@ -33,7 +33,7 @@ const AdminTopbar = () => {
   };
 
   return (
-    <header className="h-16 bg-[#0F172A]/80 backdrop-blur-xl border-b border-slate-800 flex items-center justify-between px-8 sticky top-0 z-20">
+    <header className="h-16 bg-[#0b1120]/80 backdrop-blur-xl border-b border-slate-800 flex items-center justify-between px-8 sticky top-0 z-20">
       <div className="flex items-center gap-3">
         <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-600/10 border border-cyan-400/20 rounded-full">
           <Shield size={14} className="text-cyan-400" />
@@ -55,7 +55,7 @@ const AdminTopbar = () => {
           </div>
           <div className="flex flex-col">
             <span className="text-sm text-white font-medium">{adminName}</span>
-            <span className="text-xs text-cyan-400">Super Admin</span>
+            <span className="text-xs text-cyan-400">Admin</span>
           </div>
         </div>
 
