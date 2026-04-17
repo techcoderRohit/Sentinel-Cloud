@@ -155,7 +155,7 @@ export default function Settings() {
 
   const getAvatarUrl = () => {
     if (avatarPreview) return avatarPreview;
-    if (profile.profilePicture) return `http://localhost:5100/uploads/avatars/${profile.profilePicture}`;
+    if (profile.profilePicture) return `http://localhost:5000/uploads/avatars/${profile.profilePicture}`;
     return null;
   };
 

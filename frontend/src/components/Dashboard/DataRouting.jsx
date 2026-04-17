@@ -445,7 +445,7 @@ export default function DataRouting() {
 #include <HTTPClient.h>
 
 HTTPClient http;
-http.begin("http://<YOUR_IP>:5100/api/iot/update");
+http.begin("http://<YOUR_IP>:5000/api/iot/update");
 http.addHeader("Content-Type", "application/json");
 http.addHeader("x-api-key", "sk-sentinel-your-key-here");
 

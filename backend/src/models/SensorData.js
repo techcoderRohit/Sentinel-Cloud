@@ -4,14 +4,13 @@ const sensorDataSchema = new mongoose.Schema({
   apiKey: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'ApiKey', // Kis API Key se data aaya
-    required: true
+    required: true,
+    index: true   //History charts ke liye indexing jaruri h
   },
   deviceId: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: String,
     required: true,
-    unique: true,
-
-  },
+},
   owner: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User', // Kis user ka device hai
@@ -26,7 +25,8 @@ const sensorDataSchema = new mongoose.Schema({
   },
   timestamp: {
     type: Date,
-    default: Date.now
+    default: Date.now,
+    index: true  // sorting aur history ke liye fast query
   }
 });
 

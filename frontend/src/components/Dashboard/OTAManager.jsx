@@ -72,7 +72,7 @@
 
 //   // Socket.io for real-time OTA status updates
 //   useEffect(() => {
-//     const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:5100');
+//     const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:5000');
 //     socketRef.current = socket;
 
 //     socket.on('ota_status_update', (data) => {

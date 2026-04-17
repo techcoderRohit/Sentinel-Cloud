@@ -48,7 +48,7 @@ const Topbar = () => {
 
   // Socket.io real-time notification listener
   useEffect(() => {
-    const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:5100');
+    const socket = io( 'http://localhost:5000');
     socketRef.current = socket;
 
     socket.on('new_notification', (notification) => {

@@ -9,7 +9,8 @@ const apiKeySchema = new mongoose.Schema({
   owner: { 
     type: mongoose.Schema.Types.ObjectId, 
     ref: 'User', // Tumhare User model se link karne ke liye
-    required: true 
+    required: true ,
+    index : true   //fast searching for dashboard-stats
   },
   name:{
     type: String,
@@ -19,11 +20,18 @@ const apiKeySchema = new mongoose.Schema({
     type: Boolean, 
     default: true 
   },
+  usageCount : {
+    type : Number,
+    default : 0
+  },
   createdAt: { 
     type: Date, 
     default: Date.now 
   },
-  lastUsed: Date
+  lastUsed : {
+    type : Date,
+    default : Date.now
+  }
 });
 
 module.exports = mongoose.model('ApiKey', apiKeySchema);
