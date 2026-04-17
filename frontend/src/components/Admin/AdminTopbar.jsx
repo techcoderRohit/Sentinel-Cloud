@@ -35,9 +35,9 @@ const AdminTopbar = () => {
   return (
     <header className="h-16 bg-[#0F172A]/80 backdrop-blur-xl border-b border-slate-800 flex items-center justify-between px-8 sticky top-0 z-20">
       <div className="flex items-center gap-3">
-        <div className="flex items-center gap-2 px-3 py-1.5 bg-red-500/10 border border-red-500/20 rounded-full">
-          <Shield size={14} className="text-red-400" />
-          <span className="text-xs font-semibold text-red-400 uppercase tracking-wider">Administrator</span>
+        <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-600/10 border border-cyan-400/20 rounded-full">
+          <Shield size={14} className="text-cyan-400" />
+          <span className="text-xs font-semibold text-cyan-400 uppercase tracking-wider">Administrator</span>
         </div>
       </div>
 
@@ -50,19 +50,19 @@ const AdminTopbar = () => {
 
         {/* Admin Info */}
         <div className="flex items-center gap-3 pl-6 border-l border-slate-700">
-          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center text-white text-sm font-bold shadow-lg shadow-red-500/20">
+          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-600 to-cyan-400 flex items-center justify-center text-white text-sm font-bold shadow-lg shadow-cyan-400/20">
             {adminName.charAt(0).toUpperCase()}
           </div>
           <div className="flex flex-col">
             <span className="text-sm text-white font-medium">{adminName}</span>
-            <span className="text-xs text-red-400">Super Admin</span>
+            <span className="text-xs text-cyan-400">Super Admin</span>
           </div>
         </div>
 
         {/* Logout */}
         <button
           onClick={handleLogout}
-          className="flex items-center gap-2 px-4 py-2 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all duration-200"
+          className="flex items-center gap-2 px-4 py-2 text-slate-400 hover:text-cyan-400 hover:bg-cyan-400/10 rounded-lg transition-all duration-200"
           title="Logout"
         >
           <LogOut size={18} />

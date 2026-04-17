@@ -34,7 +34,7 @@ const AdminDashboard = () => {
     return (
       <div className="flex items-center justify-center h-[60vh]">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-4 border-red-500/30 border-t-red-500 rounded-full animate-spin"></div>
+          <div className="w-12 h-12 border-4 border-cyan-400/30 border-t-cyan-400 rounded-full animate-spin"></div>
           <p className="text-slate-400 text-sm">Loading admin dashboard...</p>
         </div>
       </div>
@@ -113,7 +113,7 @@ const AdminDashboard = () => {
         {statCards.map((card, index) => (
           <div
             key={index}
-            className={`relative overflow-hidden bg-slate-900/50 backdrop-blur-sm border border-slate-800 rounded-xl p-6 hover:border-slate-700 transition-all duration-300 group`}
+            className={`relative overflow-hidden bg-[#0B1437]/80 backdrop-blur-sm border border-blue-900/50 rounded-xl p-6 hover:border-cyan-400/30 transition-all duration-300 group`}
           >
             {/* Background glow */}
             <div className={`absolute top-0 right-0 w-32 h-32 ${card.bgColor} rounded-full blur-3xl opacity-30 group-hover:opacity-50 transition-opacity`}></div>
@@ -136,7 +136,7 @@ const AdminDashboard = () => {
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Registration Trend */}
-        <div className="bg-slate-900/50 backdrop-blur-sm border border-slate-800 rounded-xl p-6">
+        <div className="bg-[#0B1437]/80 backdrop-blur-sm border border-blue-900/50 rounded-xl p-6">
           <h3 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
             <TrendingUp size={20} className="text-blue-400" />
             User Registration Trend
@@ -163,7 +163,7 @@ const AdminDashboard = () => {
         </div>
 
         {/* Device Distribution */}
-        <div className="bg-slate-900/50 backdrop-blur-sm border border-slate-800 rounded-xl p-6">
+        <div className="bg-[#0B1437]/80 backdrop-blur-sm border border-blue-900/50 rounded-xl p-6">
           <h3 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
             <HardDrive size={20} className="text-emerald-400" />
             Device Status & Distribution
@@ -231,9 +231,9 @@ const AdminDashboard = () => {
       {/* Activity Tables */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Logins */}
-        <div className="bg-slate-900/50 backdrop-blur-sm border border-slate-800 rounded-xl p-6">
+        <div className="bg-[#0B1437]/80 backdrop-blur-sm border border-blue-900/50 rounded-xl p-6">
           <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-            <Clock size={20} className="text-amber-400" />
+            <Clock size={20} className="text-cyan-400" />
             Recent Logins
           </h3>
           <div className="space-y-1 max-h-[320px] overflow-y-auto custom-scrollbar">
@@ -268,7 +268,7 @@ const AdminDashboard = () => {
         </div>
 
         {/* Recent Registrations */}
-        <div className="bg-slate-900/50 backdrop-blur-sm border border-slate-800 rounded-xl p-6">
+        <div className="bg-[#0B1437]/80 backdrop-blur-sm border border-blue-900/50 rounded-xl p-6">
           <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
             <UserPlus size={20} className="text-emerald-400" />
             Recent Registrations
@@ -306,7 +306,7 @@ const AdminDashboard = () => {
       </div>
 
       {/* Data Points Summary */}
-      <div className="bg-slate-900/50 backdrop-blur-sm border border-slate-800 rounded-xl p-6">
+      <div className="bg-[#0B1437]/80 backdrop-blur-sm border border-blue-900/50 rounded-xl p-6">
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-lg font-semibold text-white flex items-center gap-2">

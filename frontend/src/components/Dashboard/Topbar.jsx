@@ -353,7 +353,9 @@ const Topbar = () => {
                 onClose={() => setIsSettingsOpen(false)}
                 
               />
+              <Link href='/admin'>
               <button className="w-full text-left px-4 py-2 text-sm text-slate-300 hover:bg-slate-800">Admin Panel</button>
+              </Link>
               <Link href="/guest-view">
                 <button className="w-full text-left px-4 py-2 text-sm text-slate-300 hover:bg-slate-800">Guest View</button>
               </Link>

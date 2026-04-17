@@ -17,19 +17,19 @@ const AdminSidebar = () => {
   return (
     <aside className="w-64 bg-[#0F172A] border-r border-slate-800 flex flex-col fixed h-full z-10">
       <div className="h-16 flex items-center justify-center px-6 border-b border-slate-800">
-        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center mr-3 shadow-lg shadow-red-500/20">
+        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-600 to-cyan-400 flex items-center justify-center mr-3 shadow-lg shadow-cyan-400/20">
           <Shield className="text-white" size={20} />
         </div>
         <Link href="/admin" className="text-xl font-bold text-white">
-          Sentinel <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-orange-500">Admin</span>
+          Sentinel <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400">Admin</span>
         </Link>
       </div>
 
       {/* Admin Badge */}
-      <div className="px-4 py-3 mx-4 mt-4 mb-2 bg-gradient-to-r from-red-500/10 to-orange-500/10 border border-red-500/20 rounded-lg">
+      <div className="px-4 py-3 mx-4 mt-4 mb-2 bg-gradient-to-r from-blue-600/10 to-cyan-400/10 border border-cyan-400/20 rounded-lg">
         <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
-          <span className="text-xs font-semibold text-red-400 uppercase tracking-wider">Admin Panel</span>
+          <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></div>
+          <span className="text-xs font-semibold text-cyan-400 uppercase tracking-wider">Admin Panel</span>
         </div>
       </div>
 
@@ -40,8 +40,8 @@ const AdminSidebar = () => {
             href={item.path}
             className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
               pathname === item.path 
-              ? 'bg-red-500/10 text-red-400 border border-red-500/20 shadow-lg shadow-red-500/5' 
-              : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+              ? 'bg-cyan-400/10 text-cyan-400 border border-cyan-400/20 shadow-lg shadow-cyan-400/5' 
+              : 'text-slate-400 hover:text-cyan-300 hover:bg-blue-900/40'
             }`}
           >
             <span className="text-xl">{item.icon}</span>

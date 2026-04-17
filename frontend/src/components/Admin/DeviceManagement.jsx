@@ -103,9 +103,9 @@ const DeviceManagement = () => {
       </div>
 
       {/* Filters Bar */}
-      <div className="flex flex-wrap items-center gap-4 bg-slate-900/50 backdrop-blur-sm border border-slate-800 rounded-xl p-4">
+      <div className="flex flex-wrap items-center gap-4 bg-[#0B1437]/80 backdrop-blur-sm border border-blue-900/50 rounded-xl p-4">
         {/* Search */}
-        <div className="flex-1 min-w-[250px] flex items-center gap-2 bg-slate-800 border border-slate-700 rounded-lg px-3 focus-within:ring-2 focus-within:ring-red-500/50 transition">
+        <div className="flex-1 min-w-[250px] flex items-center gap-2 bg-slate-800 border border-slate-700 rounded-lg px-3 focus-within:ring-2 focus-within:ring-cyan-400/50 transition">
           <Search size={16} className="text-slate-400" />
           <input
             type="text"
@@ -127,7 +127,7 @@ const DeviceManagement = () => {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="bg-slate-800 border border-slate-700 text-sm text-slate-300 rounded-lg px-3 py-2.5 outline-none focus:ring-2 focus:ring-red-500/50"
+            className="bg-slate-800 border border-slate-700 text-sm text-slate-300 rounded-lg px-3 py-2.5 outline-none focus:ring-2 focus:ring-cyan-400/50"
           >
             <option value="">All Status</option>
             <option value="Online">Online</option>
@@ -139,7 +139,7 @@ const DeviceManagement = () => {
         <select
           value={typeFilter}
           onChange={(e) => setTypeFilter(e.target.value)}
-          className="bg-slate-800 border border-slate-700 text-sm text-slate-300 rounded-lg px-3 py-2.5 outline-none focus:ring-2 focus:ring-red-500/50"
+          className="bg-slate-800 border border-slate-700 text-sm text-slate-300 rounded-lg px-3 py-2.5 outline-none focus:ring-2 focus:ring-cyan-400/50"
         >
           <option value="">All Types</option>
           <option value="Sensor">Sensor</option>
@@ -149,10 +149,10 @@ const DeviceManagement = () => {
       </div>
 
       {/* Devices Grid */}
-      <div className="bg-slate-900/50 backdrop-blur-sm border border-slate-800 rounded-xl overflow-hidden">
+      <div className="bg-[#0B1437]/80 backdrop-blur-sm border border-blue-900/50 rounded-xl overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center py-20">
-            <div className="w-10 h-10 border-4 border-red-500/30 border-t-red-500 rounded-full animate-spin"></div>
+            <div className="w-10 h-10 border-4 border-cyan-400/30 border-t-cyan-400 rounded-full animate-spin"></div>
           </div>
         ) : devices.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-slate-500">
@@ -308,7 +308,7 @@ const DeviceManagement = () => {
                 <button
                   onClick={handleDelete}
                   disabled={actionLoading === deleteTarget._id}
-                  className="flex-1 px-4 py-2.5 bg-red-500 text-white rounded-lg font-medium text-sm hover:bg-red-600 transition-all disabled:opacity-50"
+                  className="flex-1 px-4 py-2.5 bg-cyan-400 text-white rounded-lg font-medium text-sm hover:bg-cyan-500 transition-all disabled:opacity-50"
                 >
                   {actionLoading === deleteTarget._id ? 'Deleting...' : 'Delete Device'}
                 </button>

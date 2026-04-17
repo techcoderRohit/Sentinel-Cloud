@@ -13,11 +13,12 @@ const ApiKeysRoutes = require('./routes/ApiKeysRoutes');
 const SensorDataRoutes = require('./routes/SensorDataRoutes');
 const NotificationRoutes = require('./routes/NotificationRoutes')
 const terminalRoutes = require('./routes/terminalRoutes');
-//const dataRouteRoutes = require('./routes/DataRouteRoutes');
 const aiRoutes = require('./routes/aiRoutes');
 //const otaRoutes = require('./routes/otaRoutes');
 //startMQTT();
 //Create app
+
+
 const app = express();
 
 //Middleware setup

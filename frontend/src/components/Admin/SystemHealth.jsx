@@ -36,7 +36,7 @@ const SystemHealth = () => {
   if (loading && !healthData) {
     return (
       <div className="flex items-center justify-center py-40">
-        <div className="w-10 h-10 border-4 border-red-500/30 border-t-red-500 rounded-full animate-spin"></div>
+        <div className="w-10 h-10 border-4 border-cyan-400/30 border-t-cyan-400 rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -67,7 +67,7 @@ const SystemHealth = () => {
                 type="checkbox"
                 checked={autoRefresh}
                 onChange={(e) => setAutoRefresh(e.target.checked)}
-                className="w-4 h-4 rounded border-slate-600 bg-slate-800 text-red-500 focus:ring-red-500 focus:ring-offset-slate-900"
+                className="w-4 h-4 rounded border-slate-600 bg-slate-800 text-cyan-400 focus:ring-cyan-400 focus:ring-offset-slate-900"
               />
               Auto-refresh (10s)
             </label>
@@ -85,10 +85,10 @@ const SystemHealth = () => {
       {healthData && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Main Server Status */}
-          <div className="bg-slate-900/50 backdrop-blur-sm border border-slate-800 rounded-xl overflow-hidden p-6 hover:border-slate-700 hover:shadow-lg transition">
+          <div className="bg-[#0B1437]/80 backdrop-blur-sm border border-blue-900/50 rounded-xl overflow-hidden p-6 hover:border-cyan-400/30 hover:shadow-lg transition">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                <Server className="text-red-400" />
+                <Server className="text-cyan-400" />
                 Backend Server
               </h3>
               <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(true, 'bg')} ${getStatusColor(true)} border border-emerald-500/20`}>
@@ -122,7 +122,7 @@ const SystemHealth = () => {
           </div>
 
           {/* Database Status */}
-          <div className="bg-slate-900/50 backdrop-blur-sm border border-slate-800 rounded-xl overflow-hidden p-6 hover:border-slate-700 hover:shadow-lg transition">
+          <div className="bg-[#0B1437]/80 backdrop-blur-sm border border-blue-900/50 rounded-xl overflow-hidden p-6 hover:border-cyan-400/30 hover:shadow-lg transition">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-bold text-white flex items-center gap-2">
                 <Database className="text-blue-400" />
@@ -153,7 +153,7 @@ const SystemHealth = () => {
           </div>
 
           {/* Memory Usage */}
-          <div className="bg-slate-900/50 backdrop-blur-sm border border-slate-800 rounded-xl overflow-hidden p-6 hover:border-slate-700 hover:shadow-lg transition md:col-span-2">
+          <div className="bg-[#0B1437]/80 backdrop-blur-sm border border-blue-900/50 rounded-xl overflow-hidden p-6 hover:border-cyan-400/30 hover:shadow-lg transition md:col-span-2">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-bold text-white flex items-center gap-2">
                 <Cpu className="text-purple-400" />
