@@ -108,21 +108,30 @@ import React, { useEffect, useState } from 'react';
 import API from '@/utils/api';
 import { io } from 'socket.io-client';
 import DeviceChart from './DeviceChart';
-import { Activity, Thermometer, Droplets, RefreshCw } from 'lucide-react';
+import { Activity, Thermometer, Droplets, RefreshCw, Loader2 } from 'lucide-react';
 
 const DevicesMonitor = () => {
     const [devices, setDevices] = useState([]);
     const [history, setHistory] = useState({});
     const [loading, setLoading] = useState(true);
 
+    // --- ADD DEVICE MODAL STATES ---
+    const [showModal, setShowModal] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
+    const initialFormState = { 
+        deviceName: '', 
+        deviceId: '', 
+        deviceType: 'Sensor', 
+        location: '' 
+    };
+    const [formData, setFormData] = useState(initialFormState);
+
     const fetchData = async () => {
         try {
             const config = { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } };
-            // Latest Status fetch karein
             const { data: statusData } = await API.get('/iot/monitor-all', config);
             setDevices(statusData);
 
-            // Har device ki history fetch karein charts ke liye
             statusData.forEach(async (dev) => {
                 const { data: histData } = await API.get(`/iot/history/${dev._id}`, config);
                 setHistory(prev => ({ ...prev, [dev._id]: histData }));
@@ -133,9 +142,7 @@ const DevicesMonitor = () => {
 
     useEffect(() => {
         fetchData();
-
-        // Socket.io for Real-time
-        const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:5000');
+        const socket = io('http://localhost:5000');
         
         socket.on('telemetry_update', (newData) => {
             setDevices(prev => prev.map(dev => 
@@ -145,38 +152,80 @@ const DevicesMonitor = () => {
             ));
         });
 
-        const interval = setInterval(fetchData, 30000); // Polling as backup (30s)
+        const interval = setInterval(fetchData, 30000);
         return () => {
             clearInterval(interval);
             socket.disconnect();
         };
     }, []);
 
-    const isOnline = (lastUsed) => {
-        if (!lastUsed) return false;
-        return (new Date() - new Date(lastUsed)) / 1000 < 60; // 60 sec window
+    // --- FORM HANDLERS ---
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    if (loading) return <div className="p-8 text-white">Loading Sentinel Cloud...</div>;
+    const handleAddDevice = async (e) => {
+        e.preventDefault();
+        setSubmitting(true);
+        try {
+            const res = await API.post("/devices/register", {
+                deviceName: formData.deviceName,
+                deviceId: formData.deviceId ,
+                type: formData.deviceType,
+                location : formData.location
+            });
+            if (res.data.success) {
+                await fetchData(); // List refresh karein
+                setShowModal(false);
+                setFormData(initialFormState);
+                alert("Device Registered Successfully!");
+            }
+        } catch (err) {
+            alert(`Error: ${err.response?.data?.message || "Registration Failed"}`);
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    const isOnline = (lastUsed) => {
+        if (!lastUsed) return false;
+        return (new Date() - new Date(lastUsed)) / 1000 < 60;
+    };
+
+    if (loading) return <div className="p-6 text-white">Loading Sentinel Cloud...</div>;
 
     return (
         <div className="p-8 bg-[#0B1120] min-h-screen text-slate-300">
+            {/* Header Section */}
             <div className="flex justify-between items-center mb-8">
-                <h1 className="text-3xl font-bold text-white tracking-tight">Sentinel Live Monitor</h1>
-                <button onClick={fetchData} className="p-2 hover:bg-slate-800 rounded-full transition-all">
-                    <RefreshCw size={20} className="text-cyan-500" />
-                </button>
+                <div>
+                    <h1 className="text-3xl font-bold text-white tracking-tight">Sentinel Live Monitor</h1>
+                    <p className="text-sm text-slate-400">Manage and observe your IoT nodes in real-time</p>
+                </div>
+
+                <div className="flex gap-4">
+                    <button 
+                        onClick={() => setShowModal(true)}
+                        className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-xl hover:from-cyan-600 hover:to-blue-600 px-6 py-2.5 font-bold transition-all shadow-lg shadow-blue-900/20 active:scale-95"
+                    >
+                        + Add Device
+                    </button>
+                    <button onClick={fetchData} className="p-2 hover:bg-slate-800 rounded-full transition-all border border-slate-700">
+                        <RefreshCw size={20} className="text-cyan-500" />
+                    </button>
+                </div>
             </div>
 
+            {/* Devices Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {devices.map((device) => (
-                    <div key={device._id} className="bg-[#111827] border border-slate-800 rounded-3xl p-6 hover:border-cyan-500 transition-all">
+                    <div key={device._id} className="bg-[#111827] border border-slate-800 rounded-3xl p-6 hover:border-cyan-500/50 transition-all group">
                         <div className="flex justify-between items-start mb-6">
                             <div className="flex items-center gap-3">
                                 <Activity size={20} className="text-cyan-400" />
                                 <div>
-                                    <h3 className="font-bold text-slate-100">{device.name}</h3>
-                                    <span className="text-[10px] text-slate-500">ID: {device._id.slice(-6)}</span>
+                                    <h3 className="font-bold text-slate-100">{device.name || device.deviceName}</h3>
+                                    <span className="text-[10px] text-slate-500 font-mono">ID: {device.deviceId || device._id.slice(-6)}</span>
                                 </div>
                             </div>
                             <div className={`px-3 py-1 rounded-full text-[10px] font-bold ${isOnline(device.lastUsed) ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'}`}>
@@ -199,11 +248,87 @@ const DevicesMonitor = () => {
                                 <DeviceChart data={history[device._id] || []} />
                             </div>
                         ) : (
-                            <div className="h-40 flex items-center justify-center text-slate-600">No Data Received</div>
+                            <div className="h-40 flex flex-col items-center justify-center text-slate-600 border border-dashed border-slate-800 rounded-2xl">
+                                <p className="text-xs">Waiting for telemetry...</p>
+                            </div>
                         )}
                     </div>
                 ))}
             </div>
+
+            {/* --- ADD DEVICE MODAL --- */}
+            {showModal && (
+                <div className="fixed inset-0 z-50 flex justify-center items-center bg-black/70 backdrop-blur-md p-4">
+                    <div className="w-full max-w-md p-8 bg-slate-900 rounded-2xl border border-slate-800 shadow-2xl">
+                        <h2 className="text-2xl font-bold mb-6 text-cyan-500 text-center">Register New Device</h2>
+                        <form onSubmit={handleAddDevice} className="space-y-4">
+                            <div>
+                                <label className="text-slate-400 text-xs font-semibold uppercase tracking-wider">Device Name</label>
+                                <input
+                                    name='deviceName'
+                                    value={formData.deviceName}
+                                    onChange={handleChange}
+                                    className="w-full mt-1.5 px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white outline-none focus:border-cyan-500 transition-colors"
+                                    placeholder="e.g. Living Room ESP32"
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label className="text-slate-400 text-xs font-semibold uppercase tracking-wider">Device ID / API Key</label>
+                                <input
+                                    name='deviceId'
+                                    value={formData.deviceId}
+                                    onChange={handleChange}
+                                    className="w-full mt-1.5 px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white outline-none focus:border-cyan-500 transition-colors"
+                                    placeholder="Unique hardware ID"
+                                    required
+                                />
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="text-slate-400 text-xs font-semibold uppercase tracking-wider">Type</label>
+                                    <select
+                                        name="deviceType"
+                                        value={formData.deviceType}
+                                        onChange={handleChange}
+                                        className="w-full mt-1.5 px-4 py-3 bg-slate-800/50 border border-slate-700 focus:border-cyan-500 rounded-xl text-white outline-none"
+                                    >
+                                        <option value="Sensor">Sensor</option>
+                                        <option value="Actuator">Actuator</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="text-slate-400 text-xs font-semibold uppercase tracking-wider">Location</label>
+                                    <input
+                                        name='location'
+                                        value={formData.location}
+                                        onChange={handleChange}
+                                        className="w-full mt-1.5 px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white outline-none focus:border-cyan-500 transition-colors"
+                                        placeholder="e.g. Kitchen"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="flex gap-3 pt-4">
+                                <button 
+                                    type="button" 
+                                    onClick={() => setShowModal(false)} 
+                                    className="flex-1 py-3 text-slate-400 font-bold hover:text-white transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                <button 
+                                    type="submit" 
+                                    disabled={submitting} 
+                                    className="flex-[2] bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 py-3 rounded-xl font-bold text-white transition-all flex justify-center items-center"
+                                >
+                                    {submitting ? <Loader2 className="animate-spin" /> : "Register Device"}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

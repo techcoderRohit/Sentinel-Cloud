@@ -14,7 +14,6 @@ const Sidebar = () => {
     { name: 'Reports & Analytics', icon: <LineChart size={20} />, path: "/dashboard/reports" },
     { name: 'AI Insights', icon: <Brain size={20} />, path: "/dashboard/ai-insights" },
     { name: 'API Keys', icon: <Key size={20} />, path: "/dashboard/apikeymanager" },
-    { name: 'Data Routing', icon: <GitBranch size={20} />, path: "/dashboard/routing" },
     { name: 'Settings', icon: <Settings size={20} />, path: "/dashboard/settings" },
   ];
 

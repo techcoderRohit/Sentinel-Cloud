@@ -232,19 +232,24 @@ const registerDevice = async (req, res) => {
         }
         // Auto generate a secure api key for the hardware
 
-        // const apiKey = crypto.randomBytes(16).toString('hex');
+        const apiKey = crypto.randomBytes(16).toString('hex');
 
         const device = await Device.create({
-            deviceName,
-            deviceId,
-            deviceType,
-            location,
-            owner: req.user.role === 'guest' ? req.user.managedBy : req.user.id, // Auth middleware se user Id mil rahi h, guest ke liye manager ID
-            apiKey
+            deviceName: deviceName,
+            deviceId : deviceId,
+            type: deviceType,
+            location: location,
+            owner: req.user.id, // Auth middleware se user Id mil rahi h, guest ke liye manager ID
+            apiKey:apiKey,
+            lastUsed: new Date()
         });
         res.status(201).json({
             success: true,
-            message: 'Device Registered Successfully'
+            message: 'Device Registered Successfully',
+            data :{
+                id : device._id,
+                apiKey  : device.apiKey
+            }
         });
     } catch (error) {
         res.status(500).json({

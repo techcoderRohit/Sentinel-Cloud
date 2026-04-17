@@ -225,7 +225,7 @@ const DashboardOverview = () => {
   ];
 
   return (
-    <div className="p-6 space-y-6 animate-in fade-in duration-500 bg-[#0a0f1a] min-h-screen text-white">
+    <div className="p-6 space-y-6 animate-in fade-in duration-500 bg-[#0b1120] min-h-screen text-white">
       {/* Stats Cards Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat, i) => (
