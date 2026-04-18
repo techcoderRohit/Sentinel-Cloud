@@ -108,12 +108,16 @@ import React, { useEffect, useState } from 'react';
 import API from '@/utils/api';
 import { io } from 'socket.io-client';
 import DeviceChart from './DeviceChart';
-import { Activity, Thermometer, Droplets, RefreshCw, Loader2 } from 'lucide-react';
+import { Activity, Thermometer, Droplets, RefreshCw, Loader2, Trash2 } from 'lucide-react';
 
 const DevicesMonitor = () => {
     const [devices, setDevices] = useState([]);
     const [history, setHistory] = useState({});
     const [loading, setLoading] = useState(true);
+
+    // --- DELETE DEVICE STATES ---
+    const [deleteTarget, setDeleteTarget] = useState(null); // device to delete
+    const [deleteLoading, setDeleteLoading] = useState(false);
 
     // --- ADD DEVICE MODAL STATES ---
     const [showModal, setShowModal] = useState(false);
@@ -187,6 +191,20 @@ const DevicesMonitor = () => {
         }
     };
 
+    const handleDeleteDevice = async () => {
+        if (!deleteTarget) return;
+        setDeleteLoading(true);
+        try {
+            await API.delete(`/devices/${deleteTarget._id}`);
+            setDevices(prev => prev.filter(d => d._id !== deleteTarget._id));
+            setDeleteTarget(null);
+        } catch (err) {
+            alert(`Error: ${err.response?.data?.message || 'Delete failed'}`);
+        } finally {
+            setDeleteLoading(false);
+        }
+    };
+
     const isOnline = (lastUsed) => {
         if (!lastUsed) return false;
         return (new Date() - new Date(lastUsed)) / 1000 < 60;
@@ -220,6 +238,7 @@ const DevicesMonitor = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {devices.map((device) => (
                     <div key={device._id} className="bg-[#111827] border border-slate-800 rounded-3xl p-6 hover:border-cyan-500/50 transition-all group">
+                        {/* Card Header */}
                         <div className="flex justify-between items-start mb-6">
                             <div className="flex items-center gap-3">
                                 <Activity size={20} className="text-cyan-400" />
@@ -228,8 +247,18 @@ const DevicesMonitor = () => {
                                     <span className="text-[10px] text-slate-500 font-mono">ID: {device.deviceId || device._id.slice(-6)}</span>
                                 </div>
                             </div>
-                            <div className={`px-3 py-1 rounded-full text-[10px] font-bold ${isOnline(device.lastUsed) ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'}`}>
-                                {isOnline(device.lastUsed) ? '● ONLINE' : '○ OFFLINE'}
+                            <div className="flex items-center gap-2">
+                                <div className={`px-3 py-1 rounded-full text-[6px] font-bold ${isOnline(device.lastUsed) ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'}`}>
+                                    {isOnline(device.lastUsed) ? '● ONLINE' : '○ OFFLINE'}
+                                </div>
+                                {/* Delete Button */}
+                                <button
+                                    onClick={() => setDeleteTarget(device)}
+                                    className="p-1.5 rounded-lg text-slate-600 hover:text-red-400 hover:bg-red-500/10 transition-all opacity-0 group-hover:opacity-100"
+                                    title="Delete device"
+                                >
+                                    <Trash2 size={15} />
+                                </button>
                             </div>
                         </div>
 
@@ -326,6 +355,39 @@ const DevicesMonitor = () => {
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {/* --- DELETE CONFIRM MODAL --- */}
+            {deleteTarget && (
+                <div className="fixed inset-0 z-50 flex justify-center items-center bg-black/70 backdrop-blur-md p-4">
+                    <div className="w-full max-w-sm p-8 bg-slate-900 rounded-2xl border border-red-500/20 shadow-2xl text-center">
+                        <div className="w-14 h-14 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-4">
+                            <Trash2 size={26} className="text-red-500" />
+                        </div>
+                        <h2 className="text-xl font-bold text-white mb-2">Delete Device?</h2>
+                        <p className="text-slate-400 text-sm mb-1">
+                            Are you sure you want to delete <span className="text-white font-semibold">{deleteTarget.name || deleteTarget.deviceName}</span>?
+                        </p>
+                        <p className="text-xs text-red-500 bg-red-500/5 border border-red-500/10 rounded-lg px-4 py-2 mb-6">
+                            This will permanently delete the device and all its sensor data.
+                        </p>
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => setDeleteTarget(null)}
+                                className="flex-1 py-2.5 bg-slate-800 text-slate-300 rounded-xl font-medium hover:bg-slate-700 transition-all"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleDeleteDevice}
+                                disabled={deleteLoading}
+                                className="flex-1 py-2.5 bg-red-500 text-white rounded-xl font-bold hover:bg-red-600 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                            >
+                                {deleteLoading ? <Loader2 size={16} className="animate-spin" /> : 'Delete'}
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
