@@ -1,6 +1,7 @@
 "use client"
 import React, { useState, useRef, useEffect } from 'react';
 import { Bell, User, Flame, AlertTriangle, Info, Trash2, Check, CheckCheck, Volume2, VolumeX } from 'lucide-react';
+import { io } from 'socket.io-client';
 import API from '@/utils/api';
 import { markNotificationRead, markAllNotificationsRead, deleteNotification } from '@/utils/dashboardAPI';
 import SettingsModal from './SettingsModal';
@@ -48,10 +49,10 @@ const Topbar = () => {
 
   // Socket.io real-time notification listener
   useEffect(() => {
-    import ("socket.io-client").then(({io})=>{
-      const socket = io("http://localhost:5000");
-      socketRef.current = socket;
-  socket.on('new_notification', (notification) => {
+    const socket = io( 'http://localhost:5000');
+    socketRef.current = socket;
+
+    socket.on('new_notification', (notification) => {
       // Add to top of list
       setNotifications(prev => [notification, ...prev]);
       setHasNewAlert(true);
@@ -69,13 +70,7 @@ const Topbar = () => {
     });
 
     return () => socket.disconnect();
-
-
- 
-    });
-    
-
-      }, [soundEnabled]);
+  }, [soundEnabled]);
 
   // Request browser notification permission on mount
   useEffect(() => {
