@@ -103,7 +103,7 @@ const DeviceManagement = () => {
       </div>
 
       {/* Filters Bar */}
-      <div className="flex flex-wrap items-center gap-4 bg-[#0B1437]/80 backdrop-blur-sm border border-blue-900/50 rounded-xl p-4">
+      <div className="flex flex-wrap items-center gap-4 bg-[#d1421] backdrop-blur-sm border border-slate-800 rounded-xl p-4">
         {/* Search */}
         <div className="flex-1 min-w-[250px] flex items-center gap-2 bg-slate-800 border border-slate-700 rounded-lg px-3 focus-within:ring-2 focus-within:ring-cyan-400/50 transition">
           <Search size={16} className="text-slate-400" />
@@ -149,7 +149,7 @@ const DeviceManagement = () => {
       </div>
 
       {/* Devices Grid */}
-      <div className="bg-[#0B1437]/80 backdrop-blur-sm border border-blue-900/50 rounded-xl overflow-hidden">
+      <div className="bg-[#0d1421] backdrop-blur-sm border border-slate-800 rounded-xl overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center py-20">
             <div className="w-10 h-10 border-4 border-cyan-400/30 border-t-cyan-400 rounded-full animate-spin"></div>
