@@ -1,4 +1,5 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+"use client"
+import React, { useState, useRef, useEffect } from 'react';
 import { Bell, User, Flame, AlertTriangle, Info, Trash2, Check, CheckCheck, Volume2, VolumeX } from 'lucide-react';
 import { io } from 'socket.io-client';
 import API from '@/utils/api';
