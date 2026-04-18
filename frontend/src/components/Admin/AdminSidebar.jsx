@@ -41,7 +41,7 @@ const AdminSidebar = () => {
             className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
               pathname === item.path 
               ? 'bg-cyan-400/10 text-cyan-400 border border-cyan-400/20 shadow-lg shadow-cyan-400/5' 
-              : 'text-slate-400 hover:text-cyan-300 hover:bg-blue-900/40'
+              : 'text-slate-400 hover:text-cyan-300 hover:bg-cyan-400/20'
             }`}
           >
             <span className="text-xl">{item.icon}</span>
