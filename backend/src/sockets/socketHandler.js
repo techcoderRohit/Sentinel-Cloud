@@ -136,7 +136,7 @@
 const mqtt = require('mqtt');
 
 // Local Broker IP use kar rahe hain
-const brokerUrl = 'mqtt://172.18.85.99:1883';
+const brokerUrl = 'mqtt://172.18.85.133:1883';
 const mqttClient = mqtt.connect(brokerUrl);
 
 mqttClient.on('connect', () => {

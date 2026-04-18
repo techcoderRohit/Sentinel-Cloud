@@ -242,6 +242,7 @@ const SignupUser = async (req, res) => {
         if (userExists) {
             return res.status(400).json({ message: "User Already exists!" });
         }
+
         //create new user
         const user = await User.create({
             name,
@@ -249,6 +250,7 @@ const SignupUser = async (req, res) => {
             password,
             role: role || 'user'
         });
+
         //response
         res.status(201).json({
             message: "User registered Successfully",
@@ -263,7 +265,6 @@ const SignupUser = async (req, res) => {
     catch (error) {
         res.status(500).json({ message: error.message });
     }
-
 };
 
 //login user

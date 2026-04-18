@@ -17,7 +17,7 @@ const AdminSidebar = () => {
   return (
     <aside className="w-64 bg-[#0b1120] border-r border-slate-800 flex flex-col fixed h-full z-10">
       <div className="h-16 flex items-center justify-center px-6 border-b border-slate-800">
-        <div className="w-10 h-10 font-bold rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center mr-3 shadow-lg ">
+        <div className="w-10 h-10 font-bold rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center mr-3 shadow-lg">
           SC
         </div>
         <Link href="/admin" className="text-xl font-bold text-white">

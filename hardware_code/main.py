@@ -8,7 +8,7 @@ import ujson
 # --- CONFIGURATION ---
 WIFI_SSID = "vivo Y300 5G"
 WIFI_PASSWORD = "rohit564"
-MQTT_BROKER = "172.18.85.99"    
+MQTT_BROKER = "172.18.85.133"  
 CLIENT_ID = "ESP32_Sensor_Node"
 API_KEY = "sk-sentinel-a4b215b87885b14e6ca9ba56aaddbb7c"
 
