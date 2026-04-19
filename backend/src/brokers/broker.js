@@ -22,11 +22,15 @@ httpServer.listen(WS_PORT, function () {
 // --- Logging & Events ---
 
 aedes.on('client', function (client) {
-  console.log(chalk.green('✨ Client Connected:'), chalk.white(client ? client.id : 'unknown'));
+  console.log(chalk.green('✨ Client Connected:'), chalk.white(client ? client.id : 'unknown'), chalk.gray(`(IP: ${client.conn.remoteAddress})`));
 });
 
 aedes.on('clientDisconnect', function (client) {
   console.log(chalk.red('👋 Client Disconnected:'), chalk.white(client ? client.id : 'unknown'));
+});
+
+aedes.on('connectionError', function (client, err) {
+  console.log(chalk.red.bold('💥 Connection Error:'), chalk.white(client ? client.id : 'unknown'), chalk.red(err.message));
 });
 
 aedes.on('publish', function (packet, client) {

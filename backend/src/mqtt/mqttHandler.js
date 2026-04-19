@@ -7,10 +7,12 @@ const ApiKey = require('../models/ApiKey');
 // Auth fallback always goes to DB, so restart is safe
 const authenticatedDevices = new Map();
 
+let mqttClient = null;
+
 const connectMQTT = (io) => {
-    // 1. MQTT Broker se connect karein (Local IP ya localhost)
     const brokerUrl = process.env.MQTT_BROKER_URL || 'mqtt://localhost:1883';
-    const client = mqtt.connect(brokerUrl);
+    mqttClient = mqtt.connect(brokerUrl);
+    const client = mqttClient;
 
     client.on('connect', () => {
         console.log('🛡️  Sentinel Bridge: Connected to MQTT Broker');
@@ -80,6 +82,7 @@ const connectMQTT = (io) => {
 
                 // Emit live update to dashboard via Socket.io
                 io.emit('telemetry_update', {
+                    _id: device._id,
                     apiKey: device.apiKey,
                     deviceId: clientId,
                     deviceName: device.deviceName || clientId,
@@ -103,4 +106,4 @@ const connectMQTT = (io) => {
     });
 };
 
-module.exports = connectMQTT;
+module.exports = { connectMQTT, getClient: () => mqttClient };

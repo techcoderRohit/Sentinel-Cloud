@@ -4,13 +4,20 @@ import time
 import network
 from umqtt.simple import MQTTClient
 import ujson
+import ubinascii
 
 # --- CONFIGURATION ---
-WIFI_SSID = "vivo Y300 5G"
-WIFI_PASSWORD = "rohit564"
-MQTT_BROKER = "172.18.85.133"  
-CLIENT_ID = "ESP32_Sensor_Node"
-API_KEY = "sk-sentinel-a4b215b87885b14e6ca9ba56aaddbb7c"
+WIFI_SSID = "hood hogan"
+WIFI_PASSWORD = "1qa2ws3ed4rf"
+MQTT_BROKER = "10.104.179.140"  
+
+# Unique Identification
+# Generate ID based on MAC address to avoid collisions with other students
+MAC_ID = ubinascii.hexlify(machine.unique_id()).decode()
+CLIENT_ID = "my_esp8266"
+print("🆔 Assigned Unique Client ID:", CLIENT_ID)
+
+API_KEY = "sk-sentinel-2c04d8e5235913e6e5223ec063b4a12e"
 
 # Dashboard logic topics (Inhe dhyan se check karein)
 COMMAND_TOPIC = "sentinel/device/{}/repl/rx".format(CLIENT_ID)
@@ -20,6 +27,7 @@ DATA_TOPIC = "sensors/data"
 # Application-level Auth topics
 AUTH_TOPIC = "sentinel/auth"
 AUTH_RX_TOPIC = "sentinel/device/{}/auth_tx".format(CLIENT_ID)
+OTA_TOPIC = "sentinel/device/{}/ota_update".format(CLIENT_ID)
 
 is_authorized = False
 
@@ -31,14 +39,12 @@ sensor = dht.DHT11(machine.Pin(5))
 def sub_cb(topic, msg):
     global is_authorized
     
-    # Topic ko decode karke check karna professional practice hai
     decoded_topic = topic.decode()
-    print("📩 Received on {}: {}".format(decoded_topic, msg))
+    print("[TRACE] Callback Triggered on: {}".format(decoded_topic))
     
     try:
         data = ujson.loads(msg)
         
-        # Check if it is an auth response
         if decoded_topic == AUTH_RX_TOPIC:
             if data.get("status") == "authorized":
                 is_authorized = True
@@ -48,7 +54,17 @@ def sub_cb(topic, msg):
                 print("❌ Handshake Denied! Check your API Key.")
             return
 
+        # OTA Update Processing
+        if decoded_topic == OTA_TOPIC:
+            print("🚀 OTA Command Received!")
+            update_url = data.get("url")
+            if update_url:
+                import ota_client
+                ota_client.pull_update(update_url)
+            return
+
         # Regular Repl Command Processing
+        print("[TRACE] Processing command...")
         command = data.get("command", "").lower().strip()
         
         # Dashboard ko acknowledgment bhejna ki humne command sun li hai
@@ -94,11 +110,16 @@ def connect_mqtt():
     try:
         client = MQTTClient(CLIENT_ID, MQTT_BROKER, port=1883, keepalive=60)
         client.set_callback(sub_cb)
+        
+        # Connection timeout handling
+        print('📡 Connecting to MQTT at {}...'.format(MQTT_BROKER))
         client.connect()
-        # Topic subscribe karna sabse zaroori hai Dashboard se baat karne ke liye
+        
+        # Subscribe to essential topics
         client.subscribe(COMMAND_TOPIC)
         client.subscribe(AUTH_RX_TOPIC)
-        print('🚀 Connected to Sentinel Broker & Subscribed to REPL')
+        client.subscribe(OTA_TOPIC)
+        print('🚀 Connected to Sentinel Broker & Subscribed to REPL/OTA')
         
         # Handshake Initiate karein
         print('🔐 Sending Handshake using API Key...')
@@ -115,45 +136,71 @@ connect_wifi()
 mqtt_client = connect_mqtt()
 
 last_telemetry_time = 0
-telemetry_interval = 5 # 5 seconds gap for sensor data
+telemetry_interval = 5 
+wlan = network.WLAN(network.STA_IF)
 
 while True:
     try:
-        # 1. Humesha incoming messages check karein (REPL connectivity ke liye)
-        if mqtt_client:
-            mqtt_client.check_msg()
-        else:
+        # 1. WiFi Guard: Agar network gaya, toh pehle WiFi wapas lao
+        if not wlan.isconnected():
+            print("📡 WiFi Connection Lost! Reconnecting...")
+            is_authorized = False # Reset auth state on drop
+            connect_wifi()
             mqtt_client = connect_mqtt()
             time.sleep(2)
             continue
 
-        # 2. Sensor Telemetry (Non-blocking delay use kar rahe hain)
+        # 2. MQTT Guard: Agar client nahi hai, toh reconnect karein
+        if not mqtt_client:
+            print("🔄 Attempting MQTT Reconnection...")
+            mqtt_client = connect_mqtt()
+            if not mqtt_client:
+                time.sleep(5) # Thoda zyada wait karein repeat connect se pehle
+                continue
+
+        # 3. Check for incoming messages (REPL/Commands)
+        # check_msg() non-blocking hai, but flaky network pe throw kar sakta hai
+        mqtt_client.check_msg()
+
+        # 4. Telemetry Logic
         current_time = time.time()
         if current_time - last_telemetry_time >= telemetry_interval:
             
-            # Auth Check before pushing
             if not is_authorized:
-                print("⏳ Waiting for backend authorization... skipping telemetry.")
+                print("⏳ Handshake pending... skipping telemetry.")
+                # Har 10 sec mein handshake retry (agar auth tx nahi mila)
+                if current_time % 10 == 0:
+                    print('🔐 Retrying Handshake...')
+                    auth_payload = ujson.dumps({"clientId": CLIENT_ID, "apiKey": API_KEY})
+                    mqtt_client.publish(AUTH_TOPIC, auth_payload)
                 time.sleep(1)
                 continue
 
-            sensor.measure()
-            temp = sensor.temperature()
-            hum = sensor.humidity()
-            
-            # Lightweight Payload - No API Key Needed!
-            payload = ujson.dumps({
-                "clientId": CLIENT_ID,
-                "temperature": temp,
-                "humidity": hum,
-                "timestamp": current_time
-            })
-            
-            mqtt_client.publish(DATA_TOPIC, payload)
-            print("📊 Telemetry Sent:", payload)
-            last_telemetry_time = current_time
+            # Read Sensor
+            try:
+                sensor.measure()
+                temp = sensor.temperature()
+                hum = sensor.humidity()
+                
+                payload = ujson.dumps({
+                    "clientId": CLIENT_ID,
+                    "temperature": temp,
+                    "humidity": hum,
+                    "timestamp": current_time
+                })
+                
+                mqtt_client.publish(DATA_TOPIC, payload)
+                print("📊 Telemetry Sent:", payload)
+                last_telemetry_time = current_time
+            except Exception as se:
+                print("⚠️ Sensor Read Error:", se)
 
+    except OSError as e:
+        # Error 110 = ETIMEDOUT, 104 = ECONNRESET
+        print("🌐 Network Error (OSError):", e)
+        mqtt_client = None 
+        time.sleep(5)
     except Exception as e:
-        print("💥 Loop Error:", e)
+        print("💥 Unexpected Loop Error:", e)
         mqtt_client = None 
         time.sleep(2)

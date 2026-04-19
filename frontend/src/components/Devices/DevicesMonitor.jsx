@@ -108,7 +108,7 @@ import React, { useEffect, useState } from 'react';
 import API from '@/utils/api';
 import { io } from 'socket.io-client';
 import DeviceChart from './DeviceChart';
-import { Activity, Thermometer, Droplets, RefreshCw, Loader2, Trash2 } from 'lucide-react';
+import { Activity, Thermometer, Droplets, RefreshCw, Loader2, Trash2, Cloud, Zap } from 'lucide-react';
 
 const DevicesMonitor = () => {
     const [devices, setDevices] = useState([]);
@@ -118,6 +118,12 @@ const DevicesMonitor = () => {
     // --- DELETE DEVICE STATES ---
     const [deleteTarget, setDeleteTarget] = useState(null); // device to delete
     const [deleteLoading, setDeleteLoading] = useState(false);
+    
+    // --- OTA UPDATE STATES ---
+    const [otaTarget, setOtaTarget] = useState(null); // device to flash
+    const [otaCode, setOtaCode] = useState("");
+    const [otaLoading, setOtaLoading] = useState(false);
+    const [otaDeploying, setOtaDeploying] = useState(false);
 
     // --- ADD DEVICE MODAL STATES ---
     const [showModal, setShowModal] = useState(false);
@@ -150,7 +156,7 @@ const DevicesMonitor = () => {
         
         socket.on('telemetry_update', (newData) => {
             setDevices(prev => prev.map(dev => 
-                dev._id === newData.apiKey 
+                dev._id === newData._id 
                 ? { ...dev, data: newData.payload, lastUsed: new Date() } 
                 : dev
             ));
@@ -202,6 +208,43 @@ const DevicesMonitor = () => {
             alert(`Error: ${err.response?.data?.message || 'Delete failed'}`);
         } finally {
             setDeleteLoading(false);
+        }
+    };
+
+    // --- OTA HANDLERS ---
+    const openOTAModal = async (device) => {
+        setOtaTarget(device);
+        setOtaLoading(true);
+        try {
+            const config = { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } };
+            const { data } = await API.get(`/ota/current/${device.deviceId}`, config);
+            setOtaCode(data.code);
+        } catch (err) {
+            console.error("OTA Load error", err);
+            setOtaCode("# Error loading firmware. Start fresh:\nprint('Hello Sentinel')");
+        } finally {
+            setOtaLoading(false);
+        }
+    };
+
+    const handleOTADeploy = async () => {
+        if (!otaTarget || !otaCode) return;
+        setOtaDeploying(true);
+        try {
+            const config = { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } };
+            const res = await API.post("/ota/deploy", {
+                deviceId: otaTarget.deviceId,
+                code: otaCode
+            }, config);
+            
+            if (res.data.success) {
+                alert("OTA Firmware Staged! Device update triggered.");
+                setOtaTarget(null);
+            }
+        } catch (err) {
+            alert(`OTA Error: ${err.response?.data?.message || 'Deployment failed'}`);
+        } finally {
+            setOtaDeploying(false);
         }
     };
 
@@ -258,6 +301,14 @@ const DevicesMonitor = () => {
                                     title="Delete device"
                                 >
                                     <Trash2 size={15} />
+                                </button>
+                                {/* OTA Flash Button */}
+                                <button
+                                    onClick={() => openOTAModal(device)}
+                                    className="p-1.5 rounded-lg text-slate-600 hover:text-cyan-400 hover:bg-cyan-500/10 transition-all opacity-0 group-hover:opacity-100"
+                                    title="Wireless Flash (OTA)"
+                                >
+                                    <Cloud size={15} />
                                 </button>
                             </div>
                         </div>
@@ -387,6 +438,71 @@ const DevicesMonitor = () => {
                             >
                                 {deleteLoading ? <Loader2 size={16} className="animate-spin" /> : 'Delete'}
                             </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {/* --- OTA FLASH MODAL --- */}
+            {otaTarget && (
+                <div className="fixed inset-0 z-50 flex justify-center items-center bg-black/80 backdrop-blur-lg p-4">
+                    <div className="w-full max-w-4xl h-[85vh] bg-[#0F172A] rounded-3xl border border-slate-800 shadow-2xl flex flex-col overflow-hidden">
+                        {/* Modal Header */}
+                        <div className="p-6 border-b border-slate-800 bg-slate-900/50 flex justify-between items-center">
+                            <div className="flex items-center gap-4">
+                                <div className="p-3 bg-cyan-500/10 rounded-xl">
+                                    <Cloud className="text-cyan-400" size={24} />
+                                </div>
+                                <div>
+                                    <h2 className="text-xl font-bold text-white tracking-tight">Sentinel Cloud Flash</h2>
+                                    <p className="text-xs text-slate-500 font-mono uppercase tracking-widest">Target: {otaTarget.deviceName} ({otaTarget.deviceId})</p>
+                                </div>
+                            </div>
+                            <button onClick={() => setOtaTarget(null)} className="text-slate-500 hover:text-white transition-colors">✕</button>
+                        </div>
+
+                        {/* Modal Content / Editor */}
+                        <div className="flex-1 relative flex flex-col bg-[#020617]">
+                            <div className="bg-slate-900/30 px-4 py-2 text-[10px] font-bold text-slate-600 uppercase tracking-widest border-b border-slate-800 flex justify-between">
+                                <span>main.py</span>
+                                <span>MicroPython v1.20+</span>
+                            </div>
+                            {otaLoading ? (
+                                <div className="flex-1 flex flex-col items-center justify-center text-slate-500 gap-4">
+                                    <Loader2 className="animate-spin text-cyan-500" size={40} />
+                                    <p className="font-bold tracking-widest text-xs uppercase">Fetching current firmware...</p>
+                                </div>
+                            ) : (
+                                <textarea
+                                    value={otaCode}
+                                    onChange={(e) => setOtaCode(e.target.value)}
+                                    spellCheck="false"
+                                    className="flex-1 w-full bg-transparent p-6 text-cyan-50/90 font-mono text-sm outline-none resize-none selection:bg-cyan-500/30"
+                                    placeholder="# Write your MicroPython code here..."
+                                />
+                            )}
+                        </div>
+
+                        {/* Modal Footer */}
+                        <div className="p-6 border-t border-slate-800 bg-slate-900/50 flex justify-between items-center">
+                            <div className="flex items-center gap-3 text-slate-500 text-[10px] font-bold uppercase tracking-widest">
+                                <span className="flex items-center gap-1.5"><Zap size={12} className="text-yellow-500" /> Auto-Reboot Enabled</span>
+                            </div>
+                            <div className="flex gap-4">
+                                <button 
+                                    onClick={() => setOtaTarget(null)}
+                                    className="px-6 py-2.5 text-slate-400 font-bold hover:text-white transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                <button 
+                                    onClick={handleOTADeploy}
+                                    disabled={otaDeploying || otaLoading}
+                                    className="bg-cyan-500 hover:bg-cyan-400 text-slate-900 px-8 py-2.5 rounded-xl font-bold transition-all shadow-lg shadow-cyan-900/20 flex items-center gap-2 group disabled:opacity-50"
+                                >
+                                    {otaDeploying ? <Loader2 size={18} className="animate-spin" /> : <Zap size={18} className="group-hover:animate-pulse" />}
+                                    {otaDeploying ? 'Deploying...' : 'Deploy OTA Update'}
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

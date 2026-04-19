@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useDraggable } from '@dnd-kit/core';
 
-export function DraggableWidget({ id, title, isEditing, onRemove, onResize, size, position, children }) {
+export function DraggableWidget({ id, title, isEditing, onRemove, onResize, onSettings, mappedDevice, size, position, children }) {
   const { attributes, listeners, setNodeRef, isDragging, transform } = useDraggable({
     id,
     data: { type: 'canvas-widget' }
@@ -77,16 +77,28 @@ export function DraggableWidget({ id, title, isEditing, onRemove, onResize, size
     >
       {isEditing && (
         <div className="bg-slate-800/80 backdrop-blur-sm px-3 py-2 flex justify-between items-center border-b border-slate-700/50 shrink-0 cursor-grab active:cursor-grabbing rounded-t-2xl" {...attributes} {...listeners}>
-          <div className="flex items-center gap-2 text-slate-300 flex-1">
-            <svg className="w-4 h-4 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 8h16M4 16h16"></path></svg>
-            <span className="text-[10px] font-bold uppercase tracking-widest">{title}</span>
+          <div className="flex items-center gap-2 text-slate-300 flex-1 overflow-hidden">
+            <svg className="w-4 h-4 text-cyan-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 8h16M4 16h16"></path></svg>
+            <div className="flex flex-col min-w-0">
+               <span className="text-[9px] font-black uppercase tracking-tighter text-cyan-500/80 truncate">{mappedDevice}</span>
+               <span className="text-[10px] font-bold uppercase tracking-widest text-white truncate">{title}</span>
+            </div>
           </div>
-          <button 
-            onPointerDown={(e) => { e.stopPropagation(); onRemove(id); }} 
-            className="text-slate-400 hover:text-white hover:bg-rose-500 rounded-md p-1 ml-2 transition-all pointer-events-auto z-50 flex items-center justify-center w-6 h-6 shadow-sm"
-          >
-            ✕
-          </button>
+          <div className="flex items-center gap-1">
+             <button 
+              onClick={(e) => { e.stopPropagation(); onSettings(); }} 
+              className="text-slate-400 hover:text-cyan-400 hover:bg-slate-700 rounded-md p-1.5 transition-all pointer-events-auto z-50 flex items-center justify-center w-8 h-8"
+              title="Widget Settings"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37a1.724 1.724 0 002.572-1.065z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+            </button>
+            <button 
+              onPointerDown={(e) => { e.stopPropagation(); onRemove(id); }} 
+              className="text-slate-400 hover:text-white hover:bg-rose-500 rounded-md p-1.5 transition-all pointer-events-auto z-50 flex items-center justify-center w-8 h-8"
+            >
+              ✕
+            </button>
+          </div>
         </div>
       )}
 

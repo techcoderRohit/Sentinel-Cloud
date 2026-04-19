@@ -18,7 +18,7 @@ client.on('connect', () => {
 
 client.on('message', (topic, message) => {
   const payloadStr = message.toString();
-  
+
   console.log(
     chalk.gray(`[${new Date().toLocaleTimeString()}]`),
     chalk.blue(`[FEED: ${topic}]`),

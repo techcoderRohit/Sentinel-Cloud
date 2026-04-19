@@ -1,6 +1,7 @@
-import ControlBoard from '@/components/Dashboard/ControlBoard';
+"use client";
+import BoardGallery from '@/components/Dashboard/BoardGallery';
 import React from 'react';
 
-export default function ControlBoardPage() {
-  return <ControlBoard />;
+export default function ControlBoardGalleryPage() {
+  return <BoardGallery />;
 }

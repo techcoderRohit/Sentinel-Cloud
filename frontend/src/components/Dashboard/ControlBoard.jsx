@@ -11,6 +11,8 @@ import {
   useDroppable
 } from '@dnd-kit/core';
 import { DraggableWidget } from './DraggableWidget';
+import io from 'socket.io-client';
+import { useParams } from 'next/navigation';
 
 const WIDGET_LIBRARY = [
   { type: 'switch', title: 'Relay Switch', defaultSize: { width: 220, height: 160 }, defaultData: { status: true } },
@@ -177,66 +179,105 @@ const renderWidgetUI = (widget, isEditing = false, isPreview = false, updateData
   }
 };
 
-const ControlBoard = () => {
+const ControlBoard = ({ boardId: propBoardId }) => {
+  const { id: urlBoardId } = useParams() || {};
+  const boardId = propBoardId || urlBoardId;
+  
   const [isEditing, setIsEditing] = useState(false);
   const [activeDragItem, setActiveDragItem] = useState(null);
   const [canvasWidgets, setCanvasWidgets] = useState([]);
+  const [boardInfo, setBoardInfo] = useState({ name: 'Loading...', description: '' });
+  const [devices, setDevices] = useState([]);
+  const [selectedWidgetForSettings, setSelectedWidgetForSettings] = useState(null);
+
 
   const { setNodeRef: setCanvasDropRef } = useDroppable({ id: 'main-canvas' });
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
+  // 1. Fetch Board Layout & Devices
   useEffect(() => {
-    const FetchDashboard = async () => {
+    const FetchInitialData = async () => {
       const token = localStorage.getItem('token');
+      if (!token || !boardId) return;
 
-      if (token) {
-        try {
-          const res = await API.get('/dashboard/get-layout', {
-            headers: {
-              Authorization: `Bearer ${token}`
-            }
-          });
-
-          // Agar backend se widgets milte hain toh state update karein
-          if (res.data && res.data.widgets) {
-            setCanvasWidgets(res.data.widgets);
-          }
-        } catch (error) {
-          console.error("Dashboard load karne mein error:", error.response?.data || error.message);
+      try {
+        // Fetch specific board
+        const boardRes = await API.get(`/dashboard/${boardId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (boardRes.data.success) {
+          setCanvasWidgets(boardRes.data.board.widgets || []);
+          setBoardInfo({ name: boardRes.data.board.name, description: boardRes.data.board.description });
         }
+
+        // Fetch user devices for the mapping dropdown
+        const devRes = await API.get('/iot/monitor-all', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (devRes.data.success) {
+          setDevices(devRes.data.devices);
+        }
+      } catch (error) {
+        console.error("Dashboard load error:", error);
       }
     };
+    FetchInitialData();
+  }, [boardId]);
 
-    FetchDashboard();
-  }, []); // Component load par sirf ek baar chalega
+  // 2. Socket.io Live Updates
+  useEffect(() => {
+    if (!boardId) return;
+    
+    const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:5000', {
+      transports: ['websocket'],
+      auth: { token: localStorage.getItem('token') }
+    });
 
+    socket.on('telemetry_update', (newData) => {
+      setCanvasWidgets(prev => prev.map(w => {
+        // Feed ID format: "device_id/field_name"
+        if (w.mapping && w.mapping.feedId) {
+          const [deviceId, field] = w.mapping.feedId.split('/');
+          
+          if (deviceId === newData.deviceId) {
+            const newValue = newData.payload[field];
+            
+            if (newValue !== undefined) {
+              if (w.type === 'gauge' || w.type === 'slider') {
+                return { ...w, data: { ...w.data, value: newValue } };
+              }
+              if (w.type === 'text') {
+                return { ...w, data: { ...w.data, value: newValue } };
+              }
+              if (w.type === 'lineChart') {
+                return { ...w, data: { ...w.data, current: newValue } };
+              }
+            }
+          }
+        }
+        return w;
+      }));
+    });
+
+    return () => socket.disconnect();
+  }, [boardId]);
 
   const saveDashboardToDB = async () => {
     try {
       const token = localStorage.getItem('token');
+      if (!token || !boardId) return;
 
-      if (!token) {
-        alert("Please login first!");
-        return;
-      }
-
-      // Backend route POST hai, isliye yahan .post use karein
-      const response = await API.post('/dashboard/save-layout',
-        { widgets: canvasWidgets }, // Request Body
-        {
-          headers: {
-            Authorization: `Bearer ${token}` // Token-based Access
-          }
-        }
+      const response = await API.put(`/dashboard/${boardId}/layout`,
+        { widgets: canvasWidgets, name: boardInfo.name },
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
       if (response.data.success) {
-        alert("Layout saved permanently!");
+        alert("Board updated successfully!");
         setIsEditing(false);
       }
     } catch (error) {
-      console.error("Saving failed:", error.response?.data || error.message);
-      alert("Saving failed: " + (error.response?.data?.message || "Internal Server Error"));
+      alert("Saving failed: " + (error.response?.data?.message || "Error"));
     }
   };
   const handleDragStart = (e) => setActiveDragItem(e.active);
@@ -298,10 +339,13 @@ const ControlBoard = () => {
       {/* HEADER */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-gradient-to-r from-[#0F172A] to-[#1e293b] p-5 rounded-2xl border border-slate-700/50 shadow-lg z-20">
         <div className="flex flex-col gap-1">
-          <h2 className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400 tracking-tight">Sentinel Board</h2>
+          <div className="flex items-center gap-3">
+             <button onClick={() => window.location.href='/dashboard/control-board'} className="text-slate-500 hover:text-white transition-colors">←</button>
+             <h2 className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400 tracking-tight uppercase">{boardInfo.name}</h2>
+          </div>
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <p className="text-emerald-500/80 font-bold text-[10px] uppercase tracking-widest">Freeform Dashboard Mode</p>
+            <span className="w-2 h-2 rounded-full bg-cyan-500 animate-pulse"></span>
+            <p className="text-cyan-500/80 font-bold text-[10px] uppercase tracking-widest">Live Dynamic Workspace</p>
           </div>
         </div>
         <div className="flex items-center gap-5 mt-4 sm:mt-0">
@@ -313,7 +357,7 @@ const ControlBoard = () => {
             </label>
           </div>
           {isEditing && (
-            <button onClick={saveDashboardToDB} className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white px-6 py-2.5 rounded-xl font-bold text-xs hover:scale-105 transition-all tracking-widest">SAVE LAYOUT</button>
+            <button onClick={saveDashboardToDB} className="bg-cyan-500 text-slate-900 px-6 py-2.5 rounded-xl font-bold text-xs hover:scale-105 transition-all tracking-widest shadow-[0_0_20px_rgba(6,182,212,0.4)]">PUSH UPDATES</button>
           )}
         </div>
       </div>
@@ -353,12 +397,62 @@ const ControlBoard = () => {
             )}
 
             {canvasWidgets.map(w => (
-              <DraggableWidget key={w.id} id={w.id} title={w.title} size={w.size} position={w.position} isEditing={isEditing} onRemove={removeWidget} onResize={resizeWidget}>
+              <DraggableWidget 
+                key={w.id} 
+                id={w.id} 
+                title={w.title} 
+                size={w.size} 
+                position={w.position} 
+                isEditing={isEditing} 
+                onRemove={removeWidget} 
+                onResize={resizeWidget}
+                onSettings={() => setSelectedWidgetForSettings(w)}
+                mappedDevice={w.mapping?.feedId || 'No Feed'}
+              >
                 {renderWidgetUI(w, isEditing, false, updateWidgetData)}
               </DraggableWidget>
             ))}
           </div>
         </div>
+
+        {/* WIDGET SETTINGS MODAL */}
+        {selectedWidgetForSettings && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+            <div className="bg-[#0F172A] border border-slate-700 rounded-3xl w-full max-w-md p-8 shadow-2xl">
+              <h3 className="text-xl font-bold mb-6 text-white uppercase tracking-tight">Widget Feed Configuration</h3>
+              
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Feed Identifier</label>
+                  <input 
+                    type="text"
+                    placeholder="e.g. my_esp8266/temperature"
+                    className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 outline-none focus:border-cyan-500"
+                    value={selectedWidgetForSettings.mapping?.feedId || ''}
+                    onChange={(e) => {
+                      setCanvasWidgets(prev => prev.map(w => w.id === selectedWidgetForSettings.id ? { ...w, mapping: { ...w.mapping, feedId: e.target.value } } : w));
+                      setSelectedWidgetForSettings(prev => ({ ...prev, mapping: { ...prev.mapping, feedId: e.target.value } }));
+                    }}
+                  />
+                  <div className="mt-4 p-4 bg-slate-900/50 border border-slate-800 rounded-xl">
+                    <p className="text-[10px] text-slate-500 uppercase font-black mb-2 flex items-center gap-2">
+                       <span className="w-1.5 h-1.5 rounded-full bg-cyan-500"></span> Pro Tip: How to use feeds
+                    </p>
+                    <p className="text-[10px] text-slate-400 font-medium leading-relaxed">
+                      Format: <span className="text-cyan-400">DeviceID/Key</span>. <br/>
+                      Example: If your device <span className="text-white font-bold">garden_hub</span> sends <span className="text-white font-bold">"soil": 45</span>, enter <span className="text-white font-bold italic">garden_hub/soil</span>.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="pt-4 flex gap-4">
+                   <button onClick={() => setSelectedWidgetForSettings(null)} className="flex-1 bg-cyan-500 text-slate-900 font-black py-4 rounded-2xl hover:bg-cyan-400 transition-all uppercase tracking-widest text-xs">Confirm Mapping</button>
+                   <button onClick={() => setSelectedWidgetForSettings(null)} className="px-6 py-4 bg-slate-800 text-slate-400 rounded-2xl font-bold hover:bg-slate-700 transition-all uppercase tracking-widest text-xs">Cancel</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* DRAG OVERLAY (dropAnimation null ensures NO visual snap back) */}
         <DragOverlay dropAnimation={null}>

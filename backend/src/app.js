@@ -14,7 +14,7 @@ const SensorDataRoutes = require('./routes/SensorDataRoutes');
 const NotificationRoutes = require('./routes/NotificationRoutes')
 const terminalRoutes = require('./routes/terminalRoutes');
 const aiRoutes = require('./routes/aiRoutes');
-//const otaRoutes = require('./routes/otaRoutes');
+const otaRoutes = require('./routes/otaRoutes');
 //startMQTT();
 //Create app
 
@@ -38,7 +38,7 @@ app.use('/api/iot', SensorDataRoutes);
 app.use('/api/terminal', terminalRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/notifications',NotificationRoutes)
-//app.use('/api/ota', otaRoutes);
+app.use('/api/ota', otaRoutes);
 
 //Test route
 app.get('/', (req, res) => {

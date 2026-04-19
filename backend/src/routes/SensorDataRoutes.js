@@ -298,6 +298,8 @@ router.get('/monitor-all', protect, async (req, res) => {
             const latest = await SensorData.findOne({ deviceId: device.deviceId }).sort({ timestamp: -1 });
             return {
                 _id: device._id,
+                deviceId: device.deviceId,
+                apiKey: device.apiKey,
                 name: device.deviceName || device.name || device.apiKey,
                 lastUsed: device.lastActive,
                 data: latest ? latest.payload : null
@@ -370,10 +372,11 @@ router.get('/stats/:keyId', protect, async (req, res) => {
     });
 });
 
-// GET /api/iot/history/:apiKeyId
+// GET /api/iot/history/:apiKeyId (apiKeyId yahan _id hai frontend se)
 router.get('/history/:apiKeyId', protect, async (req, res) => {
     try {
-        const device = await Device.findOne({ apiKey: req.params.apiKeyId, owner: req.user._id });
+        // Frontend dev._id bhejta hai, isliye hum _id se dhoondenge
+        const device = await Device.findOne({ _id: req.params.apiKeyId, owner: req.user._id });
         if (!device) {
             return res.status(404).json({ message: "Device not found" });
         }

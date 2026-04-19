@@ -5,17 +5,26 @@ const DashboardSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true,
-    unique: true
-  }, // Admin ki ID
+    unique: false // Changed from true to allow multiple boards
+  },
+  name: {
+    type: String,
+    required: true,
+    default: "Default Board"
+  },
+  description: {
+    type: String,
+    default: ""
+  },
   widgets: {
     type: Array,
     default: []
-  }, // Saare widgets ka data (Position, Size, etc.)
+  }, 
   shareId: {
     type: String,
     unique: false,
     default: null
-  } // Guest view ke liye unique ID
+  } 
 },
   {
     timestamps: true
