@@ -199,6 +199,37 @@ router.delete('/:id', protect, async (req, res) => {
   }
 });
 
+// 6. TOGGLE SHARING / GENERATE SHARE ID
+router.put('/:id/share', protect, async (req, res) => {
+    try {
+        const board = await Dashboard.findOne({ _id: req.params.id, userId: req.user._id });
+        if (!board) return res.status(404).json({ success: false, message: "Dashboard not found" });
+
+        // Generate a shareId if it doesn't exist
+        if (!board.shareId) {
+            const crypto = require('crypto');
+            board.shareId = crypto.randomBytes(8).toString('hex');
+            await board.save();
+        }
+
+        res.json({ success: true, shareId: board.shareId });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// 7. PUBLIC FETCH: Get board by shareId (No Protect Middleware)
+router.get('/shared/:shareId', async (req, res) => {
+    try {
+        const board = await Dashboard.findOne({ shareId: req.params.shareId }).select('name description widgets createdAt');
+        if (!board) return res.status(404).json({ success: false, message: "Shared dashboard not found" });
+
+        res.json({ success: true, board });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
 // 6. OBSOLETE Compatibility Route (Optional: For migration)
 router.get('/get-layout', protect, async (req, res) => {
   try {

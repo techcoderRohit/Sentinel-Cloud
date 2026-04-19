@@ -1,58 +1,55 @@
 const express = require('express');
 const router = express.Router();
+const { protect } = require('../middleware/authMiddleware');
+const { getClient } = require('../mqtt/mqttHandler');
+const Device = require('../models/Device');
 
 // POST: /api/terminal
-router.post('/', async (req, res) => {
+router.post('/', protect, async (req, res) => {
     try {
-        const { command } = req.body;
+        const { command, deviceId } = req.body;
 
         if (!command) {
             return res.status(400).json({ output: "No command provided", color: "#f87171" });
         }
 
         const cmd = command.toLowerCase().trim();
-        let response = {
-            output: ""
-        };
 
-        // Logic switch case for different commands
-        switch (true) {
-            case (cmd === 'help'):
-                response.output = "Available commands:\n- list: Show all connected nodes\n- status <node_id>: Get node health\n- ping <node_id>: Test connectivity\n- clear: Clear terminal";
-                response.color = "#60a5fa"; // Blue
-                break;
-
-            case (cmd === 'list'):
-                // Real project mein yahan DB se online nodes fetch honge
-                response.output = "NODE-01 [online]\nNODE-02 [online]\nNODE-03 [online]\nNODE-04 [offline]";
-                response.color = "#4ade80"; // Green
-                break;
-
-            case (cmd.startsWith('status')):
-                const nodeId = cmd.split(' ')[1] || "Unknown";
-                response.output = `${nodeId.toUpperCase()} | temp: 28.1°C | hum: 61% | battery: 67% | status: Warning`;
-                response.color = "#fbbf24"; // Yellow/Amber
-                break;
-
-            case (cmd.startsWith('ping')):
-                const pingNode = cmd.split(' ')[1] || "Gateway";
-                response.output = `PING ${pingNode}: 3 packets received, 0% loss, rtt avg 5.2ms`;
-                response.color = "#4ade80";
-                break;
-
-            case (cmd === 'clear'):
-                response.output = "CLEAR_TERMINAL"; // Frontend handle karega is flag ko
-                break;
-
-            default:
-                response.output = `Command not found: '${command}'. Type 'help' for options.`;
-                response.color = "#f87171"; // Red
+        // 1. Handle Local/Virtual Commands
+        if (cmd === 'clear') {
+            return res.json({ output: "CLEAR_TERMINAL" });
+        }
+        
+        if (cmd === 'help' && !deviceId) {
+            return res.json({ 
+                output: "Sentinel Pro Terminal\n-------------------\n- clear: Clear screen\n- status: Local system check\n\nConnect a device to use hardware REPL commands.",
+                color: "#60a5fa"
+            });
         }
 
-        res.status(200).json(response);
+        // 2. Hardware Bridge (Requires deviceId)
+        if (!deviceId) {
+            return res.status(400).json({ output: "No device selected for this REPL session", color: "#fbbf24" });
+        }
+
+        const targetId = req.user.role === 'guest' ? req.user.managedBy : req.user._id;
+        const device = await Device.findOne({ _id: deviceId, owner: targetId });
+
+        if (!device) {
+            return res.status(404).json({ output: "Device not found or access denied", color: "#f87171" });
+        }
+
+        const mqtt = getClient();
+        if (mqtt && mqtt.connected) {
+            const topic = `sentinel/device/${device.deviceId}/repl/rx`;
+            mqtt.publish(topic, JSON.stringify({ command: command }));
+            return res.json({ output: `Sending to ${device.deviceId}...`, color: "#94a3b8" });
+        } else {
+            return res.status(503).json({ output: "MQTT Bridge Offline", color: "#f87171" });
+        }
 
     } catch (error) {
-        console.error("Terminal Error:", error);
+        console.error("Terminal Bridge Error:", error);
         res.status(500).json({ output: "Internal Server Error", color: "#f87171" });
     }
 });

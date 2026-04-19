@@ -9,19 +9,19 @@ import ubinascii
 # --- CONFIGURATION ---
 WIFI_SSID = "hood hogan"
 WIFI_PASSWORD = "1qa2ws3ed4rf"
-MQTT_BROKER = "10.104.179.140"  
+MQTT_BROKER = "10.104.179.140"
 
 # Unique Identification
 # Generate ID based on MAC address to avoid collisions with other students
-MAC_ID = ubinascii.hexlify(machine.unique_id()).decode()
-CLIENT_ID = "my_esp8266"
+CLIENT_ID = "my_esp8266_og"
 print("🆔 Assigned Unique Client ID:", CLIENT_ID)
 
-API_KEY = "sk-sentinel-2c04d8e5235913e6e5223ec063b4a12e"
+API_KEY = "sk-sentinel-b8d126ed83198bf14733588094e49095"
 
 # Dashboard logic topics (Inhe dhyan se check karein)
 COMMAND_TOPIC = "sentinel/device/{}/repl/rx".format(CLIENT_ID)
 RESPONSE_TOPIC = "sentinel/device/{}/repl/tx".format(CLIENT_ID)
+INPUT_TOPIC = "sentinel/device/{}/command".format(CLIENT_ID)
 DATA_TOPIC = "sensors/data"
 
 # Application-level Auth topics
@@ -33,6 +33,7 @@ is_authorized = False
 
 # Hardware Setup
 led = machine.Pin(2, machine.Pin.OUT) # Internal LED
+relay = machine.Pin(4, machine.Pin.OUT) # Relay on D2
 sensor = dht.DHT11(machine.Pin(5))
 
 # --- CALLBACK FUNCTION (Dashboard commands yahan receive honge) ---
@@ -61,6 +62,29 @@ def sub_cb(topic, msg):
             if update_url:
                 import ota_client
                 ota_client.pull_update(update_url)
+            return
+
+        # Input Feed Control (New Command System)
+        if decoded_topic == INPUT_TOPIC:
+            print('input topic')
+            field = data.get("field")
+            value = data.get("value")
+            
+            print("🕹️ Dashboard Input: {} -> {}".format(field, value))
+            
+            if field == "status":
+                if value is True or value == 1:
+                    led.value(0) # ON
+                else:
+                    led.value(1) # OFF
+            elif field == "relay":
+                print('relay_feed')
+                if value is True or value == 1:
+                    relay.value(1) # ON (Relays are usually HIGH active)
+                else:
+                    relay.value(0) # OFF
+            
+            # You can add more logic here for other fields (e.g. brightness, threshold)
             return
 
         # Regular Repl Command Processing
@@ -119,7 +143,8 @@ def connect_mqtt():
         client.subscribe(COMMAND_TOPIC)
         client.subscribe(AUTH_RX_TOPIC)
         client.subscribe(OTA_TOPIC)
-        print('🚀 Connected to Sentinel Broker & Subscribed to REPL/OTA')
+        client.subscribe(INPUT_TOPIC)
+        print('🚀 Connected to Sentinel & Subscribed to REPL/OTA/INPUT')
         
         # Handshake Initiate karein
         print('🔐 Sending Handshake using API Key...')
@@ -190,7 +215,8 @@ while True:
                 })
                 
                 mqtt_client.publish(DATA_TOPIC, payload)
-                print("📊 Telemetry Sent:", payload)
+                # print("📊 Telemetry Sent:", payload)
+                print('data collected from sensor')
                 last_telemetry_time = current_time
             except Exception as se:
                 print("⚠️ Sensor Read Error:", se)

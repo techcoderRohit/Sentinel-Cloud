@@ -18,9 +18,12 @@ const Reports = () => {
     const fetchDevices = async () => {
       try {
         const response = await API.get('/devices');
-        setDevices(response.data);
-        if (response.data.length > 0) {
-          setSelectedDevice(response.data[0].apiKey); // Default to first device
+        if (response.data.success && Array.isArray(response.data.data)) {
+          const deviceList = response.data.data;
+          setDevices(deviceList);
+          if (deviceList.length > 0) {
+            setSelectedDevice(deviceList[0].apiKey); 
+          }
         }
       } catch (err) {
         console.error("Failed to fetch devices for analytics", err);

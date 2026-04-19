@@ -20,6 +20,8 @@ const connectMQTT = (io) => {
         client.subscribe('sensors/data');
         // Application layer auth handshake topic
         client.subscribe('sentinel/auth');
+        // REPL Output subscription
+        client.subscribe('sentinel/device/+/repl/tx');
     });
 
     client.on('message', async (topic, message) => {
@@ -94,6 +96,23 @@ const connectMQTT = (io) => {
                 });
 
                 console.log(`✅ Sentinel Cloud Updated: ${device.deviceName || clientId}`);
+            }
+
+            // ==== 3. REPL OUTPUT PROCESSING ====
+            if (topic.startsWith('sentinel/device/') && topic.endsWith('/repl/tx')) {
+                const parts = topic.split('/');
+                const clientId = parts[2]; // sentinel/device/{clientId}/repl/tx
+                const data = JSON.parse(message.toString());
+                
+                console.log(`💻 REPL Output from [${clientId}]: ${data.output}`);
+                
+                // Broadcast to dashboard
+                io.emit('repl_output', {
+                    deviceId: clientId,
+                    output: data.output,
+                    color: data.color || '#94a3b8'
+                });
+                return;
             }
 
         } catch (err) {

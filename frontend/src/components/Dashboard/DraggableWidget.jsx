@@ -2,8 +2,10 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useDraggable } from '@dnd-kit/core';
+import * as LucideIcons from 'lucide-react';
 
-export function DraggableWidget({ id, title, isEditing, onRemove, onResize, onSettings, mappedDevice, size, position, children }) {
+export function DraggableWidget({ id, title, isEditing, onRemove, onResize, onSettings, mappedDevice, size, position, icon, children }) {
+  const IconComponent = LucideIcons[icon] || LucideIcons.Activity; // Fallback to Activity
   const { attributes, listeners, setNodeRef, isDragging, transform } = useDraggable({
     id,
     data: { type: 'canvas-widget' }
@@ -78,7 +80,7 @@ export function DraggableWidget({ id, title, isEditing, onRemove, onResize, onSe
       {isEditing && (
         <div className="bg-slate-800/80 backdrop-blur-sm px-3 py-2 flex justify-between items-center border-b border-slate-700/50 shrink-0 cursor-grab active:cursor-grabbing rounded-t-2xl" {...attributes} {...listeners}>
           <div className="flex items-center gap-2 text-slate-300 flex-1 overflow-hidden">
-            <svg className="w-4 h-4 text-cyan-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 8h16M4 16h16"></path></svg>
+            <IconComponent className="w-4 h-4 text-cyan-500 shrink-0" />
             <div className="flex flex-col min-w-0">
                <span className="text-[9px] font-black uppercase tracking-tighter text-cyan-500/80 truncate">{mappedDevice}</span>
                <span className="text-[10px] font-bold uppercase tracking-widest text-white truncate">{title}</span>

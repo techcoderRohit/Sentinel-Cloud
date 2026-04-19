@@ -20,9 +20,25 @@ const WIDGET_LIBRARY = [
   { type: 'text', title: 'Status Text', defaultSize: { width: 250, height: 150 }, defaultData: { value: 'SYSTEM OK', color: 'text-emerald-400' } },
   { type: 'slider', title: 'Controller', defaultSize: { width: 350, height: 180 }, defaultData: { value: 45, min: 0, max: 100 } },
   { type: 'lineChart', title: 'Power Chart', defaultSize: { width: 450, height: 300 }, defaultData: { current: 84.2 } },
+  { type: 'actionButton', title: 'Trigger Button', defaultSize: { width: 200, height: 160 }, defaultData: { label: 'PULSE' } },
+  { type: 'numericInput', title: 'Value Entry', defaultSize: { width: 200, height: 150 }, defaultData: { value: 20 } },
+  { type: 'colorPicker', title: 'Color Hub', defaultSize: { width: 280, height: 220 }, defaultData: { color: '#06b6d4' } },
+  { type: 'terminal', title: 'Device Console', defaultSize: { width: 500, height: 350 }, defaultData: { logs: [] } },
 ];
 
-const getDynamicColor = (val, max) => {
+const ICON_LIST = ['Activity', 'Thermometer', 'Droplets', 'Zap', 'Cpu', 'Wind', 'Sun', 'Battery', 'Flame', 'Waves', 'Wifi', 'Lightbulb', 'Power', 'Settings', 'Bell'];
+const THEME_COLORS = [
+  { name: 'Cyan', hex: '#06b6d4' },
+  { name: 'Emerald', hex: '#10b981' },
+  { name: 'Rose', hex: '#f43f5e' },
+  { name: 'Amber', hex: '#f59e0b' },
+  { name: 'Violet', hex: '#8b5cf6' },
+  { name: 'Blue', hex: '#3b82f6' },
+  { name: 'White', hex: '#ffffff' }
+];
+
+const getDynamicColor = (val, max, customColor = null) => {
+  if (customColor) return { stroke: customColor, shadow: `${customColor}99` };
   const percent = val / max;
   if (percent > 0.8) return { stroke: '#f43f5e', shadow: 'rgba(244,63,94,0.6)' };
   if (percent > 0.5) return { stroke: '#eab308', shadow: 'rgba(234,179,8,0.6)' };
@@ -63,9 +79,10 @@ const WidgetStyles = () => (
   `}} />
 );
 
-const renderWidgetUI = (widget, isEditing = false, isPreview = false, updateData = null) => {
-  const isInteractive = !isEditing && !isPreview;
+const renderWidgetUI = (widget, isEditing = false, isPreview = false, updateData = null, readOnly = false) => {
+  const isInteractive = !isEditing && !isPreview && !readOnly;
   const data = widget.data || widget.defaultData;
+  const custom = widget.customSettings || {};
 
   if (isPreview) {
     switch (widget.type) {
@@ -74,37 +91,39 @@ const renderWidgetUI = (widget, isEditing = false, isPreview = false, updateData
       case 'text': return <span className="text-emerald-400 font-black tracking-widest text-sm">SYS OK</span>;
       case 'slider': return <div className="w-3/4 h-2 bg-slate-800 rounded-full border border-slate-600"><div className="w-2/3 h-full bg-cyan-500 rounded-full relative"><div className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full border-2 border-cyan-500"></div></div></div>;
       case 'lineChart': return <svg className="w-full h-full p-2" viewBox="0 0 100 50" preserveAspectRatio="none"><path d="M0,40 Q25,10 50,30 T100,20" fill="none" stroke="#06b6d4" strokeWidth="4" className="drop-shadow-[0_0_5px_cyan]" /></svg>;
+      case 'terminal': return <div className="w-full h-full bg-slate-900 border border-slate-700 rounded p-2 flex flex-col font-mono text-[8px]"><div className="text-cyan-500 mb-1">PRO_SENTINEL_v2.0</div><div className="text-slate-500"> system ready...</div><div className="text-slate-500"> waiting_for_command_</div></div>;
       default: return null;
     }
   }
 
   const pointerClass = isInteractive ? 'pointer-events-auto' : 'pointer-events-none';
+  const themeColor = custom.color || '#06b6d4';
 
   switch (widget.type) {
     case 'switch':
       return (
         <div className={`widget-box flex flex-col items-center justify-center ${pointerClass}`}>
           <label className={`relative flex items-center justify-center ${isInteractive ? 'cursor-pointer group' : 'cursor-default'}`}>
-            <input type="checkbox" className="sr-only" checked={data.status} onChange={(e) => isInteractive && updateData(widget.id, { ...data, status: e.target.checked })} disabled={!isInteractive} />
-            <div style={{ width: 'clamp(80px, 45cqmin, 160px)', height: 'clamp(40px, 22cqmin, 80px)' }} className={`relative rounded-full border-2 transition-all duration-300 ${data.status ? 'bg-slate-900 border-cyan-500/50 shadow-[0_0_20px_rgba(6,182,212,0.2)]' : 'bg-slate-800 border-slate-700 shadow-inner'}`}>
+            <input type="checkbox" className="sr-only" checked={data.status} onChange={(e) => isInteractive && updateData(widget.id, { ...data, status: e.target.checked }, true)} disabled={!isInteractive} />
+            <div style={{ width: 'clamp(80px, 45cqmin, 160px)', height: 'clamp(40px, 22cqmin, 80px)' }} className={`relative rounded-full border-2 transition-all duration-300 ${data.status ? 'bg-slate-900 border-cyan-500/50' : 'bg-slate-800 border-slate-700 shadow-inner'}`} style={{ borderColor: data.status ? themeColor : undefined }}>
               <div style={{
                 width: 'clamp(32px, 18cqmin, 68px)', height: 'clamp(32px, 18cqmin, 68px)',
                 left: data.status ? 'calc(100% - clamp(32px, 18cqmin, 68px) - 2px)' : '2px',
                 top: '50%', transform: 'translateY(-50%)',
-                backgroundColor: data.status ? '#06b6d4' : '#64748b',
-                boxShadow: data.status ? '0 0 15px rgba(6,182,212,0.8), inset 0 0 5px #fff' : 'inset 0 -2px 5px rgba(0,0,0,0.5)'
+                backgroundColor: data.status ? themeColor : '#64748b',
+                boxShadow: data.status ? `0 0 15px ${themeColor}, inset 0 0 5px #fff` : 'inset 0 -2px 5px rgba(0,0,0,0.5)'
               }} className="absolute transition-all duration-400 ease-spring rounded-full"></div>
             </div>
           </label>
-          <span style={{ fontSize: 'clamp(0.7rem, 6cqmin, 1.5rem)', marginTop: 'clamp(10px, 5cqmin, 24px)' }} className={`font-bold uppercase tracking-widest transition-colors duration-300 ${data.status ? 'text-cyan-400 drop-shadow-[0_0_5px_rgba(6,182,212,0.8)]' : 'text-slate-500'}`}>
-            {data.status ? 'System Online' : 'System Offline'}
+          <span style={{ fontSize: 'clamp(0.7rem, 6cqmin, 1.5rem)', marginTop: 'clamp(10px, 5cqmin, 24px)', color: data.status ? themeColor : undefined }} className={`font-bold uppercase tracking-widest transition-colors duration-300 ${data.status ? '' : 'text-slate-500'}`}>
+            {data.status ? (custom.title || 'System Online') : 'Disabled'}
           </span>
         </div>
       );
 
     case 'gauge':
-      const r = 15, c = 2 * Math.PI * r, offset = c - (data.value / data.max) * c;
-      const colors = getDynamicColor(data.value, data.max);
+      const r = 15, c = 2 * Math.PI * r, offset = c - (data.value / (data.max || 100)) * c;
+      const colors = getDynamicColor(data.value, data.max || 100, custom.color);
       return (
         <div className={`widget-box flex flex-col items-center justify-center p-[2cqmin] ${pointerClass}`}>
           <div style={{ width: 'clamp(120px, 85cqmin, 300px)', height: 'clamp(120px, 85cqmin, 300px)' }} className="relative flex items-center justify-center">
@@ -114,7 +133,7 @@ const renderWidgetUI = (widget, isEditing = false, isPreview = false, updateData
             </svg>
             <div className="absolute flex flex-col items-center">
               <span style={{ fontSize: 'clamp(2.5rem, 24cqmin, 6rem)' }} className="font-black text-white leading-none tracking-tighter drop-shadow-lg">{data.value}</span>
-              <span style={{ fontSize: 'clamp(0.7rem, 8cqmin, 1.5rem)', color: colors.stroke }} className="font-bold uppercase tracking-widest mt-1 transition-colors duration-700">{data.unit}</span>
+              <span style={{ fontSize: 'clamp(0.7rem, 8cqmin, 1.5rem)', color: colors.stroke }} className="font-bold uppercase tracking-widest mt-1 transition-colors duration-700">{custom.unit || data.unit}</span>
             </div>
           </div>
         </div>
@@ -124,54 +143,155 @@ const renderWidgetUI = (widget, isEditing = false, isPreview = false, updateData
       return (
         <div className="widget-box flex items-center justify-center p-4">
           <div className="bg-slate-900/50 border border-slate-700/50 rounded-2xl p-4 shadow-inner flex items-center justify-center w-full h-full">
-            <span style={{ fontSize: 'clamp(1.5rem, 16cqmin, 5rem)' }} className={`font-black tracking-widest ${data.color} animate-pulse truncate drop-shadow-[0_0_15px_rgba(52,211,153,0.4)]`}>{data.value}</span>
+            <span style={{ fontSize: 'clamp(1.5rem, 16cqmin, 5rem)', color: themeColor }} className={`font-black tracking-widest animate-pulse truncate drop-shadow-[0_0_15px_rgba(52,211,153,0.4)]`}>{data.value}</span>
           </div>
         </div>
       );
 
     case 'slider':
-      const sliderColors = getDynamicColor(data.value, data.max);
+      const sliderColors = getDynamicColor(data.value, data.max || 100, custom.color);
       return (
         <div className="widget-box flex flex-col items-center justify-center px-[8cqmin]" style={{ '--thumb-color': sliderColors.stroke, '--thumb-shadow': sliderColors.shadow }}>
           <div className="flex items-baseline mb-[4cqmin]">
             <span style={{ fontSize: 'clamp(3rem, 25cqmin, 7rem)', color: sliderColors.stroke }} className="font-black leading-none tracking-tighter drop-shadow-md transition-colors duration-300">{data.value}</span>
-            <span style={{ fontSize: 'clamp(1.2rem, 10cqmin, 2.5rem)' }} className="text-slate-500 ml-2 font-bold">%</span>
+            <span style={{ fontSize: 'clamp(1.2rem, 10cqmin, 2.5rem)' }} className="text-slate-500 ml-2 font-bold">{custom.unit || '%'}</span>
           </div>
-          <input type="range" min={data.min} max={data.max} value={data.value} onChange={(e) => isInteractive && updateData(widget.id, { ...data, value: parseInt(e.target.value) })} className={`w-full fluid-slider bg-slate-900 border-2 border-slate-700 rounded-full appearance-none outline-none shadow-inner ${isInteractive ? 'cursor-pointer hover:border-slate-500 transition-colors' : ''}`} style={{ height: 'clamp(10px, 4cqmin, 24px)' }} />
+          <input type="range" min={data.min || 0} max={data.max || 100} value={data.value} onChange={(e) => isInteractive && updateData(widget.id, { ...data, value: parseInt(e.target.value) }, true)} className={`w-full fluid-slider bg-slate-900 border-2 border-slate-700 rounded-full appearance-none outline-none shadow-inner ${isInteractive ? 'cursor-pointer hover:border-slate-500 transition-colors' : ''}`} style={{ height: 'clamp(10px, 4cqmin, 24px)' }} />
+        </div>
+      );
+
+    case 'actionButton':
+      return (
+        <div className={`widget-box flex items-center justify-center p-4 ${pointerClass}`}>
+          <button
+            onClick={() => isInteractive && updateData(widget.id, { ...data }, true)}
+            style={{ backgroundColor: themeColor, boxShadow: `0 10px 30px ${themeColor}66` }}
+            className="w-full h-full rounded-2xl text-slate-900 font-black tracking-widest uppercase transition-all active:scale-95 flex flex-col items-center justify-center gap-2"
+          >
+            <span style={{ fontSize: 'clamp(1rem, 8cqmin, 2rem)' }}>{data.label || 'TRIGGER'}</span>
+            <div className="w-8 h-1 bg-white/40 rounded-full"></div>
+          </button>
+        </div>
+      );
+
+    case 'numericInput':
+      return (
+        <div className={`widget-box flex flex-col items-center justify-center p-4 ${pointerClass}`}>
+          <div className="relative w-full max-w-[180px]">
+            <input
+              type="number"
+              value={data.value}
+              onChange={(e) => isInteractive && updateData(widget.id, { ...data, value: e.target.value }, true)}
+              className="w-full bg-slate-900 border-2 border-slate-700 rounded-2xl px-4 py-3 text-center text-2xl font-black text-cyan-400 outline-none focus:border-cyan-500 transition-all shadow-inner"
+            />
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-slate-800 px-2 py-0.5 rounded text-[10px] font-bold text-slate-500 uppercase tracking-widest border border-slate-700">VALUE</div>
+          </div>
+        </div>
+      );
+
+    case 'colorPicker':
+      return (
+        <div className={`widget-box flex flex-col items-center justify-center p-4 ${pointerClass}`}>
+          <div className="bg-slate-900/50 p-4 rounded-3xl border border-slate-700/50 shadow-2xl flex flex-col items-center gap-4">
+            <input
+              type="color"
+              value={data.color || themeColor}
+              onChange={(e) => isInteractive && updateData(widget.id, { ...data, color: e.target.value }, true)}
+              className="w-20 h-20 rounded-full overflow-hidden cursor-pointer border-4 border-white shadow-xl hover:scale-110 transition-transform"
+            />
+            <div className="font-mono text-xs font-bold text-slate-400 uppercase tracking-widest">{data.color || themeColor}</div>
+          </div>
         </div>
       );
 
     case 'lineChart':
+      const chartColor = custom.color || '#06b6d4';
       return (
         <div className={`widget-box flex flex-col relative p-4 sm:p-6 ${pointerClass} overflow-hidden rounded-xl bg-slate-900/30`}>
           <div className="absolute inset-0 animated-grid opacity-30 pointer-events-none z-0"></div>
 
           <div className="flex justify-between items-end mb-2 shrink-0 z-20">
             <span style={{ fontSize: 'clamp(1.5rem, 12cqmin, 3.5rem)' }} className="text-white font-black tracking-tight drop-shadow-md flex items-baseline gap-1">
-              {data.current} <span style={{ fontSize: 'clamp(0.8rem, 6cqmin, 2rem)' }} className="text-cyan-500 font-bold">kW</span>
+              {data.current} <span style={{ fontSize: 'clamp(0.8rem, 6cqmin, 2rem)', color: chartColor }} className="font-bold">{custom.unit || 'units'}</span>
             </span>
-            <span style={{ fontSize: 'clamp(0.6rem, 5cqmin, 1rem)' }} className="text-emerald-400 font-bold bg-emerald-500/10 px-2 py-1 rounded-md border border-emerald-500/30 shadow-[0_0_10px_rgba(52,211,153,0.2)] flex items-center gap-1.5 backdrop-blur-sm">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> LIVE
+            <span style={{ fontSize: 'clamp(0.6rem, 5cqmin, 1rem)', color: chartColor }} className="font-bold bg-white/5 px-2 py-1 rounded-md border border-white/10 shadow-[0_0_10px_rgba(6,182,212,0.1)] flex items-center gap-1.5 backdrop-blur-sm">
+              <span className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: chartColor }}></span> LIVE
             </span>
           </div>
 
           <div className="flex-1 w-full relative mt-2 min-h-0 z-10">
             <svg className="absolute inset-0 w-full h-full overflow-visible" preserveAspectRatio="none" viewBox="0 0 100 100">
               <defs>
-                <linearGradient id="chartGrad" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stopColor="#06b6d4" stopOpacity="0.6" /><stop offset="100%" stopColor="#06b6d4" stopOpacity="0.0" /></linearGradient>
+                <linearGradient id={`chartGrad-${widget.id}`} x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stopColor={chartColor} stopOpacity="0.6" /><stop offset="100%" stopColor={chartColor} stopOpacity="0.0" /></linearGradient>
               </defs>
-              <path d="M 0 80 C 20 60, 40 90, 60 50 C 80 10, 90 40, 100 20 L 100 100 L 0 100 Z" fill="url(#chartGrad)" />
-              <path d="M 0 80 C 20 60, 40 90, 60 50 C 80 10, 90 40, 100 20" fill="none" stroke="#06b6d4" strokeWidth="4" strokeLinecap="round" className="drop-shadow-[0_0_10px_rgba(6,182,212,0.8)]" />
+              <path d="M 0 80 C 20 60, 40 90, 60 50 C 80 10, 90 40, 100 20 L 100 100 L 0 100 Z" fill={`url(#chartGrad-${widget.id})`} />
+              <path d="M 0 80 C 20 60, 40 90, 60 50 C 80 10, 90 40, 100 20" fill="none" stroke={chartColor} strokeWidth="4" strokeLinecap="round" style={{ filter: `drop-shadow(0 0 10px ${chartColor})` }} />
             </svg>
-            <div className="absolute inset-0 pointer-events-none">
-              <div className="absolute bg-slate-900 border-2 border-cyan-500 rounded-full" style={{ width: 'clamp(8px, 3cqmin, 16px)', height: 'clamp(8px, 3cqmin, 16px)', left: '20%', bottom: '40%', transform: 'translate(-50%, 50%)' }}></div>
-              <div className="absolute bg-white rounded-full shadow-[0_0_8px_#fff]" style={{ width: 'clamp(10px, 4cqmin, 18px)', height: 'clamp(10px, 4cqmin, 18px)', left: '60%', bottom: '50%', transform: 'translate(-50%, 50%)' }}></div>
-              <div className="absolute bg-cyan-400 border-2 border-white rounded-full shadow-[0_0_15px_#06b6d4] animate-pulse" style={{ width: 'clamp(12px, 5cqmin, 24px)', height: 'clamp(12px, 5cqmin, 24px)', left: '100%', bottom: '80%', transform: 'translate(-50%, 50%)' }}></div>
+          </div>
+          <div className="flex justify-between mt-3 font-mono font-bold uppercase tracking-widest shrink-0 text-slate-500 z-20" style={{ fontSize: 'clamp(0.6rem, 4.5cqmin, 1.2rem)' }}>
+            <span>08:00</span><span>10:00</span><span>12:00</span><span style={{ color: chartColor }}>Now</span>
+          </div>
+        </div>
+      );
+    case 'terminal':
+      const logs = data.logs || [];
+      return (
+        <div className={`widget-box flex flex-col bg-slate-900/80 border-2 border-slate-700 rounded-2xl overflow-hidden font-mono ${pointerClass}`}>
+          {/* Terminal Header */}
+          <div className="bg-slate-800 px-4 py-2 flex items-center justify-between border-b border-slate-700 shrink-0">
+            <div className="flex gap-1.5">
+              <div className="w-2.5 h-2.5 rounded-full bg-rose-500/80"></div>
+              <div className="w-2.5 h-2.5 rounded-full bg-amber-500/80"></div>
+              <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/80"></div>
             </div>
+            <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest leading-none">REPL v1.0</span>
           </div>
 
-          <div className="flex justify-between mt-3 font-mono font-bold uppercase tracking-widest shrink-0 text-slate-500 z-20" style={{ fontSize: 'clamp(0.6rem, 4.5cqmin, 1.2rem)' }}>
-            <span>08:00</span><span>10:00</span><span>12:00</span><span className="text-cyan-400">Now</span>
+          {/* Log Area */}
+          <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-1 custom-scrollbar scroll-smooth" id={`terminal-logs-${widget.id}`}>
+            <div className="text-cyan-500 text-[10px] mb-2 font-black tracking-widest">--- SENTINEL REMOTE REPL ---</div>
+            {logs.map((log, idx) => (
+              <div key={idx} className="text-[12px] leading-snug break-all" style={{ color: log.color || '#94a3b8' }}>
+                <span className="opacity-50 mr-2">[{log.time}]</span>
+                {log.text}
+              </div>
+            ))}
+            {logs.length === 0 && <div className="text-slate-600 text-[10px] italic">Waiting for hardware response...</div>}
+          </div>
+
+          {/* Input Area */}
+          <div className="p-3 bg-slate-900 border-t border-slate-800 shrink-0">
+            <div className="flex items-center gap-2 bg-slate-950/50 rounded-lg px-3 py-2 border border-slate-800 focus-within:border-cyan-500/50 transition-all">
+              <span className="text-cyan-500 font-bold"></span>
+              <input
+                type="text"
+                placeholder="Type command..."
+                className="bg-transparent border-none outline-none text-[13px] text-slate-200 w-full placeholder:text-slate-700"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && e.target.value.trim()) {
+                    const cmd = e.target.value.trim();
+                    // Send to backend
+                    API.post('/terminal', {
+                      command: cmd,
+                      deviceId: widget.mapping?.feedId?.split('/')[0]
+                    }, {
+                      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+                    }).then(res => {
+                      if (res.data.output === "CLEAR_TERMINAL") {
+                        updateData(widget.id, { ...data, logs: [] });
+                      } else {
+                        // Optimistically show command line
+                        updateData(widget.id, {
+                          ...data,
+                          logs: [...logs, { text: `> ${cmd}`, time: new Date().toLocaleTimeString(), color: '#60a5fa' }]
+                        });
+                      }
+                    });
+                    e.target.value = '';
+                  }
+                }}
+              />
+            </div>
           </div>
         </div>
       );
@@ -179,10 +299,10 @@ const renderWidgetUI = (widget, isEditing = false, isPreview = false, updateData
   }
 };
 
-const ControlBoard = ({ boardId: propBoardId }) => {
-  const { id: urlBoardId } = useParams() || {};
-  const boardId = propBoardId || urlBoardId;
-  
+const ControlBoard = ({ boardId: propBoardId, readOnly = false }) => {
+  const params = useParams() || {};
+  const boardId = propBoardId || params.id;
+
   const [isEditing, setIsEditing] = useState(false);
   const [activeDragItem, setActiveDragItem] = useState(null);
   const [canvasWidgets, setCanvasWidgets] = useState([]);
@@ -214,8 +334,9 @@ const ControlBoard = ({ boardId: propBoardId }) => {
         const devRes = await API.get('/iot/monitor-all', {
           headers: { Authorization: `Bearer ${token}` }
         });
-        if (devRes.data.success) {
-          setDevices(devRes.data.devices);
+        // The endpoint returns a direct array, not wrapped in {success, devices}
+        if (Array.isArray(devRes.data)) {
+          setDevices(devRes.data);
         }
       } catch (error) {
         console.error("Dashboard load error:", error);
@@ -227,7 +348,7 @@ const ControlBoard = ({ boardId: propBoardId }) => {
   // 2. Socket.io Live Updates
   useEffect(() => {
     if (!boardId) return;
-    
+
     const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:5000', {
       transports: ['websocket'],
       auth: { token: localStorage.getItem('token') }
@@ -238,10 +359,10 @@ const ControlBoard = ({ boardId: propBoardId }) => {
         // Feed ID format: "device_id/field_name"
         if (w.mapping && w.mapping.feedId) {
           const [deviceId, field] = w.mapping.feedId.split('/');
-          
+
           if (deviceId === newData.deviceId) {
             const newValue = newData.payload[field];
-            
+
             if (newValue !== undefined) {
               if (w.type === 'gauge' || w.type === 'slider') {
                 return { ...w, data: { ...w.data, value: newValue } };
@@ -259,8 +380,75 @@ const ControlBoard = ({ boardId: propBoardId }) => {
       }));
     });
 
+    socket.on('repl_output', (res) => {
+      setCanvasWidgets(prev => prev.map(w => {
+        if (w.type === 'terminal' && w.mapping?.feedId?.startsWith(res.deviceId)) {
+          const currentLogs = w.data?.logs || [];
+          const newLog = {
+            text: res.output,
+            time: new Date().toLocaleTimeString(),
+            color: res.color
+          };
+          return {
+            ...w,
+            data: {
+              ...w.data,
+              logs: [...currentLogs, newLog].slice(-100) // Keep last 100 lines
+            }
+          };
+        }
+        return w;
+      }));
+    });
+
     return () => socket.disconnect();
   }, [boardId]);
+
+  const dispatchCommand = async (widget, newValue) => {
+    if (!widget.mapping?.feedId) return;
+    console.log("🔍 Dispatching for Feed:", widget.mapping.feedId);
+    try {
+      const [deviceId, field] = widget.mapping.feedId.split('/');
+      // Mapping from human-friendly feedId to DB IDs? 
+      const deviceObj = devices.find(d => d.deviceId === deviceId);
+      if (!deviceObj) {
+        console.warn(`⚠️ Device [${deviceId}] not found in dashboard state. Check your Feed Identifier spelling!`);
+        return;
+      }
+
+      const token = localStorage.getItem('token');
+      await API.post(`/iot/command`, {
+        deviceId: deviceObj._id,
+        field,
+        value: newValue
+      }, { headers: { Authorization: `Bearer ${token}` } });
+
+      console.log(`🚀 Command Dispatch Triggered: ${field} -> ${newValue}`);
+    } catch (e) {
+      console.error("Command Dispatch Failed", e);
+    }
+  };
+
+  const updateWidgetData = (id, newData, forceCommand = false) => {
+    setCanvasWidgets(prev => prev.map(w => {
+      if (w.id === id) {
+        // Trigger MQTT command if interactive
+        if (forceCommand) {
+          // Determine what exactly changed
+          const widgetType = w.type;
+          let valToDispatch = null;
+          if (widgetType === 'switch') valToDispatch = newData.status;
+          if (widgetType === 'slider' || widgetType === 'numericInput') valToDispatch = newData.value;
+          if (widgetType === 'colorPicker') valToDispatch = newData.color;
+          if (widgetType === 'actionButton') valToDispatch = true; // Pulse trigger
+
+          if (valToDispatch !== null) dispatchCommand(w, valToDispatch);
+        }
+        return { ...w, data: newData };
+      }
+      return w;
+    }));
+  };
 
   const saveDashboardToDB = async () => {
     try {
@@ -328,7 +516,6 @@ const ControlBoard = ({ boardId: propBoardId }) => {
     }
   };
 
-  const updateWidgetData = (id, newData) => setCanvasWidgets(prev => prev.map(w => w.id === id ? { ...w, data: newData } : w));
   const removeWidget = (id) => setCanvasWidgets(prev => prev.filter(w => w.id !== id));
   const resizeWidget = (id, newSize) => setCanvasWidgets(prev => prev.map(w => w.id === id ? { ...w, size: newSize } : w));
 
@@ -340,26 +527,45 @@ const ControlBoard = ({ boardId: propBoardId }) => {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-gradient-to-r from-[#0F172A] to-[#1e293b] p-5 rounded-2xl border border-slate-700/50 shadow-lg z-20">
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-3">
-             <button onClick={() => window.location.href='/dashboard/control-board'} className="text-slate-500 hover:text-white transition-colors">←</button>
-             <h2 className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400 tracking-tight uppercase">{boardInfo.name}</h2>
+            <button onClick={() => window.location.href = '/dashboard/control-board'} className="text-slate-500 hover:text-white transition-colors">←</button>
+            <h2 className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400 tracking-tight uppercase">{boardInfo.name}</h2>
           </div>
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-cyan-500 animate-pulse"></span>
             <p className="text-cyan-500/80 font-bold text-[10px] uppercase tracking-widest">Live Dynamic Workspace</p>
           </div>
         </div>
-        <div className="flex items-center gap-5 mt-4 sm:mt-0">
-          <div className={`flex items-center gap-3 px-5 py-2.5 rounded-xl border-2 transition-colors ${isEditing ? 'bg-cyan-900/30 border-cyan-500/50 shadow-[0_0_15px_rgba(6,182,212,0.2)]' : 'bg-[#111827] border-slate-700'}`}>
-            <span className={`text-xs font-bold tracking-widest ${isEditing ? 'text-cyan-400' : 'text-slate-400'}`}>BUILD MODE</span>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input type="checkbox" className="sr-only peer" checked={isEditing} onChange={() => setIsEditing(!isEditing)} />
-              <div className="w-12 h-6 bg-slate-800 border border-slate-600 rounded-full peer peer-checked:after:translate-x-6 peer-checked:bg-cyan-500 peer-checked:border-cyan-400 after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-white after:rounded-full after:h-4 after:w-4 transition-all"></div>
-            </label>
+        {!readOnly && (
+          <div className="flex items-center gap-5 mt-4 sm:mt-0">
+            <div className={`flex items-center gap-3 px-5 py-2.5 rounded-xl border-2 transition-colors ${isEditing ? 'bg-cyan-900/30 border-cyan-500/50 shadow-[0_0_15px_rgba(6,182,212,0.2)]' : 'bg-[#111827] border-slate-700'}`}>
+              <span className={`text-xs font-bold tracking-widest ${isEditing ? 'text-cyan-400' : 'text-slate-400'}`}>BUILD MODE</span>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" className="sr-only peer" checked={isEditing} onChange={() => setIsEditing(!isEditing)} />
+                <div className="w-12 h-6 bg-slate-800 border border-slate-600 rounded-full peer peer-checked:after:translate-x-6 peer-checked:bg-cyan-500 peer-checked:border-cyan-400 after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-white after:rounded-full after:h-4 after:w-4 transition-all"></div>
+              </label>
+            </div>
+            {isEditing && (
+              <div className="flex gap-3">
+                <button
+                  onClick={async () => {
+                    try {
+                      const token = localStorage.getItem('token');
+                      const res = await API.put(`/dashboard/${boardId}/share`, {}, { headers: { Authorization: `Bearer ${token}` } });
+                      const shareUrl = `${window.location.origin}/share/${res.data.shareId}`;
+                      navigator.clipboard.writeText(shareUrl);
+                      alert(`🚀 Public Link Copied: ${shareUrl}`);
+                    } catch (e) { alert("Sharing failed"); }
+                  }}
+                  className="bg-slate-800 text-cyan-400 border border-slate-700 px-4 py-2.5 rounded-xl font-bold text-xs hover:bg-slate-700 transition-all flex items-center gap-2 uppercase tracking-widest"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
+                  Share
+                </button>
+                <button onClick={saveDashboardToDB} className="bg-cyan-500 text-slate-900 px-6 py-2.5 rounded-xl font-bold text-xs hover:scale-105 transition-all tracking-widest shadow-[0_0_20px_rgba(6,182,212,0.4)] uppercase">Push Updates</button>
+              </div>
+            )}
           </div>
-          {isEditing && (
-            <button onClick={saveDashboardToDB} className="bg-cyan-500 text-slate-900 px-6 py-2.5 rounded-xl font-bold text-xs hover:scale-105 transition-all tracking-widest shadow-[0_0_20px_rgba(6,182,212,0.4)]">PUSH UPDATES</button>
-          )}
-        </div>
+        )}
       </div>
 
       <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
@@ -397,19 +603,20 @@ const ControlBoard = ({ boardId: propBoardId }) => {
             )}
 
             {canvasWidgets.map(w => (
-              <DraggableWidget 
-                key={w.id} 
-                id={w.id} 
-                title={w.title} 
-                size={w.size} 
-                position={w.position} 
-                isEditing={isEditing} 
-                onRemove={removeWidget} 
+              <DraggableWidget
+                key={w.id}
+                id={w.id}
+                title={w.customSettings?.title || w.title}
+                icon={w.customSettings?.icon || 'Activity'}
+                size={w.size}
+                position={w.position}
+                isEditing={isEditing}
+                onRemove={removeWidget}
                 onResize={resizeWidget}
                 onSettings={() => setSelectedWidgetForSettings(w)}
                 mappedDevice={w.mapping?.feedId || 'No Feed'}
               >
-                {renderWidgetUI(w, isEditing, false, updateWidgetData)}
+                {renderWidgetUI(w, isEditing, false, updateWidgetData, readOnly)}
               </DraggableWidget>
             ))}
           </div>
@@ -418,36 +625,102 @@ const ControlBoard = ({ boardId: propBoardId }) => {
         {/* WIDGET SETTINGS MODAL */}
         {selectedWidgetForSettings && (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-            <div className="bg-[#0F172A] border border-slate-700 rounded-3xl w-full max-w-md p-8 shadow-2xl">
-              <h3 className="text-xl font-bold mb-6 text-white uppercase tracking-tight">Widget Feed Configuration</h3>
-              
+            <div className="bg-[#0F172A] border border-slate-700 rounded-3xl w-full max-w-lg p-8 shadow-2xl overflow-y-auto max-h-[90vh]">
+              <h3 className="text-xl font-bold mb-6 text-white uppercase tracking-tight flex items-center gap-3">
+                <span className="w-2 h-8 bg-cyan-500 rounded-full"></span>
+                Widget Lab Configuration
+              </h3>
+
               <div className="space-y-6">
+                {/* 1. Naming & Units */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Display Name</label>
+                    <input
+                      type="text"
+                      className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 outline-none focus:border-cyan-500 text-sm"
+                      value={selectedWidgetForSettings.customSettings?.title || ''}
+                      onChange={(e) => {
+                        setCanvasWidgets(prev => prev.map(w => w.id === selectedWidgetForSettings.id ? { ...w, customSettings: { ...w.customSettings, title: e.target.value } } : w));
+                        setSelectedWidgetForSettings(prev => ({ ...prev, customSettings: { ...prev.customSettings, title: e.target.value } }));
+                      }}
+                      placeholder="e.g. Living Room Temp"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Unit Label</label>
+                    <input
+                      type="text"
+                      className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 outline-none focus:border-cyan-500 text-sm"
+                      value={selectedWidgetForSettings.customSettings?.unit || ''}
+                      onChange={(e) => {
+                        setCanvasWidgets(prev => prev.map(w => w.id === selectedWidgetForSettings.id ? { ...w, customSettings: { ...w.customSettings, unit: e.target.value } } : w));
+                        setSelectedWidgetForSettings(prev => ({ ...prev, customSettings: { ...prev.customSettings, unit: e.target.value } }));
+                      }}
+                      placeholder="e.g. °C, %, kW"
+                    />
+                  </div>
+                </div>
+
+                {/* 2. Theme Color */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Feed Identifier</label>
-                  <input 
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Theme Color</label>
+                  <div className="flex flex-wrap gap-3">
+                    {THEME_COLORS.map(c => (
+                      <button
+                        key={c.hex}
+                        onClick={() => {
+                          setCanvasWidgets(prev => prev.map(w => w.id === selectedWidgetForSettings.id ? { ...w, customSettings: { ...w.customSettings, color: c.hex } } : w));
+                          setSelectedWidgetForSettings(prev => ({ ...prev, customSettings: { ...prev.customSettings, color: c.hex } }));
+                        }}
+                        className={`w-8 h-8 rounded-full border-2 transition-all ${selectedWidgetForSettings.customSettings?.color === c.hex ? 'border-white scale-125' : 'border-transparent'}`}
+                        style={{ backgroundColor: c.hex }}
+                        title={c.name}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                {/* 3. Icon Selection */}
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Widget Icon</label>
+                  <div className="flex flex-wrap gap-2.5 bg-slate-900/50 p-4 rounded-2xl border border-slate-800">
+                    {ICON_LIST.map(iconName => {
+                      const Icon = require('lucide-react')[iconName] || require('lucide-react').Activity;
+                      return (
+                        <button
+                          key={iconName}
+                          onClick={() => {
+                            setCanvasWidgets(prev => prev.map(w => w.id === selectedWidgetForSettings.id ? { ...w, customSettings: { ...w.customSettings, icon: iconName } } : w));
+                            setSelectedWidgetForSettings(prev => ({ ...prev, customSettings: { ...prev.customSettings, icon: iconName } }));
+                          }}
+                          className={`p-2 rounded-lg border transition-all ${selectedWidgetForSettings.customSettings?.icon === iconName ? 'bg-cyan-500 text-slate-900 border-white' : 'bg-slate-800 text-slate-500 border-slate-700'}`}
+                        >
+                          <Icon size={16} />
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* 4. Data Routing */}
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Feed Identifier (Routing)</label>
+                  <input
                     type="text"
                     placeholder="e.g. my_esp8266/temperature"
-                    className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 outline-none focus:border-cyan-500"
+                    className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 outline-none focus:border-cyan-500 text-sm font-mono"
                     value={selectedWidgetForSettings.mapping?.feedId || ''}
                     onChange={(e) => {
                       setCanvasWidgets(prev => prev.map(w => w.id === selectedWidgetForSettings.id ? { ...w, mapping: { ...w.mapping, feedId: e.target.value } } : w));
                       setSelectedWidgetForSettings(prev => ({ ...prev, mapping: { ...prev.mapping, feedId: e.target.value } }));
                     }}
                   />
-                  <div className="mt-4 p-4 bg-slate-900/50 border border-slate-800 rounded-xl">
-                    <p className="text-[10px] text-slate-500 uppercase font-black mb-2 flex items-center gap-2">
-                       <span className="w-1.5 h-1.5 rounded-full bg-cyan-500"></span> Pro Tip: How to use feeds
-                    </p>
-                    <p className="text-[10px] text-slate-400 font-medium leading-relaxed">
-                      Format: <span className="text-cyan-400">DeviceID/Key</span>. <br/>
-                      Example: If your device <span className="text-white font-bold">garden_hub</span> sends <span className="text-white font-bold">"soil": 45</span>, enter <span className="text-white font-bold italic">garden_hub/soil</span>.
-                    </p>
-                  </div>
                 </div>
 
                 <div className="pt-4 flex gap-4">
-                   <button onClick={() => setSelectedWidgetForSettings(null)} className="flex-1 bg-cyan-500 text-slate-900 font-black py-4 rounded-2xl hover:bg-cyan-400 transition-all uppercase tracking-widest text-xs">Confirm Mapping</button>
-                   <button onClick={() => setSelectedWidgetForSettings(null)} className="px-6 py-4 bg-slate-800 text-slate-400 rounded-2xl font-bold hover:bg-slate-700 transition-all uppercase tracking-widest text-xs">Cancel</button>
+                  <button onClick={() => setSelectedWidgetForSettings(null)} className="flex-1 bg-cyan-500 text-slate-900 font-bold py-3.5 rounded-2xl hover:bg-cyan-400 transition-all uppercase tracking-widest text-xs">Save Settings</button>
+                  <button onClick={() => setSelectedWidgetForSettings(null)} className="px-6 py-3.5 bg-slate-800 text-slate-400 rounded-2xl font-bold hover:bg-slate-700 transition-all uppercase tracking-widest text-xs">Cancel</button>
                 </div>
               </div>
             </div>

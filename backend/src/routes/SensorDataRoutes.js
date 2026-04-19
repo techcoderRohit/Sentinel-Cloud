@@ -202,6 +202,7 @@ const express = require('express');
 const SensorData = require('../models/SensorData');
 const Device = require('../models/Device');
 const { validateApiKey, protect } = require('../middleware/authMiddleware');
+const { getClient } = require('../mqtt/mqttHandler');
 const router = express.Router();
 // POST /api/iot/update
 router.post('/update', validateApiKey, async (req, res) => {
@@ -312,34 +313,35 @@ router.get('/monitor-all', protect, async (req, res) => {
     }
 });
 
-// POST /api/iot/control/:deviceId
-router.post('/control/:deviceId', protect, async (req, res) => {
+// POST /api/iot/command (Bidirectional Input)
+router.post('/command', protect, async (req, res) => {
     try {
-        const { deviceId } = req.params;
-        const { status } = req.body; // e.g. true or false (actuator switch)
+        const { deviceId, field, value } = req.body;
+        console.log(`📩 Command Received: DeviceID=${deviceId}, Field=${field}, Value=${value}`);
 
-        // Verify permission if guest
-        if (req.user.role === 'guest') {
-            if (!req.user.permissions || !req.user.permissions.includes('control_devices')) {
-                return res.status(403).json({ success: false, message: 'Access Denied: You do not have permission to control devices' });
-            }
-            if (req.user.allowedDevices && !req.user.allowedDevices.includes(deviceId)) {
-                return res.status(403).json({ success: false, message: 'Access Denied: You cannot control this device' });
-            }
-        }
-
-        // Validate Key Existence
+        // Security check
         const targetId = req.user.role === 'guest' ? req.user.managedBy : req.user._id;
-const device = await Device.findOne({ _id: deviceId, owner: targetId });
+        const device = await Device.findOne({ _id: deviceId, owner: targetId });
         
         if (!device) {
              return res.status(404).json({ success: false, message: 'Device not found' });
         }
 
-        // We fetch the latest payload and create a new record mimicking an action update 
-        // to propagate the command status forward
+        // 1. Publish to MQTT
+        const mqtt = getClient();
+        if (mqtt && mqtt.connected) {
+            const topic = `sentinel/device/${device.deviceId}/command`;
+            const payload = JSON.stringify({ field, value });
+            mqtt.publish(topic, payload);
+            console.log(`📤 MQTT PUBLISH: [${topic}] -> ${payload}`);
+        } else {
+            console.log(`⚠️ MQTT NOT CONNECTED: Command to [${device.deviceId}] failed`);
+        }
+
+        // 2. Optimistic state tracking in DB
         const latest = await SensorData.findOne({ deviceId: device.deviceId }).sort({ timestamp: -1 });
-        const newPayload = latest ? { ...latest.payload, status: status } : { temperature: 0, humidity: 0, status: status };
+        let newPayload = latest ? { ...latest.payload } : { status: false };
+        newPayload[field] = value;
 
         await SensorData.create({
             deviceId: device.deviceId,
@@ -347,13 +349,10 @@ const device = await Device.findOne({ _id: deviceId, owner: targetId });
             payload: newPayload
         });
 
-        // Note: In a fully distributed MQTT environment, you would also use mqttClient.publish(`sentinel/device/${device.apiKey}/command`, JSON.stringify({status}))
-
-        res.status(200).json({ success: true, message: `Device ${device.deviceName || device.name || device.apiKey} turned ${status ? 'ON' : 'OFF'}`, data: newPayload });
-
+        res.json({ success: true, message: "Command dispatched" });
     } catch (err) {
-        console.error("Control mapping error:", err);
-        res.status(500).json({ message: "Control action failed" });
+        console.error("Command error:", err);
+        res.status(500).json({ success: false, error: err.message });
     }
 });
 
