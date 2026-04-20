@@ -24,13 +24,24 @@ const AIInsights = () => {
     const fetchDevices = async () => {
       try {
         const response = await API.get('/devices');
-        setDevices(response.data);
-        if (response.data.length > 0) {
-          setSelectedDevice(response.data[0].apiKey);
-          setSelectedDeviceName(response.data[0].deviceName || response.data[0].name || 'Device');
+        if (response.data.success && Array.isArray(response.data.data)) {
+          const deviceList = response.data.data;
+          setDevices(deviceList);
+          if (deviceList.length > 0) {
+            setSelectedDevice(deviceList[0].apiKey);
+            setSelectedDeviceName(deviceList[0].deviceName || deviceList[0].name || 'Device');
+          }
+        } else if (Array.isArray(response.data)) {
+           // Fallback if backend directly returns array
+           setDevices(response.data);
+           if (response.data.length > 0) {
+             setSelectedDevice(response.data[0].apiKey);
+             setSelectedDeviceName(response.data[0].deviceName || response.data[0].name || 'Device');
+           }
         }
       } catch (err) {
         console.error("Failed to fetch devices", err);
+        setDevices([]);
       }
     };
     fetchDevices();
@@ -147,11 +158,10 @@ const AIInsights = () => {
           <button
             onClick={handleAnalyze}
             disabled={analyzing || !selectedDevice}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all ${
-              analyzing
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all ${analyzing
                 ? 'bg-purple-500/20 text-purple-300 cursor-wait'
                 : 'bg-gradient-to-r from-purple-600 to-violet-600 text-white hover:from-purple-500 hover:to-violet-500 hover:shadow-lg hover:shadow-purple-500/25 active:scale-95'
-            }`}
+              }`}
           >
             {analyzing ? (
               <>
@@ -492,8 +502,8 @@ const PastReportRow = ({ report, expanded, onToggle, onDelete, onView }) => {
   const scoreColor = report.healthScore >= 80
     ? 'text-emerald-400'
     : report.healthScore >= 50
-    ? 'text-amber-400'
-    : 'text-red-400';
+      ? 'text-amber-400'
+      : 'text-red-400';
 
   const anomalyCount = report.anomalies?.length || 0;
 
@@ -543,9 +553,8 @@ const PastReportRow = ({ report, expanded, onToggle, onDelete, onView }) => {
             <div className="mt-3 space-y-1.5">
               {report.anomalies.map((a, i) => (
                 <div key={i} className="flex items-center gap-2 text-xs">
-                  <span className={`w-1.5 h-1.5 rounded-full ${
-                    a.severity === 'critical' ? 'bg-red-400' : a.severity === 'warning' ? 'bg-amber-400' : 'bg-blue-400'
-                  }`} />
+                  <span className={`w-1.5 h-1.5 rounded-full ${a.severity === 'critical' ? 'bg-red-400' : a.severity === 'warning' ? 'bg-amber-400' : 'bg-blue-400'
+                    }`} />
                   <span className="text-gray-500">{a.message}</span>
                 </div>
               ))}

@@ -118,7 +118,7 @@ const DevicesMonitor = () => {
     // --- DELETE DEVICE STATES ---
     const [deleteTarget, setDeleteTarget] = useState(null); // device to delete
     const [deleteLoading, setDeleteLoading] = useState(false);
-    
+
     // --- OTA UPDATE STATES ---
     const [otaTarget, setOtaTarget] = useState(null); // device to flash
     const [otaCode, setOtaCode] = useState("");
@@ -128,11 +128,11 @@ const DevicesMonitor = () => {
     // --- ADD DEVICE MODAL STATES ---
     const [showModal, setShowModal] = useState(false);
     const [submitting, setSubmitting] = useState(false);
-    const initialFormState = { 
-        deviceName: '', 
-        deviceId: '', 
-        deviceType: 'Sensor', 
-        location: '' 
+    const initialFormState = {
+        deviceName: '',
+        deviceId: '',
+        deviceType: 'Sensor',
+        location: ''
     };
     const [formData, setFormData] = useState(initialFormState);
 
@@ -153,12 +153,12 @@ const DevicesMonitor = () => {
     useEffect(() => {
         fetchData();
         const socket = io('http://localhost:5000');
-        
+
         socket.on('telemetry_update', (newData) => {
-            setDevices(prev => prev.map(dev => 
-                dev._id === newData._id 
-                ? { ...dev, data: newData.payload, lastUsed: new Date() } 
-                : dev
+            setDevices(prev => prev.map(dev =>
+                dev._id === newData._id
+                    ? { ...dev, data: newData.payload, lastUsed: new Date() }
+                    : dev
             ));
         });
 
@@ -180,9 +180,9 @@ const DevicesMonitor = () => {
         try {
             const res = await API.post("/devices/register", {
                 deviceName: formData.deviceName,
-                deviceId: formData.deviceId ,
+                deviceId: formData.deviceId,
                 type: formData.deviceType,
-                location : formData.location
+                location: formData.location
             });
             if (res.data.success) {
                 await fetchData(); // List refresh karein
@@ -236,7 +236,7 @@ const DevicesMonitor = () => {
                 deviceId: otaTarget.deviceId,
                 code: otaCode
             }, config);
-            
+
             if (res.data.success) {
                 alert("OTA Firmware Staged! Device update triggered.");
                 setOtaTarget(null);
@@ -265,7 +265,7 @@ const DevicesMonitor = () => {
                 </div>
 
                 <div className="flex gap-4">
-                    <button 
+                    <button
                         onClick={() => setShowModal(true)}
                         className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-xl hover:from-cyan-600 hover:to-blue-600 px-6 py-2.5 font-bold transition-all shadow-lg shadow-blue-900/20 active:scale-95"
                     >
@@ -317,11 +317,11 @@ const DevicesMonitor = () => {
                             <div className="space-y-6">
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="bg-slate-900/50 p-4 rounded-2xl border border-white/5">
-                                        <p className="text-slate-500 text-xs flex items-center gap-1"><Thermometer size={12}/> Temp</p>
+                                        <p className="text-slate-500 text-xs flex items-center gap-1"><Thermometer size={12} /> Temp</p>
                                         <p className="text-2xl font-bold text-white">{device.data.temperature}°C</p>
                                     </div>
                                     <div className="bg-slate-900/50 p-4 rounded-2xl border border-white/5">
-                                        <p className="text-slate-500 text-xs flex items-center gap-1"><Droplets size={12}/> Hum</p>
+                                        <p className="text-slate-500 text-xs flex items-center gap-1"><Droplets size={12} /> Hum</p>
                                         <p className="text-2xl font-bold text-white">{device.data.humidity}%</p>
                                     </div>
                                 </div>
@@ -390,16 +390,16 @@ const DevicesMonitor = () => {
                             </div>
 
                             <div className="flex gap-3 pt-4">
-                                <button 
-                                    type="button" 
-                                    onClick={() => setShowModal(false)} 
+                                <button
+                                    type="button"
+                                    onClick={() => setShowModal(false)}
                                     className="flex-1 py-3 text-slate-400 font-bold hover:text-white transition-colors"
                                 >
                                     Cancel
                                 </button>
-                                <button 
-                                    type="submit" 
-                                    disabled={submitting} 
+                                <button
+                                    type="submit"
+                                    disabled={submitting}
                                     className="flex-[2] bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 py-3 rounded-xl font-bold text-white transition-all flex justify-center items-center"
                                 >
                                     {submitting ? <Loader2 className="animate-spin" /> : "Register Device"}
@@ -488,13 +488,13 @@ const DevicesMonitor = () => {
                                 <span className="flex items-center gap-1.5"><Zap size={12} className="text-yellow-500" /> Auto-Reboot Enabled</span>
                             </div>
                             <div className="flex gap-4">
-                                <button 
+                                <button
                                     onClick={() => setOtaTarget(null)}
                                     className="px-6 py-2.5 text-slate-400 font-bold hover:text-white transition-colors"
                                 >
                                     Cancel
                                 </button>
-                                <button 
+                                <button
                                     onClick={handleOTADeploy}
                                     disabled={otaDeploying || otaLoading}
                                     className="bg-cyan-500 hover:bg-cyan-400 text-slate-900 px-8 py-2.5 rounded-xl font-bold transition-all shadow-lg shadow-cyan-900/20 flex items-center gap-2 group disabled:opacity-50"

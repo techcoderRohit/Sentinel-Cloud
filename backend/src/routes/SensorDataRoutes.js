@@ -204,21 +204,59 @@ const Device = require('../models/Device');
 const { validateApiKey, protect } = require('../middleware/authMiddleware');
 const { getClient } = require('../mqtt/mqttHandler');
 const router = express.Router();
+const Notification = require('../models/Notification');
+const SendAlert = require('../utils/alertService');
+const User = require('../models/User');
+
 // POST /api/iot/update
 router.post('/update', validateApiKey, async (req, res) => {
     try {
-        // req.user aur req.device hume 'validateApiKey' middleware se milenge
         const { temperature, humidity, status } = req.body;
+        const device = req.device;
 
+        // 1. Save data to DB
         const newData = await SensorData.create({
-            deviceId: req.device.deviceId,
-            owner: req.device.owner,
+            deviceId: device.deviceId,
+            owner: device.owner,
             payload: { temperature, humidity, status }
         });
 
+        // 2. Anomaly Detection Logic (Customizable)
+        let anomalyDetected = false;
+        let alertMsg = '';
+
+        if (temperature > 45) {
+            anomalyDetected = true;
+            alertMsg = `Critical Temperature Detected: ${temperature}°C on device ${device.deviceName || device.deviceId}`;
+        } else if (humidity > 90) {
+            anomalyDetected = true;
+            alertMsg = `High Humidity Alert: ${humidity}% on device ${device.deviceName || device.deviceId}`;
+        }
+
+        // 3. If Anomaly, Trigger Notifications
+        if (anomalyDetected) {
+            const owner = await User.findById(device.owner);
+            if (owner) {
+                // Save to Dashboard Notifications
+                await Notification.create({
+                    userId: owner._id,
+                    title: '🚨 ANOMALY DETECTED',
+                    message: alertMsg,
+                    type: 'critical'
+                });
+
+                // Dispatch Email, Telegram, SMS — async
+                SendAlert(owner, { 
+                    title: `${device.deviceName || device.deviceId} - Sensor Alert`, 
+                    message: alertMsg 
+                }).catch(err => console.error('[SensorDataUpdate] Alert dispatch error:', err.message));
+            }
+        }
+
         res.status(201).json({
             success: true,
-            message: "Data synced to Sentinel Cloud"
+            message: "Data synced to Sentinel Cloud",
+            anomaly: anomalyDetected
         });
     } catch (err) {
         console.error(err);

@@ -43,6 +43,11 @@ const userSchema = new mongoose.Schema(
          trim: true,
          default: null
       },
+      phoneNumber: {
+         type: String,
+         trim: true,
+         default: null
+      },
       resetOTP: {
          type: String
       },

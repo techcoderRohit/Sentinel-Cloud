@@ -7,16 +7,16 @@ import ujson
 import ubinascii
 
 # --- CONFIGURATION ---
-WIFI_SSID = "hood hogan"
-WIFI_PASSWORD = "1qa2ws3ed4rf"
-MQTT_BROKER = "10.104.179.140"
+WIFI_SSID = "vivo Y300 5G"
+WIFI_PASSWORD = "rohit564"
+MQTT_BROKER = "10.51.222.133"
 
 # Unique Identification
 # Generate ID based on MAC address to avoid collisions with other students
-CLIENT_ID = "my_esp8266_og"
+CLIENT_ID = "my_esp8266_76"
 print("🆔 Assigned Unique Client ID:", CLIENT_ID)
 
-API_KEY = "sk-sentinel-b8d126ed83198bf14733588094e49095"
+API_KEY = "sk-sentinel-f5d5c09018c17f280850763ee74b2a86"
 
 # Dashboard logic topics (Inhe dhyan se check karein)
 COMMAND_TOPIC = "sentinel/device/{}/repl/rx".format(CLIENT_ID)
@@ -80,9 +80,9 @@ def sub_cb(topic, msg):
             elif field == "relay":
                 print('relay_feed')
                 if value is True or value == 1:
-                    relay.value(1) # ON (Relays are usually HIGH active)
+                    relay.value(0) # ON (Relays are usually HIGH active)
                 else:
-                    relay.value(0) # OFF
+                    relay.value(1) # OFF
             
             # You can add more logic here for other fields (e.g. brightness, threshold)
             return
@@ -215,8 +215,8 @@ while True:
                 })
                 
                 mqtt_client.publish(DATA_TOPIC, payload)
-                # print("📊 Telemetry Sent:", payload)
-                print('data collected from sensor')
+                print("📊 Telemetry Sent:", payload)
+            
                 last_telemetry_time = current_time
             except Exception as se:
                 print("⚠️ Sensor Read Error:", se)

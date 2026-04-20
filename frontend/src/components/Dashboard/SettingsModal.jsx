@@ -25,7 +25,7 @@ const SettingsModal = ({ isOpen, onClose, currentUser }) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await API.put('/users/update-settings', formData);
+      const response = await API.put('/user/profile', formData);
       if (response.data.success) {
         toast.success("Settings saved successfully! 🚀");
         onClose();

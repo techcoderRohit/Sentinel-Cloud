@@ -38,10 +38,9 @@ const axios = require('axios');
 const sendEmail = require('./sendEmail');
 
 /**
- * Send alerts via all configured channels (Email + Telegram)
- * Designed to be plug-and-play — silently skips unconfigured channels
+ * Send alerts via all configured channels (Email + Telegram + SMS)
  * 
- * @param {Object} user - User object with { email, telegramChatId }
+ * @param {Object} user - User object with { email, telegramChatId, phoneNumber }
  * @param {Object} alertData - { title, message }
  */
 const SendAlert = async (user, alertData) => {
@@ -69,9 +68,6 @@ const SendAlert = async (user, alertData) => {
                                 </p>
                             </div>
                         </div>
-                        <div style="border-top: 1px solid #1e293b; padding: 12px 24px; text-align: center;">
-                            <p style="color: #475569; margin: 0; font-size: 11px;">Sentinel Cloud — Real-Time IoT Monitoring</p>
-                        </div>
                     </div>
                 `
             });
@@ -82,7 +78,7 @@ const SendAlert = async (user, alertData) => {
     }
 
     // 2. Telegram Alert
-    if (user.telegramChatId && process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_BOT_TOKEN !== 'YOUR_TELEGRAM_BOT_TOKEN_HERE') {
+    if (user.telegramChatId && process.env.TELEGRAM_BOT_TOKEN) {
         try {
             const botToken = process.env.TELEGRAM_BOT_TOKEN;
             const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
@@ -94,6 +90,19 @@ const SendAlert = async (user, alertData) => {
             console.log('[AlertService] Telegram alert sent to chat:', user.telegramChatId);
         } catch (error) {
             console.error('[AlertService] Telegram alert failed:', error.message);
+        }
+    }
+
+    // 3. SMS Alert (Placeholder for Twilio/SNS)
+    if (user.phoneNumber && process.env.TWILIO_SID && process.env.TWILIO_AUTH_TOKEN) {
+        try {
+            // This is a placeholder. You'd normally use the twilio library here:
+            // const client = require('twilio')(sid, token);
+            // await client.messages.create({ body: `Sentinel Alert: ${message}`, from: '+1...', to: user.phoneNumber });
+            
+            console.log('[AlertService] SMS alert simulated for:', user.phoneNumber);
+        } catch (error) {
+            console.error('[AlertService] SMS alert failed:', error.message);
         }
     }
 };
