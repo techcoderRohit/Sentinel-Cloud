@@ -2,36 +2,49 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 // Initialize Gemini — reads key from .env
 const getModel = () => {
-  const apiKey = process.env.GEMINI_API_KEY;
+  // const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = 'AIzaSyAEraHX797NMVA7a8NLbG0KFjxTtXkpPzc';
   if (!apiKey || apiKey === 'YOUR_GEMINI_API_KEY_HERE') {
     throw new Error('GEMINI_API_KEY is not configured. Add your key to backend/.env file.');
   }
   const genAI = new GoogleGenerativeAI(apiKey);
-  return genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+  return genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 };
 
 /**
  * Analyze sensor data using Gemini AI
  * @param {Array} sensorData - Array of sensor readings with payload & timestamp
  * @param {String} deviceName - Human-readable device name
+ * @param {String} feed - Optional specific field to focus on (e.g., 'temperature')
  * @returns {Object} Structured analysis result
  */
-const analyzeSensorData = async (sensorData, deviceName = 'Unknown Device') => {
+const analyzeSensorData = async (sensorData, deviceName = 'Unknown Device', feed = null) => {
   const model = getModel();
 
   // Format sensor data into a readable table for the AI
   const dataTable = sensorData.map((reading, i) => {
     const temp = reading.payload?.temperature ?? 'N/A';
     const hum = reading.payload?.humidity ?? 'N/A';
+    const motion = reading.payload?.motion ?? 'N/A';
     const status = reading.payload?.status ?? 'N/A';
     const time = new Date(reading.timestamp).toLocaleString();
-    return `${i + 1}. Time: ${time} | Temp: ${temp}°C | Humidity: ${hum}% | Status: ${status}`;
+
+    if (feed) {
+      const val = reading.payload?.[feed] ?? 'N/A';
+      return `${i + 1}. Time: ${time} | ${feed.toUpperCase()}: ${val}`;
+    }
+
+    return `${i + 1}. Time: ${time} | Temp: ${temp}°C | Humidity: ${hum}% | Motion: ${motion} | Status: ${status}`;
   }).join('\n');
+
+  const focusInstruction = feed ? `Specifically focus your analysis on the "${feed}" feed.` : "Analyze the overall health and trends of all available sensor data.";
 
   const prompt = `You are an expert IoT data analyst for Sentinel Cloud platform. Analyze the following sensor telemetry data from device "${deviceName}" and provide a comprehensive analysis.
 
 DATA (${sensorData.length} readings, chronological order):
 ${dataTable}
+
+${focusInstruction}
 
 RESPOND IN STRICT JSON FORMAT (no markdown, no code blocks, just raw JSON):
 {
@@ -39,7 +52,7 @@ RESPOND IN STRICT JSON FORMAT (no markdown, no code blocks, just raw JSON):
   "healthScore": <number 0-100, where 100=perfect, 80-99=good, 50-79=needs attention, below 50=critical>,
   "anomalies": [
     {
-      "type": "<temperature_spike|temperature_drop|humidity_spike|humidity_drop|sensor_offline|erratic_readings|threshold_breach>",
+      "type": "<spike|drop|offline|erratic|threshold_breach>",
       "severity": "<normal|warning|critical>",
       "message": "Clear human-readable description of what went wrong and when",
       "timestamp": "The approximate time when this anomaly occurred"
@@ -56,13 +69,14 @@ ANALYSIS RULES:
 - Temperature above 40°C or below 5°C is CRITICAL
 - Temperature above 35°C or below 10°C is WARNING  
 - Humidity above 85% or below 20% is WARNING
-- Sudden changes (>10°C temp change or >20% humidity change between consecutive readings) are anomalies
+- Sudden changes (>10 units change between consecutive readings) are anomalies
 - If all readings are stable and within normal range, return an empty anomalies array and healthScore close to 95-100
 - Always provide at least 2 insights even if data looks normal
 - Keep the summary conversational and easy to understand`;
 
   const result = await model.generateContent(prompt);
   const responseText = result.response.text();
+
 
   // Parse AI response — handle potential markdown wrapping
   let parsed;

@@ -7,16 +7,16 @@ import ujson
 import ubinascii
 
 # --- CONFIGURATION ---
-WIFI_SSID = "vivo Y300 5G"
-WIFI_PASSWORD = "rohit564"
-MQTT_BROKER = "10.51.222.133"
+WIFI_SSID = "hood hogan"
+WIFI_PASSWORD = "1qa2ws3ed4rf"
+MQTT_BROKER = "10.104.179.140"
 
 # Unique Identification
 # Generate ID based on MAC address to avoid collisions with other students
-CLIENT_ID = "my_esp8266_76"
+CLIENT_ID = "my_esp8266_mm"
 print("🆔 Assigned Unique Client ID:", CLIENT_ID)
 
-API_KEY = "sk-sentinel-f5d5c09018c17f280850763ee74b2a86"
+API_KEY = "sk-sentinel-6709d9a0b9fe278a48cd18a3e8e70568"
 
 # Dashboard logic topics (Inhe dhyan se check karein)
 COMMAND_TOPIC = "sentinel/device/{}/repl/rx".format(CLIENT_ID)

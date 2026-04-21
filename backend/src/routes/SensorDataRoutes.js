@@ -435,7 +435,7 @@ const mongoose = require('mongoose');
 // GET /api/iot/analytics/:apiKeyId?range=1H|24H|7D|1M|1Y
 router.get('/analytics/:apiKeyId', protect, async (req, res) => {
     try {
-        const { range } = req.query; // '1H', '24H', '7D', '1M', '1Y'
+        const { range, feed } = req.query; // '1H', '24H', '7D', '1M', '1Y'
         const apiKeyId = req.params.apiKeyId;
 
         const device = await Device.findOne({ apiKey: apiKeyId, owner: req.user._id });
@@ -480,18 +480,27 @@ router.get('/analytics/:apiKeyId', protect, async (req, res) => {
 
         matchStage.timestamp = { $gte: startDate };
 
+        // Dynamic Group Stage
+        let groupStage = {
+            _id: { $dateToString: { format: groupByFormat, date: "$timestamp" } },
+            count: { $sum: 1 }
+        };
+
+        if (!feed || feed === 'All') {
+            groupStage.avgTemp = { $avg: "$payload.temperature" };
+            groupStage.avgHum = { $avg: "$payload.humidity" };
+        } else {
+            // For boolean fields like motion, we might want to sum or see if it happened
+            // For now, let's just avg it (works for numbers, for booleans it gives a ratio 0-1)
+            groupStage.avgValue = { $avg: `$payload.${feed}` };
+        }
+
         const pipeline = [
             { $match: matchStage },
-            {
-                $group: {
-                    _id: { $dateToString: { format: groupByFormat, date: "$timestamp" } },
-                    avgTemp: { $avg: "$payload.temperature" },
-                    avgHum: { $avg: "$payload.humidity" },
-                    count: { $sum: 1 }
-                }
-            },
+            { $group: groupStage },
             { $sort: { "_id": 1 } } // Sort chronological
         ];
+
 
         const results = await SensorData.aggregate(pipeline);
         res.json(results);

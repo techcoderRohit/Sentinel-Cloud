@@ -29,11 +29,12 @@ router.post('/analyze/:apiKeyId', protect, async (req, res) => {
             });
         }
 
-        // Reverse to chronological order for analysis
         const chronologicalData = sensorData.reverse();
+        const { feed } = req.query;
 
         // Run Gemini AI analysis
-        const analysis = await analyzeSensorData(chronologicalData, device.deviceName || device.name || apiKeyId);
+        const analysis = await analyzeSensorData(chronologicalData, device.deviceName || device.name || apiKeyId, feed);
+
 
         // Determine data range
         const dataRange = {
