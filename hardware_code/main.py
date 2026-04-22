@@ -5,6 +5,8 @@ import network
 from umqtt.simple import MQTTClient
 import ujson
 import ubinascii
+import sys
+import uio
 
 # --- CONFIGURATION ---
 WIFI_SSID = "hood hogan"
@@ -35,6 +37,42 @@ is_authorized = False
 led = machine.Pin(2, machine.Pin.OUT) # Internal LED
 relay = machine.Pin(4, machine.Pin.OUT) # Relay on D2
 sensor = dht.DHT11(machine.Pin(5))
+
+# --- REPL EXECUTION ENGINE ---
+# Maintain a persistent context for commands (variables stay in memory)
+repl_globals = {
+    'led': led,
+    'relay': relay,
+    'sensor': sensor,
+    'time': time,
+    'machine': machine,
+    'network': network
+}
+
+def run_repl_command(cmd):
+    """Executes code and captures its stdout."""
+    output = uio.StringIO()
+    original_stdout = sys.stdout
+    sys.stdout = output
+    
+    try:
+        # 1. Try eval() for single expressions (to capture return values)
+        try:
+            result = eval(cmd, repl_globals)
+            if result is not None:
+                print(result)
+        except SyntaxError:
+            # 2. If eval fails (e.g. assignment), try exec()
+            exec(cmd, repl_globals)
+        except Exception as e:
+            # 3. Fallback for other errors that might be valid in exec
+            exec(cmd, repl_globals)
+    except Exception as e:
+        print("Error:", e)
+    finally:
+        sys.stdout = original_stdout
+        
+    return output.getvalue().strip()
 
 # --- CALLBACK FUNCTION (Dashboard commands yahan receive honge) ---
 def sub_cb(topic, msg):
@@ -89,31 +127,39 @@ def sub_cb(topic, msg):
 
         # Regular Repl Command Processing
         print("[TRACE] Processing command...")
-        command = data.get("command", "").lower().strip()
         
-        # Dashboard ko acknowledgment bhejna ki humne command sun li hai
-        response = ""
-        color = "#94a3b8" # Default Gray
+        # Check for 'execute' (code block) or 'command' (single line)
+        code_to_run = data.get("execute") or data.get("command")
+        
+        if code_to_run:
+            response = ""
+            color = "#94a3b8" # Default Gray
+            
+            # Handle legacy/built-in commands first
+            cmd_clean = code_to_run.lower().strip()
+            if cmd_clean == "led_on":
+                led.value(0)
+                response = "Success: LED is now ON"
+                color = "#4ade80" # Green
+            elif cmd_clean == "led_off":
+                led.value(1)
+                response = "Success: LED is now OFF"
+                color = "#f87171" # Red
+            elif cmd_clean == "status":
+                response = "System: Operational | Temp/Hum active"
+                color = "#22d3ee" # Cyan
+            elif cmd_clean == "help":
+                response = "Available: led_on, led_off, status, help, or any MicroPython code (e.g. print(1+1))"
+            else:
+                # Run as arbitrary MicroPython code
+                print("[REPL] Executing: {}".format(code_to_run))
+                response = run_repl_command(code_to_run)
+                if not response:
+                    response = "OK"
+                color = "#ffffff" # White for code results
 
-        if command == "led_on":
-            led.value(0)
-            response = "Success: LED is now ON"
-            color = "#4ade80" # Green
-        elif command == "led_off":
-            led.value(1)
-            response = "Success: LED is now OFF"
-            color = "#f87171" # Red
-        elif command == "status":
-            response = "System: Operational | Temp/Hum active"
-            color = "#22d3ee" # Cyan
-        elif command == "help":
-            response = "Commands: led_on, led_off, status, help"
-        else:
-            response = "Error: Unknown command '{}'".format(command)
-            color = "#ffbd2e" # Yellow
-
-        # Dashboard REPL history mein result dikhane ke liye publish karein
-        client.publish(RESPONSE_TOPIC, ujson.dumps({"output": response, "color": color}))
+            # Publish result back to Dashboard
+            client.publish(RESPONSE_TOPIC, ujson.dumps({"output": response, "color": color}))
         
     except Exception as e:
         error_msg = "Critical Error: " + str(e)

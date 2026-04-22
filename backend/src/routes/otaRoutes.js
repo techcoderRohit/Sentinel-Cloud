@@ -16,7 +16,7 @@ if (!fs.existsSync(FIRMWARE_DIR)) {
 // 1. DEPLOY CODE (POST /api/ota/deploy)
 router.post('/deploy', protect, async (req, res) => {
     const { deviceId, code } = req.body;
-
+    console.log(deviceId, code);
     if (!deviceId || !code) {
         return res.status(400).json({ success: false, message: "Missing Device ID or Code" });
     }
@@ -43,10 +43,10 @@ router.post('/deploy', protect, async (req, res) => {
                 cmd: "update",
                 url: `${serverUrl}/api/ota/download/${deviceId}`
             });
-            
+
             mqttClient.publish(`sentinel/device/${deviceId}/ota_update`, updateMsg);
             console.log(`🚀 OTA Triggered for ${deviceId}: ${updateMsg}`);
-            
+
             res.json({ success: true, message: "Firmware staged and OTA trigger sent!" });
         } else {
             res.status(503).json({ success: false, message: "Bridge offline. Code saved, but OTA trigger failed." });
