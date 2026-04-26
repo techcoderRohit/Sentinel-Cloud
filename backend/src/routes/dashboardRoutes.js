@@ -118,6 +118,7 @@
 
 const express = require('express');
 const Dashboard = require('../models/Dashboard');
+const User = require('../models/User');
 const { protect } = require('../middleware/authMiddleware');
 const router = express.Router();
 
@@ -147,14 +148,21 @@ router.post('/create', protect, async (req, res) => {
   }
 });
 
-// 3. GET SPECIFIC BOARD LAYOUT
+// 3. GET SPECIFIC BOARD LAYOUT (owner OR shared user)
 router.get('/:id', protect, async (req, res) => {
   try {
-    const board = await Dashboard.findOne({ _id: req.params.id, userId: req.user._id });
+    const board = await Dashboard.findOne({
+      _id: req.params.id,
+      $or: [
+        { userId: req.user._id },
+        { sharedWith: req.user._id }
+      ]
+    });
     if (!board) {
       return res.status(404).json({ success: false, message: "Dashboard not found" });
     }
-    res.json({ success: true, board });
+    const isOwner = board.userId.toString() === req.user._id.toString();
+    res.json({ success: true, board, isOwner });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
@@ -218,7 +226,81 @@ router.put('/:id/share', protect, async (req, res) => {
     }
 });
 
-// 7. PUBLIC FETCH: Get board by shareId (No Protect Middleware)
+// 7. SHARE BOARD WITH A REGISTERED USER BY EMAIL
+router.post('/:id/share-with-user', protect, async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ success: false, message: 'Email is required' });
+
+    const board = await Dashboard.findOne({ _id: req.params.id, userId: req.user._id });
+    if (!board) return res.status(404).json({ success: false, message: 'Dashboard not found or you are not the owner' });
+
+    const targetUser = await User.findOne({ email: email.toLowerCase() });
+    if (!targetUser) return res.status(404).json({ success: false, message: `No registered user found with email: ${email}` });
+
+    if (targetUser._id.toString() === req.user._id.toString()) {
+      return res.status(400).json({ success: false, message: 'You cannot share a board with yourself' });
+    }
+
+    if (board.sharedWith.map(id => id.toString()).includes(targetUser._id.toString())) {
+      return res.status(400).json({ success: false, message: `Board is already shared with ${email}` });
+    }
+
+    board.sharedWith.push(targetUser._id);
+    await board.save();
+
+    res.json({ success: true, message: `Board shared with ${targetUser.name} (${email})` });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 8. REVOKE SHARE ACCESS FOR A USER
+router.delete('/:id/revoke-user', protect, async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ success: false, message: 'Email is required' });
+
+    const board = await Dashboard.findOne({ _id: req.params.id, userId: req.user._id });
+    if (!board) return res.status(404).json({ success: false, message: 'Dashboard not found or you are not the owner' });
+
+    const targetUser = await User.findOne({ email: email.toLowerCase() });
+    if (!targetUser) return res.status(404).json({ success: false, message: `No user found with email: ${email}` });
+
+    board.sharedWith = board.sharedWith.filter(id => id.toString() !== targetUser._id.toString());
+    await board.save();
+
+    res.json({ success: true, message: `Access revoked for ${email}` });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 9. GET BOARDS SHARED WITH ME
+router.get('/shared/with-me', protect, async (req, res) => {
+  try {
+    const boards = await Dashboard.find({ sharedWith: req.user._id })
+      .select('name description createdAt userId')
+      .populate('userId', 'name email');
+    res.json({ success: true, boards });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 10. GET USERS A BOARD IS SHARED WITH (for the owner to manage)
+router.get('/:id/shared-users', protect, async (req, res) => {
+  try {
+    const board = await Dashboard.findOne({ _id: req.params.id, userId: req.user._id })
+      .populate('sharedWith', 'name email');
+    if (!board) return res.status(404).json({ success: false, message: 'Dashboard not found' });
+    res.json({ success: true, sharedUsers: board.sharedWith });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// PUBLIC FETCH: Get board by shareId (No Protect Middleware)
 router.get('/shared/:shareId', async (req, res) => {
     try {
         const board = await Dashboard.findOne({ shareId: req.params.shareId }).select('name description widgets createdAt');
@@ -229,6 +311,7 @@ router.get('/shared/:shareId', async (req, res) => {
         res.status(500).json({ success: false, error: err.message });
     }
 });
+
 
 // 6. OBSOLETE Compatibility Route (Optional: For migration)
 router.get('/get-layout', protect, async (req, res) => {

@@ -5,7 +5,6 @@ import {
   Settings as SettingsIcon,
   Bell,
   User,
-  Users,
   Mail,
   Lock,
   Shield,
@@ -26,7 +25,6 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
-import AccessManagement from './AccessManagement';
 
 export default function Settings() {
   const router = useRouter();
@@ -240,8 +238,6 @@ export default function Settings() {
     { id: 'profile', label: 'Profile', icon: <User className="w-4 h-4" /> },
     { id: 'security', label: 'Security', icon: <Lock className="w-4 h-4" /> },
     { id: 'notifications', label: 'Notifications', icon: <Bell className="w-4 h-4" /> },
-    // Only show Access Control if user is NOT a guest
-    ...(profile.role !== 'guest' ? [{ id: 'access', label: 'Access Control', icon: <Users className="w-4 h-4" /> }] : []),
     { id: 'danger', label: 'Danger Zone', icon: <AlertTriangle className="w-4 h-4" /> },
   ];
 
@@ -715,11 +711,6 @@ export default function Settings() {
                 </div>
               </div>
             </div>
-          )}
-
-          {/* ========== ACCESS CONTROL SECTION ========== */}
-          {activeSection === 'access' && profile.role !== 'guest' && (
-            <AccessManagement />
           )}
 
           {/* ========== DANGER ZONE ========== */}
