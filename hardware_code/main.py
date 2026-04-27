@@ -8,21 +8,17 @@ import ubinascii
 import sys
 import uio
 
-# --- CONFIGURATION ---
-WIFI_SSID = "Digipodium_4G"
-WIFI_PASSWORD = "digipod@123"
 MQTT_BROKER = "192.168.18.61"
-
-print(f'connecting to {WIFI_SSID}...')
 
 # Unique Identification
 # Generate ID based on MAC address to avoid collisions with other students
-CLIENT_ID = "my_esp8266_91"
+CLIENT_ID = "my_esp8266_mm"
 print("🆔 Assigned Unique Client ID:", CLIENT_ID)
 
-API_KEY = "sk-sentinel-998ff1d9614dc3d374863211c839936d"
+API_KEY = "sk-sentinel-8de516368da019de0d10bb13c60d03fe"
 
 # Dashboard logic topics (Inhe dhyan se check karein)
+
 COMMAND_TOPIC = "sentinel/device/{}/repl/rx".format(CLIENT_ID)
 RESPONSE_TOPIC = "sentinel/device/{}/repl/tx".format(CLIENT_ID)
 INPUT_TOPIC = "sentinel/device/{}/command".format(CLIENT_ID)
@@ -167,16 +163,6 @@ def sub_cb(topic, msg):
         error_msg = "Critical Error: " + str(e)
         client.publish(RESPONSE_TOPIC, ujson.dumps({"output": error_msg, "color": "#ff5f56"}))
 
-def connect_wifi():
-    wlan = network.WLAN(network.STA_IF)
-    wlan.active(True)
-    if not wlan.isconnected():
-        print('📶 Connecting to WiFi...')
-        wlan.connect(WIFI_SSID, WIFI_PASSWORD)
-        while not wlan.isconnected():
-            time.sleep(0.5)
-    print('✅ WiFi Connected:', wlan.ifconfig())
-
 def connect_mqtt():
     global client
     try:
@@ -205,11 +191,13 @@ def connect_mqtt():
         return None
 
 # --- MAIN EXECUTION ---
-connect_wifi()
+# connect_wifi()
 mqtt_client = connect_mqtt()
 
 last_telemetry_time = 0
 telemetry_interval = 5 
+last_handshake_time = 0
+handshake_retry_interval = 10
 wlan = network.WLAN(network.STA_IF)
 
 while True:
@@ -240,13 +228,13 @@ while True:
         if current_time - last_telemetry_time >= telemetry_interval:
             
             if not is_authorized:
-                print("⏳ Handshake pending... skipping telemetry.")
                 # Har 10 sec mein handshake retry (agar auth tx nahi mila)
-                if current_time % 10 == 0:
-                    print('🔐 Retrying Handshake...')
+                if current_time - last_handshake_time >= handshake_retry_interval:
+                    print("⏳ Handshake pending... retrying.")
                     auth_payload = ujson.dumps({"clientId": CLIENT_ID, "apiKey": API_KEY})
                     mqtt_client.publish(AUTH_TOPIC, auth_payload)
-                time.sleep(1)
+                    last_handshake_time = current_time
+                # Removed time.sleep(1) to allow check_msg() to run faster
                 continue
 
             # Read Sensor

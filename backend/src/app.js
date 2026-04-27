@@ -15,6 +15,7 @@ const NotificationRoutes = require('./routes/NotificationRoutes')
 const terminalRoutes = require('./routes/terminalRoutes');
 const aiRoutes = require('./routes/aiRoutes');
 const otaRoutes = require('./routes/otaRoutes');
+const triggerRoutes = require('./routes/triggerRoutes');
 //startMQTT();
 //Create app
 
@@ -39,6 +40,7 @@ app.use('/api/terminal', terminalRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/notifications',NotificationRoutes)
 app.use('/api/ota', otaRoutes);
+app.use('/api/triggers', triggerRoutes);
 
 //Test route
 app.get('/', (req, res) => {

@@ -1,138 +1,96 @@
 const Notification = require('../models/Notification');
 const SendAlert = require('../utils/alertService');
 const User = require('../models/User');
+const Trigger = require('../models/Trigger');
 
 // =============================================
-// DEFAULT THRESHOLDS (Configurable per-user later)
+// DEFAULT THRESHOLDS (Fallback)
 // =============================================
-const THRESHOLDS = {
-  temperature: {
-    critical_high: 45,
-    critical_low: 0,
-    warning_high: 35,
-    warning_low: 10
-  },
-  humidity: {
-    critical_high: 95,
-    critical_low: 10,
-    warning_high: 85,
-    warning_low: 20
-  }
+const DEFAULT_THRESHOLDS = {
+  temperature: { high: 45, low: 0 },
+  humidity: { high: 95, low: 10 }
 };
 
-// =============================================
-// COOLDOWN CACHE — Prevent alert spam
-// Key format: `${ownerId}_${apiKeyId}_${anomalyType}`
-// Value: timestamp of last alert
-// =============================================
 const alertCooldowns = new Map();
 const COOLDOWN_MS = 5 * 60 * 1000; // 5 minutes
 
 const isOnCooldown = (key) => {
   const lastAlert = alertCooldowns.get(key);
-  if (!lastAlert) return false;
-  return (Date.now() - lastAlert) < COOLDOWN_MS;
+  return lastAlert && (Date.now() - lastAlert) < COOLDOWN_MS;
 };
 
 const setCooldown = (key) => {
   alertCooldowns.set(key, Date.now());
-  // Clean old entries periodically
-  if (alertCooldowns.size > 500) {
-    const now = Date.now();
-    for (const [k, v] of alertCooldowns) {
-      if (now - v > COOLDOWN_MS * 2) alertCooldowns.delete(k);
-    }
-  }
 };
 
 /**
  * Check incoming sensor data for anomalies and dispatch alerts
- * @param {Object} payload - { temperature, humidity, status }
- * @param {String} deviceName - Human-readable device name
- * @param {Object} apiKeyDoc - The API Key document (has _id, owner)
- * @param {Object} io - Socket.io instance for real-time push
+ * Handles both hardcoded defaults and dynamic user-defined triggers
  */
-const checkForAnomalies = async (payload, deviceName, apiKeyDoc, io) => {
-  const { temperature, humidity } = payload;
-  const ownerId = apiKeyDoc.owner;
-  const apiKeyId = apiKeyDoc._id;
+const checkForAnomalies = async (payload, deviceName, deviceDoc, io) => {
+  const ownerId = deviceDoc.owner;
+  const deviceId = deviceDoc.deviceId;
   const anomalies = [];
 
-  // --- TEMPERATURE CHECKS ---
-  if (temperature !== undefined && temperature !== null) {
-    if (temperature >= THRESHOLDS.temperature.critical_high) {
-      anomalies.push({
-        type: 'critical',
-        title: `🔥 Critical: High Temperature — ${deviceName}`,
-        message: `Temperature has reached ${temperature}°C (threshold: ${THRESHOLDS.temperature.critical_high}°C). Immediate attention required!`,
-        anomalyKey: `${ownerId}_${apiKeyId}_temp_critical_high`
-      });
-    } else if (temperature <= THRESHOLDS.temperature.critical_low) {
-      anomalies.push({
-        type: 'critical',
-        title: `❄️ Critical: Low Temperature — ${deviceName}`,
-        message: `Temperature has dropped to ${temperature}°C (threshold: ${THRESHOLDS.temperature.critical_low}°C). Possible sensor failure or freezing conditions.`,
-        anomalyKey: `${ownerId}_${apiKeyId}_temp_critical_low`
-      });
-    } else if (temperature >= THRESHOLDS.temperature.warning_high) {
-      anomalies.push({
-        type: 'warning',
-        title: `⚠️ Warning: High Temperature — ${deviceName}`,
-        message: `Temperature is ${temperature}°C, approaching critical levels (threshold: ${THRESHOLDS.temperature.warning_high}°C).`,
-        anomalyKey: `${ownerId}_${apiKeyId}_temp_warning_high`
-      });
-    } else if (temperature <= THRESHOLDS.temperature.warning_low) {
-      anomalies.push({
-        type: 'warning',
-        title: `⚠️ Warning: Low Temperature — ${deviceName}`,
-        message: `Temperature is ${temperature}°C, below normal range (threshold: ${THRESHOLDS.temperature.warning_low}°C).`,
-        anomalyKey: `${ownerId}_${apiKeyId}_temp_warning_low`
-      });
-    }
-  }
+  try {
+    // 1. Fetch Custom User Triggers for this device
+    const customTriggers = await Trigger.find({ 
+      userId: ownerId, 
+      deviceId: deviceId, 
+      isActive: true 
+    });
 
-  // --- HUMIDITY CHECKS ---
-  if (humidity !== undefined && humidity !== null) {
-    if (humidity >= THRESHOLDS.humidity.critical_high) {
-      anomalies.push({
-        type: 'critical',
-        title: `💧 Critical: High Humidity — ${deviceName}`,
-        message: `Humidity has reached ${humidity}% (threshold: ${THRESHOLDS.humidity.critical_high}%). Risk of condensation or water damage.`,
-        anomalyKey: `${ownerId}_${apiKeyId}_hum_critical_high`
-      });
-    } else if (humidity <= THRESHOLDS.humidity.critical_low) {
-      anomalies.push({
-        type: 'critical',
-        title: `🏜️ Critical: Low Humidity — ${deviceName}`,
-        message: `Humidity has dropped to ${humidity}% (threshold: ${THRESHOLDS.humidity.critical_low}%). Possible sensor malfunction.`,
-        anomalyKey: `${ownerId}_${apiKeyId}_hum_critical_low`
-      });
-    } else if (humidity >= THRESHOLDS.humidity.warning_high) {
-      anomalies.push({
-        type: 'warning',
-        title: `⚠️ Warning: High Humidity — ${deviceName}`,
-        message: `Humidity is ${humidity}%, approaching critical levels (threshold: ${THRESHOLDS.humidity.warning_high}%).`,
-        anomalyKey: `${ownerId}_${apiKeyId}_hum_warning_high`
-      });
-    } else if (humidity <= THRESHOLDS.humidity.warning_low) {
-      anomalies.push({
-        type: 'warning',
-        title: `⚠️ Warning: Low Humidity — ${deviceName}`,
-        message: `Humidity is ${humidity}%, below normal range (threshold: ${THRESHOLDS.humidity.warning_low}%).`,
-        anomalyKey: `${ownerId}_${apiKeyId}_hum_warning_low`
-      });
-    }
-  }
+    // 2. Evaluate Custom Triggers
+    for (const trigger of customTriggers) {
+      const value = payload[trigger.feed];
+      if (value === undefined || value === null) continue;
 
-  // --- PROCESS DETECTED ANOMALIES ---
-  for (const anomaly of anomalies) {
-    // Check cooldown to avoid spam
-    if (isOnCooldown(anomaly.anomalyKey)) {
-      continue;
+      let isTriggered = false;
+      let conditionSymbol = '';
+
+      switch (trigger.condition) {
+        case 'greater_than':
+          isTriggered = value > trigger.threshold;
+          conditionSymbol = '>';
+          break;
+        case 'less_than':
+          isTriggered = value < trigger.threshold;
+          conditionSymbol = '<';
+          break;
+        case 'equal_to':
+          isTriggered = value == trigger.threshold;
+          conditionSymbol = '=';
+          break;
+      }
+
+      if (isTriggered) {
+        anomalies.push({
+          type: trigger.alertType || 'warning',
+          title: `🔔 Sentinel Alert: ${trigger.feed.toUpperCase()} — ${deviceName}`,
+          message: `Your custom trigger was met: ${trigger.feed} (${value}) is ${conditionSymbol} ${trigger.threshold}.`,
+          anomalyKey: `${ownerId}_${deviceId}_${trigger._id}`
+        });
+      }
     }
 
-    try {
-      // 1. Save notification to DB
+    // 3. Fallback: Default Critical Checks (If no custom triggers cover these)
+    // Only check defaults if we haven't already flagged a custom trigger for this feed
+    if (anomalies.length === 0) {
+      if (payload.temperature >= DEFAULT_THRESHOLDS.temperature.high) {
+        anomalies.push({
+          type: 'critical',
+          title: `🔥 High Temp — ${deviceName}`,
+          message: `Critical temperature of ${payload.temperature}°C detected!`,
+          anomalyKey: `${ownerId}_${deviceId}_temp_default_high`
+        });
+      }
+    }
+
+    // 4. Process detected anomalies
+    for (const anomaly of anomalies) {
+      if (isOnCooldown(anomaly.anomalyKey)) continue;
+
+      // Save notification
       const notification = await Notification.create({
         userId: ownerId,
         title: anomaly.title,
@@ -140,35 +98,24 @@ const checkForAnomalies = async (payload, deviceName, apiKeyDoc, io) => {
         type: anomaly.type
       });
 
-      // 2. Set cooldown
       setCooldown(anomaly.anomalyKey);
 
-      // 3. Push real-time notification via Socket.io
+      // Real-time Push
       if (io) {
-        io.emit('new_notification', {
-          _id: notification._id,
-          userId: ownerId.toString(),
-          title: anomaly.title,
-          message: anomaly.message,
-          type: anomaly.type,
-          isRead: false,
-          createdAt: notification.createdAt
-        });
+        io.emit('new_notification', notification);
       }
 
-      // 4. Send external alerts (Telegram + Email) — fire and forget
+      // External Alerts (Telegram/Email)
       const user = await User.findById(ownerId).select('email telegramChatId');
       if (user) {
-        SendAlert(user, { title: anomaly.title, message: anomaly.message }).catch(err => {
-          console.error('[AnomalyDetector] External alert dispatch failed:', err.message);
-        });
+        SendAlert(user, { title: anomaly.title, message: anomaly.message }).catch(e => 
+          console.error('[AnomalyDetector] External alert error:', e.message)
+        );
       }
-
-      console.log(`[AnomalyDetector] ${anomaly.type.toUpperCase()} alert created for ${deviceName}: ${anomaly.message}`);
-
-    } catch (err) {
-      console.error('[AnomalyDetector] Failed to create notification:', err.message);
     }
+
+  } catch (err) {
+    console.error('[AnomalyDetector] Processing Error:', err.message);
   }
 
   return anomalies.length;

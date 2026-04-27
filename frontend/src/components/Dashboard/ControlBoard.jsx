@@ -319,6 +319,12 @@ const ControlBoard = ({ boardId: propBoardId, readOnly = false }) => {
   const [sharedUsers, setSharedUsers] = useState([]);
   const [sharedUsersLoading, setSharedUsersLoading] = useState(false);
 
+  // Trigger system state
+  const [showTriggersModal, setShowTriggersModal] = useState(false);
+  const [triggers, setTriggers] = useState([]);
+  const [triggerLoading, setTriggerLoading] = useState(false);
+  const [newTrigger, setNewTrigger] = useState({ deviceId: '', feed: 'temperature', condition: 'greater_than', threshold: 0, alertType: 'warning' });
+
 
   const { setNodeRef: setCanvasDropRef } = useDroppable({ id: 'main-canvas' });
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
@@ -525,6 +531,51 @@ const ControlBoard = ({ boardId: propBoardId, readOnly = false }) => {
       alert('Revoke failed: ' + (e.response?.data?.message || 'Error'));
     }
   };
+
+  const fetchTriggers = async () => {
+    setTriggerLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      const res = await API.get('/triggers', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.data.success) setTriggers(res.data.data);
+    } catch (e) {
+      console.error('Failed to fetch triggers', e);
+    } finally {
+      setTriggerLoading(false);
+    }
+  };
+
+  const handleCreateTrigger = async () => {
+    if (!newTrigger.deviceId || !newTrigger.feed) {
+        alert("Please select a device and feed");
+        return;
+    }
+    try {
+      const token = localStorage.getItem('token');
+      await API.post('/triggers', newTrigger, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      fetchTriggers();
+      setNewTrigger({ ...newTrigger, threshold: 0 });
+    } catch (e) {
+      alert('Failed to create trigger');
+    }
+  };
+
+  const handleDeleteTrigger = async (id) => {
+    try {
+      const token = localStorage.getItem('token');
+      await API.delete(`/triggers/${id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      fetchTriggers();
+    } catch (e) {
+      alert('Failed to delete trigger');
+    }
+  };
+
   const handleDragStart = (e) => setActiveDragItem(e.active);
 
   // 🌟 THE BULLETPROOF SNAP-BACK FIX 🌟
@@ -609,6 +660,15 @@ const ControlBoard = ({ boardId: propBoardId, readOnly = false }) => {
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
                   Share Board
+                </button>
+              )}
+              {isOwner && (
+                <button
+                  onClick={() => { setShowTriggersModal(true); fetchTriggers(); }}
+                  className="bg-slate-800 text-amber-400 border border-slate-700 px-4 py-2.5 rounded-xl font-bold text-xs hover:bg-slate-700 transition-all flex items-center gap-2 uppercase tracking-widest"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                  Alerts
                 </button>
               )}
               {isEditing && (
@@ -789,6 +849,117 @@ const ControlBoard = ({ boardId: propBoardId, readOnly = false }) => {
           ) : null}
         </DragOverlay>
       </DndContext>
+
+      {/* ===== TRIGGERS / NOTIFICATION MODAL ===== */}
+      {showTriggersModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[200] flex items-center justify-center p-4">
+          <div className="bg-[#0F172A] border border-slate-700 rounded-3xl w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="px-8 py-6 border-b border-slate-800 flex justify-between items-center bg-slate-900/50">
+              <div>
+                <h3 className="text-xl font-black text-white uppercase tracking-tight flex items-center gap-3">
+                    <span className="w-2 h-6 bg-amber-500 rounded-full"></span>
+                    Notification Triggers
+                </h3>
+                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">Configure Telegram Alerts</p>
+              </div>
+              <button onClick={() => setShowTriggersModal(false)} className="text-slate-500 hover:text-white transition-colors text-2xl">×</button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-8 space-y-8">
+              {/* Add New Trigger Section */}
+              <div className="bg-slate-900/50 rounded-2xl p-6 border border-slate-800">
+                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6">Create New Alert</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Source Device</label>
+                    <select 
+                      className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 outline-none focus:border-amber-500 text-sm text-white"
+                      value={newTrigger.deviceId}
+                      onChange={(e) => setNewTrigger({...newTrigger, deviceId: e.target.value})}
+                    >
+                      <option value="">Select Device</option>
+                      {devices.map(d => (
+                        <option key={d._id} value={d.deviceId}>{d.deviceName || d.deviceId}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Sensor Feed</label>
+                    <input 
+                      type="text"
+                      placeholder="e.g. temperature"
+                      className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 outline-none focus:border-amber-500 text-sm"
+                      value={newTrigger.feed}
+                      onChange={(e) => setNewTrigger({...newTrigger, feed: e.target.value})}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Condition</label>
+                    <select 
+                      className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 outline-none focus:border-amber-500 text-sm text-white"
+                      value={newTrigger.condition}
+                      onChange={(e) => setNewTrigger({...newTrigger, condition: e.target.value})}
+                    >
+                      <option value="greater_than">Greater Than (&gt;)</option>
+                      <option value="less_than">Less Than (&lt;)</option>
+                      <option value="equal_to">Equal To (=)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Threshold Value</label>
+                    <input 
+                      type="number"
+                      className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 outline-none focus:border-amber-500 text-sm"
+                      value={newTrigger.threshold}
+                      onChange={(e) => {
+                        const val = e.target.value === '' ? '' : parseFloat(e.target.value);
+                        setNewTrigger({...newTrigger, threshold: val});
+                      }}
+                    />
+                  </div>
+                </div>
+                <button 
+                  onClick={handleCreateTrigger}
+                  className="w-full mt-6 bg-amber-500 text-slate-900 font-bold py-4 rounded-xl hover:bg-amber-400 transition-all uppercase tracking-widest text-xs shadow-lg shadow-amber-500/20"
+                >
+                  Enable This Alert
+                </button>
+              </div>
+
+              {/* Active Triggers List */}
+              <div>
+                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Active Alerts ({triggers.length})</h4>
+                <div className="space-y-3">
+                  {triggerLoading ? (
+                    <div className="text-center py-10 text-slate-600 animate-pulse font-mono text-xs">Loading triggers...</div>
+                  ) : triggers.length === 0 ? (
+                    <div className="text-center py-10 bg-slate-900/30 rounded-2xl border border-dashed border-slate-800 text-slate-600 text-xs uppercase tracking-widest">No alerts configured</div>
+                  ) : triggers.map(t => (
+                    <div key={t._id} className="flex items-center justify-between bg-slate-900/80 border border-slate-800 rounded-2xl p-4 group hover:border-amber-500/30 transition-all">
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 bg-amber-500/10 rounded-full flex items-center justify-center text-amber-500">
+                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        </div>
+                        <div>
+                          <p className="text-white font-bold text-sm uppercase tracking-tight">{t.feed} <span className="text-amber-500">{t.condition.replace('_', ' ')}</span> {t.threshold}</p>
+                          <p className="text-[10px] text-slate-500 font-medium">DEVICE: {t.deviceId}</p>
+                        </div>
+                      </div>
+                      <button onClick={() => handleDeleteTrigger(t._id)} className="p-2 text-slate-600 hover:text-rose-500 transition-colors">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="px-8 py-5 bg-slate-900/80 border-t border-slate-800 flex items-center justify-center">
+                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Requires Telegram Chat ID in User Profile</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ===== SHARE BOARD MODAL ===== */}
       {showShareModal && (

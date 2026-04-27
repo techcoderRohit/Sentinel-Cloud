@@ -7,6 +7,7 @@ const router = express.Router();
 const Notification = require('../models/Notification');
 const SendAlert = require('../utils/alertService');
 const User = require('../models/User');
+const { checkForAnomalies } = require('../services/anomalyDetector');
 
 // POST /api/iot/update
 router.post('/update', validateApiKey, async (req, res) => {
