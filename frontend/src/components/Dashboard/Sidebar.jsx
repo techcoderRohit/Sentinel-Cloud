@@ -13,7 +13,6 @@ const Sidebar = () => {
     { name: 'Devices', icon: <Cpu size={20} />, path: "/dashboard/devices" },
     { name: 'Web Repl Console', icon: <Terminal size={20} />, path: "/dashboard/webRepl"},
     { name: 'Reports & Analytics', icon: <LineChart size={20} />, path: "/dashboard/reports" },
-    { name: 'AI Insights', icon: <Brain size={20} />, path: "/dashboard/ai-insights" },
     { name: 'Alert Simulator', icon: <GitBranch size={20} />, path: "/dashboard/alert-simulator" },
     { name: 'API Keys', icon: <Key size={20} />, path: "/dashboard/apikeymanager" },
     { name: 'Settings', icon: <Settings size={20} />, path: "/dashboard/settings" },

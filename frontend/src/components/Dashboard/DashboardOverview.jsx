@@ -9,13 +9,32 @@ import {
   Bell,
   Terminal as TerminalIcon
 } from 'lucide-react';
+import API from '../../utils/api';
 
 const DashboardOverview = () => {
   const [liveNodes, setLiveNodes] = useState({});
+  const [devices, setDevices] = useState([]);
   const [totalDataPoints, setTotalDataPoints] = useState(0);
   const [connectionStatus, setConnectionStatus] = useState('Disconnected');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Fetch all registered devices
+    const fetchDevices = async () => {
+      try {
+        const response = await API.get('/devices/my-devices');
+        if (response.data.success) {
+          setDevices(response.data.data);
+        }
+      } catch (error) {
+        console.error("Error fetching devices:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDevices();
+
     // 1. Backend Server URL (Make sure your Node.js server is running on 5000)
     const socket = io('http://localhost:5000');
 
@@ -34,7 +53,6 @@ const DashboardOverview = () => {
         [data.apiKey]: {
           name: data.deviceName || 'Unknown Device',
           apiKey: data.apiKey,
-          // Format: "25°C / 60%"
           val: `${data.payload.temperature ?? '--'}°C / ${data.payload.humidity ?? '--'}%`,
           time: new Date().toLocaleTimeString(),
           status: 'Online'
@@ -49,18 +67,11 @@ const DashboardOverview = () => {
     return () => socket.disconnect();
   }, []);
 
-  const isDeviceOnline = (timestring) => {
-    if (!timestring) {
-      return false;  //kyuki hum sirf localtime string save kar rahe h
-    }
-    return true; //socket.io live h toh online hi dikhayega
-  }
-
   const liveNodeList = Object.values(liveNodes);
 
   // Stats Logic
   const stats = [
-    { label: 'Total Devices', value: liveNodeList.length, sub: 'Registered', icon: <Cpu className="text-blue-400" />, color: 'bg-blue-500/10' },
+    { label: 'Total Devices', value: devices.length, sub: 'Registered', icon: <Cpu className="text-blue-400" />, color: 'bg-blue-500/10' },
     { label: 'Live Nodes', value: liveNodeList.filter(n => n.status === 'Online').length.toString().padStart(2, '0'), sub: 'Streaming Now', icon: <Activity className="text-emerald-400" />, color: 'bg-emerald-500/10' },
     { label: 'Data Points', value: totalDataPoints.toLocaleString(), sub: 'Total Logs', icon: <Database className="text-purple-400" />, color: 'bg-purple-500/10' },
     { label: 'Backend Status', value: connectionStatus, sub: 'Socket.io', icon: <ShieldCheck className={connectionStatus === 'Online' ? "text-cyan-400" : "text-red-400"} />, color: 'bg-cyan-500/10' },
@@ -88,7 +99,7 @@ const DashboardOverview = () => {
         {/* Device Monitoring Table */}
         <div className="lg:col-span-2 bg-[#0d1421] border border-gray-800 rounded-2xl overflow-hidden">
           <div className="p-5 border-b border-gray-800 flex justify-between items-center">
-            <h3 className="text-sm font-bold text-gray-400 tracking-wider">LIVE STREAMING NODES</h3>
+            <h3 className="text-sm font-bold text-gray-400 tracking-wider">REGISTERED DEVICES</h3>
             <span className="text-[10px] bg-emerald-500/10 text-emerald-500 px-2 py-1 rounded border border-emerald-500/20 uppercase font-black animate-pulse">
               {connectionStatus === 'Online' ? 'Real-Time Sync' : 'Reconnecting...'}
             </span>
@@ -98,19 +109,40 @@ const DashboardOverview = () => {
               <thead className="bg-[#141c2d] text-[10px] text-gray-500 font-black uppercase tracking-[0.1em]">
                 <tr>
                   <th className="px-6 py-4">Device Name</th>
-                  <th className="px-6 py-4">ID / Key</th>
-                  <th className="px-6 py-4 text-center">Temp/Hum</th>
-                  <th className="px-6 py-4">Last Seen</th>
+                  <th className="px-6 py-4">Device ID</th>
+                  <th className="px-6 py-4">Location</th>
                   <th className="px-6 py-4">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-800/50 text-sm">
-                {liveNodeList.length > 0 ? liveNodeList.map((node, i) => (
-                  <DeviceRow key={i} name={node.name} apiKey={node.apiKey} val={node.val} time={node.time} status={node.status} />
-                )) : (
+                {loading ? (
                   <tr>
-                    <td colSpan="5" className="px-6 py-10 text-center text-gray-500">
-                      Waiting for ESP32 data... Make sure Backend and MQTT are running.
+                    <td colSpan="4" className="px-6 py-10 text-center text-gray-500">
+                      Loading devices...
+                    </td>
+                  </tr>
+                ) : devices.length > 0 ? devices.map((device, i) => {
+                  const isLive = liveNodes[device.apiKey];
+                  
+                  // Calculate if device was recently active (within last 60 seconds)
+                  const lastActiveDate = new Date(device.lastActive);
+                  const isRecentlyActive = (new Date() - lastActiveDate) < 60000; 
+
+                  const currentStatus = (isLive || isRecentlyActive) ? 'Online' : 'Offline';
+
+                  return (
+                    <DeviceRow 
+                      key={device._id || i} 
+                      name={device.deviceName} 
+                      deviceId={device.deviceId} 
+                      location={device.location || 'N/A'} 
+                      status={currentStatus} 
+                    />
+                  );
+                }) : (
+                  <tr>
+                    <td colSpan="4" className="px-6 py-10 text-center text-gray-500">
+                      No registered devices found.
                     </td>
                   </tr>
                 )}
@@ -141,16 +173,15 @@ const DashboardOverview = () => {
   );
 };
 
-// --- Sub-Components (Wahi hain jo aapne banaye the) ---
-const DeviceRow = ({ name, apiKey, val, time, status }) => (
+// --- Sub-Components ---
+const DeviceRow = ({ name, deviceId, location, status }) => (
   <tr className="hover:bg-gray-800/20 transition-all group">
     <td className="px-6 py-4 font-bold text-white">{name}</td>
-    <td className="px-6 py-4 font-mono text-xs text-gray-400">{apiKey}</td>
-    <td className="px-6 py-4 text-center font-bold text-cyan-400">{val}</td>
-    <td className="px-6 py-4 text-xs text-gray-500">{time}</td>
+    <td className="px-6 py-4 font-mono text-xs text-gray-400">{deviceId}</td>
+    <td className="px-6 py-4 text-gray-400">{location}</td>
     <td className="px-6 py-4">
       <span className={`flex items-center gap-1.5 text-[10px] font-bold uppercase ${status === 'Online' ? 'text-emerald-400' : 'text-red-500'}`}>
-        <span className={`h-1.5 w-1.5 rounded-full ${status === 'Online' ? 'bg-emerald-400' : 'bg-red-500'} animate-pulse`} />
+        <span className={`h-1.5 w-1.5 rounded-full ${status === 'Online' ? 'bg-emerald-400' : 'bg-red-500'} ${status === 'Online' ? 'animate-pulse' : ''}`} />
         {status}
       </span>
     </td>

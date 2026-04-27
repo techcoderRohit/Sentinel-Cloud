@@ -11,7 +11,7 @@ const authenticatedDevices = new Map();
 let mqttClient = null;
 
 const connectMQTT = (io) => {
-    const brokerUrl = process.env.MQTT_BROKER_URL || 'mqtt://192.168.18.61:1883';
+    const brokerUrl = process.env.MQTT_BROKER_URL || 'mqtt://192.168.18.247:1883';
     mqttClient = mqtt.connect(brokerUrl);
     const client = mqttClient;
 
