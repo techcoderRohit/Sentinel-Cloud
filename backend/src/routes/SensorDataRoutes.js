@@ -311,4 +311,18 @@ router.get('/analytics/:apiKeyId', protect, async (req, res) => {
     }
 });
 
-module.exports = router;
+// POST /api/iot/simulate (Testing Alerts)
+router.post('/simulate', protect, async (req, res) => {
+    try {
+        const { deviceId, payload } = req.body;
+        const targetId = req.user.role === 'guest' ? req.user.managedBy : req.user._id;
+        const device = await Device.findOne({ deviceId, owner: targetId });
+        if (!device) return res.status(404).json({ message: "Device not found" });
+        const anomalyCount = await checkForAnomalies(payload, device.deviceName || deviceId, device, null);
+        res.json({ success: true, message: "Simulation successful", anomaliesTriggered: anomalyCount });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+module.exports = router;

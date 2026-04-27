@@ -30,8 +30,8 @@ export default function Settings() {
   const router = useRouter();
 
   // Profile state
-  const [profile, setProfile] = useState({ name: '', email: '', role: '', createdAt: '', profilePicture: '' });
-  const [profileForm, setProfileForm] = useState({ name: '', email: '' });
+  const [profile, setProfile] = useState({ name: '', email: '', role: '', createdAt: '', profilePicture: '', telegramChatId: '', phoneNumber: '' });
+  const [profileForm, setProfileForm] = useState({ name: '', email: '', telegramChatId: '', phoneNumber: '' });
   const [profileLoading, setProfileLoading] = useState(true);
   const [profileSaving, setProfileSaving] = useState(false);
   const [profileEdited, setProfileEdited] = useState(false);
@@ -62,7 +62,10 @@ export default function Settings() {
   useEffect(() => {
     // Track if profile form has been edited
     setProfileEdited(
-      profileForm.name !== profile.name || profileForm.email !== profile.email
+      profileForm.name !== profile.name || 
+      profileForm.email !== profile.email ||
+      profileForm.telegramChatId !== (profile.telegramChatId || '') ||
+      profileForm.phoneNumber !== (profile.phoneNumber || '')
     );
   }, [profileForm, profile]);
 
@@ -71,7 +74,12 @@ export default function Settings() {
       const config = { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } };
       const { data } = await API.get('/user/profile', config);
       setProfile(data);
-      setProfileForm({ name: data.name, email: data.email });
+      setProfileForm({ 
+        name: data.name, 
+        email: data.email, 
+        telegramChatId: data.telegramChatId || '', 
+        phoneNumber: data.phoneNumber || '' 
+      });
     } catch (err) {
       console.error("Profile fetch error:", err);
       toast.error("Failed to load profile");
@@ -89,7 +97,13 @@ export default function Settings() {
     try {
       const config = { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } };
       const { data } = await API.put('/user/profile', profileForm, config);
-      setProfile(prev => ({ ...prev, name: data.name, email: data.email }));
+      setProfile(prev => ({ 
+        ...prev, 
+        name: data.name, 
+        email: data.email, 
+        telegramChatId: data.telegramChatId,
+        phoneNumber: data.phoneNumber 
+      }));
       toast.success(data.message || "Profile updated successfully");
     } catch (err) {
       toast.error(err.response?.data?.message || "Update failed");
@@ -667,23 +681,17 @@ export default function Settings() {
                       <div className="flex gap-2">
                         <input
                           type="text"
-                          value={profile.telegramChatId || ''}
-                          onChange={(e) => setProfile(prev => ({ ...prev, telegramChatId: e.target.value }))}
+                          value={profileForm.telegramChatId}
+                          onChange={(e) => setProfileForm(prev => ({ ...prev, telegramChatId: e.target.value }))}
                           className="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-white outline-none focus:border-cyan-500/50 text-sm font-mono"
                           placeholder="e.g. 123456789"
                         />
                         <button
-                          onClick={async () => {
-                            try {
-                              await API.put('/user/profile', { telegramChatId: profile.telegramChatId });
-                              toast.success('Telegram Chat ID saved!');
-                            } catch (err) {
-                              toast.error('Failed to save');
-                            }
-                          }}
-                          className="px-4 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold text-xs rounded-xl hover:from-cyan-600 hover:to-blue-600 transition-all"
+                          onClick={handleProfileUpdate}
+                          disabled={profileSaving}
+                          className="px-4 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold text-xs rounded-xl hover:from-cyan-600 hover:to-blue-600 transition-all disabled:opacity-50"
                         >
-                          Save
+                          {profileSaving ? 'Saving...' : 'Save'}
                         </button>
                       </div>
                     </div>

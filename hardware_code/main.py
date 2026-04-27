@@ -206,7 +206,7 @@ while True:
         if not wlan.isconnected():
             print("📡 WiFi Connection Lost! Reconnecting...")
             is_authorized = False # Reset auth state on drop
-            connect_wifi()
+            # connect_wifi()
             mqtt_client = connect_mqtt()
             time.sleep(2)
             continue

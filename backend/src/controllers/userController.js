@@ -19,6 +19,8 @@ const getUserProfile = async (req, res) => {
             name: user.name,
             email: user.email,
             role: user.role,
+            telegramChatId: user.telegramChatId,
+            phoneNumber: user.phoneNumber,
             permissions: user.permissions || [],
             profilePicture: user.profilePicture,
             isActive: user.isActive,
@@ -32,7 +34,7 @@ const getUserProfile = async (req, res) => {
     }
 };
 
-//update user profile (name, email)
+//update user profile (name, email, telegram, phone)
 
 const updateUserProfile = async (req, res) => {
     try {
@@ -44,6 +46,8 @@ const updateUserProfile = async (req, res) => {
         // Update allowed fields
         if (req.body.name) user.name = req.body.name;
         if (req.body.email) user.email = req.body.email;
+        if (req.body.telegramChatId !== undefined) user.telegramChatId = req.body.telegramChatId;
+        if (req.body.phoneNumber !== undefined) user.phoneNumber = req.body.phoneNumber;
 
         const updatedUser = await user.save({ validateBeforeSave: true });
 
@@ -53,6 +57,8 @@ const updateUserProfile = async (req, res) => {
             name: updatedUser.name,
             email: updatedUser.email,
             role: updatedUser.role,
+            telegramChatId: updatedUser.telegramChatId,
+            phoneNumber: updatedUser.phoneNumber,
             profilePicture: updatedUser.profilePicture,
             createdAt: updatedUser.createdAt
         });
