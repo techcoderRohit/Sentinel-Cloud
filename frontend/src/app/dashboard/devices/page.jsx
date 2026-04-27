@@ -8,12 +8,3 @@ export default function DeviceMonitorPage() {
   )
 }
 
-// import DeviceControl from "@/components/Devices/DeviceControl";
-
-
-// export default function DeviceMonitorPage() {
-//   return (
-//     <div className="flex flex-col">
-//         <DeviceControl/> </div>
-//  )
-//  }
