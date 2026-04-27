@@ -3,7 +3,7 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 // Initialize Gemini — reads key from .env
 const getModel = () => {
   // const apiKey = process.env.GEMINI_API_KEY;
-  const apiKey = 'AIzaSyAEraHX797NMVA7a8NLbG0KFjxTtXkpPzc';
+  const apiKey = 'AIzaSyDMqdz_Gb7Q0fB2OMBHx3TBdpbwLDW1P6U';
   if (!apiKey || apiKey === 'YOUR_GEMINI_API_KEY_HERE') {
     throw new Error('GEMINI_API_KEY is not configured. Add your key to backend/.env file.');
   }

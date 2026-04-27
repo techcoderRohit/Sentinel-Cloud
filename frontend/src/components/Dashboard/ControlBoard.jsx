@@ -309,6 +309,15 @@ const ControlBoard = ({ boardId: propBoardId, readOnly = false }) => {
   const [boardInfo, setBoardInfo] = useState({ name: 'Loading...', description: '' });
   const [devices, setDevices] = useState([]);
   const [selectedWidgetForSettings, setSelectedWidgetForSettings] = useState(null);
+  const [isOwner, setIsOwner] = useState(false);
+
+  // Share modal state
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [shareEmail, setShareEmail] = useState('');
+  const [shareLoading, setShareLoading] = useState(false);
+  const [shareMsg, setShareMsg] = useState(null); // { type: 'success'|'error', text: string }
+  const [sharedUsers, setSharedUsers] = useState([]);
+  const [sharedUsersLoading, setSharedUsersLoading] = useState(false);
 
 
   const { setNodeRef: setCanvasDropRef } = useDroppable({ id: 'main-canvas' });
@@ -328,6 +337,7 @@ const ControlBoard = ({ boardId: propBoardId, readOnly = false }) => {
         if (boardRes.data.success) {
           setCanvasWidgets(boardRes.data.board.widgets || []);
           setBoardInfo({ name: boardRes.data.board.name, description: boardRes.data.board.description });
+          setIsOwner(boardRes.data.isOwner ?? true);
         }
 
         // Fetch user devices for the mapping dropdown
@@ -468,6 +478,53 @@ const ControlBoard = ({ boardId: propBoardId, readOnly = false }) => {
       alert("Saving failed: " + (error.response?.data?.message || "Error"));
     }
   };
+
+  const fetchSharedUsers = async () => {
+    setSharedUsersLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      const res = await API.get(`/dashboard/${boardId}/shared-users`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.data.success) setSharedUsers(res.data.sharedUsers);
+    } catch (e) {
+      console.error('Failed to fetch shared users', e);
+    } finally {
+      setSharedUsersLoading(false);
+    }
+  };
+
+  const handleShareWithUser = async () => {
+    if (!shareEmail.trim()) return;
+    setShareLoading(true);
+    setShareMsg(null);
+    try {
+      const token = localStorage.getItem('token');
+      const res = await API.post(`/dashboard/${boardId}/share-with-user`,
+        { email: shareEmail.trim() },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setShareMsg({ type: 'success', text: res.data.message });
+      setShareEmail('');
+      fetchSharedUsers();
+    } catch (e) {
+      setShareMsg({ type: 'error', text: e.response?.data?.message || 'Sharing failed' });
+    } finally {
+      setShareLoading(false);
+    }
+  };
+
+  const handleRevokeUser = async (email) => {
+    try {
+      const token = localStorage.getItem('token');
+      await API.delete(`/dashboard/${boardId}/revoke-user`,
+        { data: { email }, headers: { Authorization: `Bearer ${token}` } }
+      );
+      fetchSharedUsers();
+    } catch (e) {
+      alert('Revoke failed: ' + (e.response?.data?.message || 'Error'));
+    }
+  };
   const handleDragStart = (e) => setActiveDragItem(e.active);
 
   // 🌟 THE BULLETPROOF SNAP-BACK FIX 🌟
@@ -544,26 +601,20 @@ const ControlBoard = ({ boardId: propBoardId, readOnly = false }) => {
                 <div className="w-12 h-6 bg-slate-800 border border-slate-600 rounded-full peer peer-checked:after:translate-x-6 peer-checked:bg-cyan-500 peer-checked:border-cyan-400 after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-white after:rounded-full after:h-4 after:w-4 transition-all"></div>
               </label>
             </div>
-            {isEditing && (
-              <div className="flex gap-3">
+            <div className="flex gap-3">
+              {isOwner && (
                 <button
-                  onClick={async () => {
-                    try {
-                      const token = localStorage.getItem('token');
-                      const res = await API.put(`/dashboard/${boardId}/share`, {}, { headers: { Authorization: `Bearer ${token}` } });
-                      const shareUrl = `${window.location.origin}/share/${res.data.shareId}`;
-                      navigator.clipboard.writeText(shareUrl);
-                      alert(`🚀 Public Link Copied: ${shareUrl}`);
-                    } catch (e) { alert("Sharing failed"); }
-                  }}
+                  onClick={() => { setShowShareModal(true); setShareMsg(null); fetchSharedUsers(); }}
                   className="bg-slate-800 text-cyan-400 border border-slate-700 px-4 py-2.5 rounded-xl font-bold text-xs hover:bg-slate-700 transition-all flex items-center gap-2 uppercase tracking-widest"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
-                  Share
+                  Share Board
                 </button>
+              )}
+              {isEditing && (
                 <button onClick={saveDashboardToDB} className="bg-cyan-500 text-slate-900 px-6 py-2.5 rounded-xl font-bold text-xs hover:scale-105 transition-all tracking-widest shadow-[0_0_20px_rgba(6,182,212,0.4)] uppercase">Push Updates</button>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         )}
       </div>
@@ -738,6 +789,103 @@ const ControlBoard = ({ boardId: propBoardId, readOnly = false }) => {
           ) : null}
         </DragOverlay>
       </DndContext>
+
+      {/* ===== SHARE BOARD MODAL ===== */}
+      {showShareModal && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[200] flex items-center justify-center p-4">
+          <div className="bg-[#0F172A] border border-slate-700 rounded-3xl w-full max-w-md shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between px-6 py-5 border-b border-slate-800">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-cyan-500/10 border border-cyan-500/20 rounded-lg flex items-center justify-center">
+                  <svg className="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
+                </div>
+                <div>
+                  <h3 className="text-white font-bold text-sm uppercase tracking-wider">Share Board</h3>
+                  <p className="text-slate-500 text-[10px] mt-0.5">{boardInfo.name}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => { setShowShareModal(false); setShareMsg(null); setShareEmail(''); }}
+                className="w-8 h-8 bg-slate-800 hover:bg-slate-700 rounded-lg flex items-center justify-center text-slate-400 hover:text-white transition-all"
+              >✕</button>
+            </div>
+
+            <div className="p-6 space-y-5">
+              {/* Email Input */}
+              <div>
+                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 block">Share with registered user</label>
+                <div className="flex gap-2">
+                  <div className="flex-1 flex items-center bg-slate-900 border border-slate-700 rounded-xl px-4 focus-within:border-cyan-500/50 focus-within:ring-1 focus-within:ring-cyan-500/20 transition-all">
+                    <svg className="w-4 h-4 text-slate-600 shrink-0 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"></path></svg>
+                    <input
+                      type="email"
+                      value={shareEmail}
+                      onChange={(e) => setShareEmail(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleShareWithUser()}
+                      placeholder="Enter user email address"
+                      className="w-full py-3 bg-transparent text-white outline-none placeholder-slate-600 text-sm"
+                    />
+                  </div>
+                  <button
+                    onClick={handleShareWithUser}
+                    disabled={shareLoading || !shareEmail.trim()}
+                    className="px-4 py-3 bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold text-xs rounded-xl hover:from-cyan-600 hover:to-blue-600 transition-all disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap"
+                  >
+                    {shareLoading ? '...' : 'Invite'}
+                  </button>
+                </div>
+                {/* Feedback message */}
+                {shareMsg && (
+                  <div className={`mt-2 flex items-center gap-2 text-xs font-medium px-3 py-2 rounded-lg border ${shareMsg.type === 'success' ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' : 'text-rose-400 bg-rose-500/10 border-rose-500/20'}`}>
+                    <span>{shareMsg.type === 'success' ? '✓' : '✕'}</span>
+                    {shareMsg.text}
+                  </div>
+                )}
+              </div>
+
+              {/* Shared Users List */}
+              <div>
+                <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">People with access</h4>
+                {sharedUsersLoading ? (
+                  <div className="flex items-center justify-center py-6">
+                    <div className="w-5 h-5 border-2 border-cyan-500/30 border-t-cyan-500 rounded-full animate-spin"></div>
+                  </div>
+                ) : sharedUsers.length === 0 ? (
+                  <div className="py-5 text-center bg-slate-900/40 rounded-xl border border-slate-800">
+                    <p className="text-slate-600 text-xs font-medium">No one else has access yet</p>
+                    <p className="text-slate-700 text-[10px] mt-1">Enter an email above to invite</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                    {sharedUsers.map(u => (
+                      <div key={u._id} className="flex items-center justify-between bg-slate-900 border border-slate-800 rounded-xl px-4 py-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white text-xs font-black">
+                            {u.name?.charAt(0)?.toUpperCase() || '?'}
+                          </div>
+                          <div>
+                            <p className="text-white text-xs font-bold">{u.name}</p>
+                            <p className="text-slate-500 text-[10px]">{u.email}</p>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => handleRevokeUser(u.email)}
+                          className="text-[10px] font-bold text-rose-400 hover:text-rose-300 border border-rose-500/20 hover:border-rose-500/40 bg-rose-500/5 hover:bg-rose-500/10 px-2.5 py-1 rounded-lg transition-all uppercase tracking-wide"
+                        >Revoke</button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <p className="text-[10px] text-slate-600 text-center border-t border-slate-800 pt-4">
+                Shared users can view and interact with this board in read-only mode
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

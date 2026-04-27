@@ -24,7 +24,11 @@ const DashboardSchema = new mongoose.Schema({
     type: String,
     unique: false,
     default: null
-  } 
+  },
+  sharedWith: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }]
 },
   {
     timestamps: true

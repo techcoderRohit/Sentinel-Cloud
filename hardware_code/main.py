@@ -17,7 +17,7 @@ print(f'connecting to {WIFI_SSID}...')
 
 # Unique Identification
 # Generate ID based on MAC address to avoid collisions with other students
-CLIENT_ID = "my_esp8266_mm"
+CLIENT_ID = "my_esp8266_91"
 print("🆔 Assigned Unique Client ID:", CLIENT_ID)
 
 API_KEY = "sk-sentinel-998ff1d9614dc3d374863211c839936d"
