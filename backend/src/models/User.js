@@ -38,7 +38,7 @@ const userSchema = new mongoose.Schema(
          type: Date,
          default: null
       },
-      telegramChatId:{
+      telegramChatId: {
          type: String,
          trim: true,
          default: null
@@ -69,7 +69,6 @@ userSchema.pre("save", async function () {
       return;
    const salt = await bcrypt.genSalt(10);
    this.password = await bcrypt.hash(this.password, salt);
-
 });
 
 //password compare function

@@ -9,16 +9,18 @@ import sys
 import uio
 
 # --- CONFIGURATION ---
-WIFI_SSID = "hood hogan"
-WIFI_PASSWORD = "1qa2ws3ed4rf"
-MQTT_BROKER = "10.104.179.140"
+WIFI_SSID = "Digipodium_4G"
+WIFI_PASSWORD = "digipod@123"
+MQTT_BROKER = "192.168.18.61"
+
+print(f'connecting to {WIFI_SSID}...')
 
 # Unique Identification
 # Generate ID based on MAC address to avoid collisions with other students
 CLIENT_ID = "my_esp8266_mm"
 print("🆔 Assigned Unique Client ID:", CLIENT_ID)
 
-API_KEY = "sk-sentinel-6709d9a0b9fe278a48cd18a3e8e70568"
+API_KEY = "sk-sentinel-998ff1d9614dc3d374863211c839936d"
 
 # Dashboard logic topics (Inhe dhyan se check karein)
 COMMAND_TOPIC = "sentinel/device/{}/repl/rx".format(CLIENT_ID)
