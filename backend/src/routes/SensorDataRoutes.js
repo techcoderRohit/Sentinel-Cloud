@@ -47,9 +47,9 @@ router.post('/update', validateApiKey, async (req, res) => {
                 });
 
                 // Dispatch Email, Telegram, SMS — async
-                SendAlert(owner, { 
-                    title: `${device.deviceName || device.deviceId} - Sensor Alert`, 
-                    message: alertMsg 
+                SendAlert(owner, {
+                    title: `${device.deviceName || device.deviceId} - Sensor Alert`,
+                    message: alertMsg
                 }).catch(err => console.error('[SensorDataUpdate] Alert dispatch error:', err.message));
             }
         }
@@ -161,9 +161,9 @@ router.post('/command', protect, async (req, res) => {
         // Security check
         const targetId = req.user.role === 'guest' ? req.user.managedBy : req.user._id;
         const device = await Device.findOne({ _id: deviceId, owner: targetId });
-        
+
         if (!device) {
-             return res.status(404).json({ success: false, message: 'Device not found' });
+            return res.status(404).json({ success: false, message: 'Device not found' });
         }
 
         // 1. Publish to MQTT
@@ -311,18 +311,4 @@ router.get('/analytics/:apiKeyId', protect, async (req, res) => {
     }
 });
 
-// POST /api/iot/simulate (Testing Alerts)
-router.post('/simulate', protect, async (req, res) => {
-    try {
-        const { deviceId, payload } = req.body;
-        const targetId = req.user.role === 'guest' ? req.user.managedBy : req.user._id;
-        const device = await Device.findOne({ deviceId, owner: targetId });
-        if (!device) return res.status(404).json({ message: "Device not found" });
-        const anomalyCount = await checkForAnomalies(payload, device.deviceName || deviceId, device, null);
-        res.json({ success: true, message: "Simulation successful", anomaliesTriggered: anomalyCount });
-    } catch (err) {
-        res.status(500).json({ success: false, message: err.message });
-    }
-});
-
-module.exports = router;
+module.exports = router;

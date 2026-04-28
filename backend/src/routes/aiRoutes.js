@@ -61,10 +61,13 @@ router.post('/analyze/:apiKeyId', protect, async (req, res) => {
         });
 
     } catch (err) {
-        console.error('AI Analysis error:', err);
+        console.error('========== AI ANALYSIS ERROR ==========');
+        console.error('Message:', err.message);
+        console.error('Stack:', err.stack);
+        console.error('=======================================');
 
         // Handle specific Gemini API key errors gracefully
-        if (err.message && err.message.includes('GEMINI_API_KEY')) {
+        if (err.message && (err.message.includes('GEMINI_KEY') || err.message.includes('API_KEY') || err.message.includes('API key'))) {
             return res.status(503).json({
                 success: false,
                 message: err.message
@@ -73,7 +76,7 @@ router.post('/analyze/:apiKeyId', protect, async (req, res) => {
 
         res.status(500).json({
             success: false,
-            message: 'AI Analysis failed. Please try again.',
+            message: 'AI Analysis failed. Internal Server Error.',
             error: err.message
         });
     }

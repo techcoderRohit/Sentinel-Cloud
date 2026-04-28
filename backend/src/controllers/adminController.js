@@ -3,6 +3,7 @@ const Device = require('../models/Device');
 const ApiKey = require('../models/ApiKey');
 const SensorData = require('../models/SensorData');
 const mongoose = require('mongoose');
+const { isConnected: isMqttConnected } = require('../mqtt/mqttHandler');
 
 // @desc    Get admin dashboard statistics
 // @route   GET /api/admin/stats
@@ -30,6 +31,22 @@ const getAdminDashboardStats = async (req, res) => {
             createdAt: { $gte: oneWeekAgo },
             role: { $ne: 'admin' }
         });
+
+        // Previous week users (for trend calculation)
+        const twoWeeksAgo = new Date();
+        twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
+        const usersLastWeek = await User.countDocuments({
+            createdAt: { $gte: twoWeeksAgo, $lt: oneWeekAgo },
+            role: { $ne: 'admin' }
+        });
+
+        // Calculate user trend
+        let userTrend = 0;
+        if (usersLastWeek > 0) {
+            userTrend = ((newUsersThisWeek - usersLastWeek) / usersLastWeek) * 100;
+        } else if (newUsersThisWeek > 0) {
+            userTrend = 100;
+        }
 
         // New devices this week
         const newDevicesThisWeek = await Device.countDocuments({
@@ -68,7 +85,8 @@ const getAdminDashboardStats = async (req, res) => {
                     active: activeUsers,
                     blocked: blockedUsers,
                     guests: guestUsers,
-                    newThisWeek: newUsersThisWeek
+                    newThisWeek: newUsersThisWeek,
+                    trend: parseFloat(userTrend.toFixed(1))
                 },
                 devices: {
                     total: totalDevices,
@@ -79,7 +97,7 @@ const getAdminDashboardStats = async (req, res) => {
                 dataPoints: totalDataPoints,
                 registrationTrend,
                 deviceTypeDistribution: deviceTypeDistribution.map(d => ({
-                    type: d._id || 'Unknown',
+                    type: d._id || 'Sensor',
                     count: d.count
                 }))
             }
@@ -371,7 +389,7 @@ const getSystemHealth = async (req, res) => {
         const uptime = process.uptime();
         const memoryUsage = process.memoryUsage();
         const dbState = mongoose.connection.readyState;
-        // 0 = disconnected, 1 = connected, 2 = connecting, 3 = disconnecting
+        const mqttStatus = isMqttConnected();
 
         const dbStateMap = {
             0: 'Disconnected',
@@ -388,7 +406,9 @@ const getSystemHealth = async (req, res) => {
                     uptimeFormatted: formatUptime(uptime),
                     nodeVersion: process.version,
                     platform: process.platform,
-                    pid: process.pid
+                    pid: process.pid,
+                    env: process.env.NODE_ENV || 'development',
+                    status: 'Operational'
                 },
                 memory: {
                     rss: formatBytes(memoryUsage.rss),
@@ -402,6 +422,10 @@ const getSystemHealth = async (req, res) => {
                     isConnected: dbState === 1,
                     host: mongoose.connection.host || 'N/A',
                     name: mongoose.connection.name || 'N/A'
+                },
+                mqtt: {
+                    status: mqttStatus ? 'Connected' : 'Disconnected',
+                    isConnected: mqttStatus
                 },
                 timestamp: new Date().toISOString()
             }

@@ -2,7 +2,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, LayoutDashboard, Cpu, GitBranch, Key, Settings, Terminal, LineChart, Brain, Upload } from 'lucide-react';
+import { Home, LayoutDashboard, Cpu, Key, Settings, Terminal, LineChart, Brain, Upload } from 'lucide-react';
 
 const Sidebar = () => {
   const pathname = usePathname();
@@ -13,7 +13,6 @@ const Sidebar = () => {
     { name: 'Devices', icon: <Cpu size={20} />, path: "/dashboard/devices" },
     { name: 'Web Repl Console', icon: <Terminal size={20} />, path: "/dashboard/webRepl"},
     { name: 'Reports & Analytics', icon: <LineChart size={20} />, path: "/dashboard/reports" },
-    { name: 'Alert Simulator', icon: <GitBranch size={20} />, path: "/dashboard/alert-simulator" },
     { name: 'API Keys', icon: <Key size={20} />, path: "/dashboard/apikeymanager" },
     { name: 'Settings', icon: <Settings size={20} />, path: "/dashboard/settings" },
   ];

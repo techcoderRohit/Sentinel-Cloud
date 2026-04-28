@@ -10,13 +10,13 @@ const sendEmail = async (options) => {
     },
   });
 
-  // 2. Email details (OTP ke liye dynamic message)
+  // 2. Email details
   const mailOptions = {
     from: '"Sentinel Cloud Support" <no-reply@sentinelcloud.com>',
     to: options.email,
     subject: options.subject,
     text: options.message, // Plain text version
-    html: `
+    html: options.html || `
       <div style="font-family: Arial, sans-serif; max-width: 400px; margin: auto; border: 1px solid #ddd; padding: 20px; border-radius: 10px; background-color: #f9f9f9;">
         <h2 style="color: #0891b2; text-align: center;">Sentinel Cloud</h2>
         <p style="font-size: 16px; color: #333;">Aapka Password Reset OTP niche diya gaya hai:</p>

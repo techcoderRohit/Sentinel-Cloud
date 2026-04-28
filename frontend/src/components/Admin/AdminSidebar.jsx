@@ -2,7 +2,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Users, Cpu, Activity, ArrowLeft, Shield } from 'lucide-react';
+import { LayoutDashboard, Users, Cpu, ArrowLeft, Shield, Mail } from 'lucide-react';
 
 const AdminSidebar = () => {
   const pathname = usePathname();
@@ -11,7 +11,7 @@ const AdminSidebar = () => {
     { name: 'Dashboard', icon: <LayoutDashboard size={20} />, path: "/admin" },
     { name: 'User Management', icon: <Users size={20} />, path: "/admin/users" },
     { name: 'Device Management', icon: <Cpu size={20} />, path: "/admin/devices" },
-    { name: 'System Health', icon: <Activity size={20} />, path: "/admin/system" },
+    { name: 'Contact Queries', icon: <Mail size={20} />, path: "/admin/contacts" },
   ];
 
   return (

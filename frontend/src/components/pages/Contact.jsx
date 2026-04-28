@@ -1,8 +1,41 @@
-"use client";
-
+import { useState } from "react";
 import { motion } from "framer-motion";
+import API from "@/utils/api";
+import toast from "react-hot-toast";
 
 const Contact = () => {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    subject: "",
+    message: "",
+  });
+  const [loading, setLoading] = useState(false);
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!formData.name || !formData.email || !formData.subject || !formData.message) {
+      return toast.error("Please fill all fields");
+    }
+
+    try {
+      setLoading(true);
+      const res = await API.post("/contact", formData);
+      if (res.data.success) {
+        toast.success(res.data.message);
+        setFormData({ name: "", email: "", subject: "", message: "" });
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <section id="Contact" className="py-24 bg-[#0b0f1a] text-white">
       <div className="container mx-auto px-6 lg:px-20">
@@ -28,7 +61,7 @@ const Contact = () => {
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* LEFT SIDE CONTENT */}
           <motion.div
-            initial={{ opacity: 0, x: 60 }}
+            initial={{ opacity: 0, x: -60 }}
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.7 }}
             viewport={{ once: true }}
@@ -59,7 +92,7 @@ const Contact = () => {
             viewport={{ once: true }}
             className="bg-gray-800/60 backdrop-blur-md border border-gray-700 p-8 rounded-2xl shadow-xl"
           >
-            <form className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6">
               {/* Name */}
               <div>
                 <label className="block text-sm mb-2 text-gray-300">
@@ -67,6 +100,9 @@ const Contact = () => {
                 </label>
                 <input
                   type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
                   placeholder="Enter your name"
                   className="w-full px-4 py-3 rounded-xl bg-gray-900 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-cyan-500"
                 />
@@ -79,6 +115,9 @@ const Contact = () => {
                 </label>
                 <input
                   type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
                   placeholder="Enter your email"
                   className="w-full px-4 py-3 rounded-xl bg-gray-900 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-cyan-500"
                 />
@@ -91,6 +130,9 @@ const Contact = () => {
                 </label>
                 <input
                   type="text"
+                  name="subject"
+                  value={formData.subject}
+                  onChange={handleChange}
                   placeholder="Enter subject"
                   className="w-full px-4 py-3 rounded-xl bg-gray-900 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-cyan-500"
                 />
@@ -103,6 +145,9 @@ const Contact = () => {
                 </label>
                 <textarea
                   rows="4"
+                  name="message"
+                  value={formData.message}
+                  onChange={handleChange}
                   placeholder="Write your message..."
                   className="w-full px-4 py-3 rounded-xl bg-gray-900 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-cyan-500"
                 ></textarea>
@@ -113,9 +158,10 @@ const Contact = () => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 type="submit"
-                className="w-full bg-linear-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white py-3 rounded-xl font-semibold shadow-lg transition"
+                disabled={loading}
+                className="w-full bg-linear-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white py-3 rounded-xl font-semibold shadow-lg transition disabled:opacity-50"
               >
-                Send Message
+                {loading ? "Sending..." : "Send Message"}
               </motion.button>
             </form>
           </motion.div>

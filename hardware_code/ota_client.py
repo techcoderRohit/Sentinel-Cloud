@@ -1,6 +1,7 @@
 import urequests
 import os
 import machine
+import gc
 
 class OTAClient:
     def __init__(self, download_url):
@@ -8,16 +9,25 @@ class OTAClient:
 
     def update(self):
         print("🚀 Starting OTA Update from:", self.url)
+        gc.collect()
+        print("📊 Free memory before update:", gc.mem_free())
+        
         try:
-            # 1. Download to temp file (Safe approach)
-            response = urequests.get(self.url)
+            # 1. Download to temp file using streaming to save RAM
+            response = urequests.get(self.url, stream=True)
             if response.status_code != 200:
                 print("❌ Download failed. HTTP:", response.status_code)
+                response.close()
                 return False
 
-            print("💾 Writing new firmware...")
-            with open('main.py.new', 'w') as f:
-                f.write(response.text)
+            print("💾 Writing new firmware in chunks...")
+            with open('main.py.new', 'wb') as f:
+                while True:
+                    chunk = response.raw.read(512) # Read in 512 byte blocks
+                    if not chunk:
+                        break
+                    f.write(chunk)
+                    gc.collect() # Clean up after each chunk
             
             response.close()
 
@@ -45,6 +55,8 @@ class OTAClient:
         except Exception as e:
             print("❌ OTA Error:", e)
             return False
+        finally:
+            gc.collect()
 
 def pull_update(url):
     client = OTAClient(url)

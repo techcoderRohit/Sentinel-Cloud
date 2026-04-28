@@ -57,3 +57,15 @@ export const getSystemHealth = async () => {
   const response = await API.get("/admin/system-health");
   return response.data;
 };
+
+// --------- CONTACT QUERIES ---------
+
+export const getAllContacts = async () => {
+  const response = await API.get("/contact/admin");
+  return response.data;
+};
+
+export const replyToContact = async (id, reply) => {
+  const response = await API.post(`/contact/admin/${id}/reply`, { reply });
+  return response.data;
+};

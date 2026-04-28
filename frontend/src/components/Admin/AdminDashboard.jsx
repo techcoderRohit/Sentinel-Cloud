@@ -123,7 +123,12 @@ const AdminDashboard = () => {
                 <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${card.gradient} flex items-center justify-center text-white shadow-lg ${card.shadowColor}`}>
                   {card.icon}
                 </div>
-                <TrendingUp size={16} className={card.textColor} />
+                {index === 0 && stats?.users?.trend !== undefined && (
+                  <div className={`flex items-center gap-1 text-xs font-bold ${stats.users.trend >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                    {stats.users.trend >= 0 ? '+' : ''}{stats.users.trend}%
+                    <TrendingUp size={14} className={stats.users.trend < 0 ? 'rotate-180' : ''} />
+                  </div>
+                )}
               </div>
               <h3 className="text-sm font-medium text-slate-400">{card.title}</h3>
               <p className="text-3xl font-bold text-white mt-1">{card.value.toLocaleString()}</p>

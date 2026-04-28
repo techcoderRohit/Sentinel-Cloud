@@ -4,6 +4,10 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 const getModel = () => {
 
   const apiKey = process.env.GEMINI_KEY;
+  console.log('--- Gemini Initialization ---');
+  console.log('Key Present:', !!apiKey);
+  console.log('Key Length:', apiKey ? apiKey.length : 0);
+
   if (!apiKey) {
     throw new Error('GEMINI_KEY is not configured. Add your key to backend/.env file.');
   }
@@ -74,9 +78,19 @@ ANALYSIS RULES:
 - Always provide at least 2 insights even if data looks normal
 - Keep the summary conversational and easy to understand`;
 
-  const result = await model.generateContent(prompt);
-  const responseText = result.response.text();
+  let responseText;
+  try {
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    responseText = response.text();
 
+    if (!responseText) {
+      throw new Error('Gemini returned an empty response. This might be due to safety filters or quota limits.');
+    }
+  } catch (error) {
+    console.error('Gemini API Error:', error);
+    throw new Error(`AI generation failed: ${error.message}`);
+  }
 
   // Parse AI response — handle potential markdown wrapping
   let parsed;
@@ -87,14 +101,23 @@ ANALYSIS RULES:
     // If Gemini wrapped it in ```json ... ```, extract the JSON
     const jsonMatch = responseText.match(/```(?:json)?\s*([\s\S]*?)```/);
     if (jsonMatch) {
-      parsed = JSON.parse(jsonMatch[1].trim());
+      try {
+        parsed = JSON.parse(jsonMatch[1].trim());
+      } catch (e2) {
+        throw new Error('Failed to parse JSON inside code blocks');
+      }
     } else {
       // Last resort: try to find JSON object in the response
       const braceMatch = responseText.match(/\{[\s\S]*\}/);
       if (braceMatch) {
-        parsed = JSON.parse(braceMatch[0]);
+        try {
+          parsed = JSON.parse(braceMatch[0]);
+        } catch (e3) {
+          throw new Error('Failed to parse JSON object from text');
+        }
       } else {
-        throw new Error('Failed to parse AI response as JSON');
+        console.log('Raw AI Response:', responseText);
+        throw new Error('Failed to parse AI response as JSON. See logs for raw output.');
       }
     }
   }

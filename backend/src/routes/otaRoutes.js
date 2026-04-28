@@ -38,7 +38,7 @@ router.post('/deploy', protect, async (req, res) => {
         // Notify device via MQTT
         const mqttClient = getClient();
         if (mqttClient && mqttClient.connected) {
-            const serverUrl = process.env.OTA_SERVER_URL || 'http://10.104.179.140:5000'; // Default to laptop IP
+            const serverUrl = process.env.OTA_SERVER_URL || 'http://10.190.69.133:5000'; // Updated default to current laptop IP
             const updateMsg = JSON.stringify({
                 cmd: "update",
                 url: `${serverUrl}/api/ota/download/${deviceId}`

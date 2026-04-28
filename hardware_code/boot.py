@@ -5,8 +5,8 @@ import gc
 import time
 
 def do_connect():
-    ssid = 'Digipodium_4G'
-    password = 'digipod@123'
+    ssid = 'vivo Y300 5G'
+    password = 'rohit564'
     
     sta_if = network.WLAN(network.STA_IF)
     if not sta_if.isconnected():
