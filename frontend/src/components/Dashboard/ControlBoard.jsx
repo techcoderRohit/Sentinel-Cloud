@@ -115,7 +115,7 @@ const renderWidgetUI = (widget, isEditing = false, isPreview = false, updateData
               }} className="absolute transition-all duration-400 ease-spring rounded-full"></div>
             </div>
           </label>
-          <span style={{ fontSize: 'clamp(0.7rem, 6cqmin, 1.5rem)', marginTop: 'clamp(10px, 5cqmin, 24px)', color: data.status ? themeColor : undefined }} className={`font-bold uppercase tracking-widest transition-colors duration-300 ${data.status ? '' : 'text-slate-500'}`}>
+          <span style={{ fontSize: 'clamp(0.7rem, 6cqmin, 1.5rem)', marginTop: 'clamp(10px, 5cqmin, 24px)', color: data.status ? themeColor : undefined }} className={`font-bold tracking-widest transition-colors duration-300 ${data.status ? '' : 'text-slate-500'}`}>
             {data.status ? (custom.title || 'System Online') : 'Disabled'}
           </span>
         </div>
@@ -133,7 +133,7 @@ const renderWidgetUI = (widget, isEditing = false, isPreview = false, updateData
             </svg>
             <div className="absolute flex flex-col items-center">
               <span style={{ fontSize: 'clamp(2.5rem, 24cqmin, 6rem)' }} className="font-black text-white leading-none tracking-tighter drop-shadow-lg">{data.value}</span>
-              <span style={{ fontSize: 'clamp(0.7rem, 8cqmin, 1.5rem)', color: colors.stroke }} className="font-bold uppercase tracking-widest mt-1 transition-colors duration-700">{custom.unit || data.unit}</span>
+              <span style={{ fontSize: 'clamp(0.7rem, 8cqmin, 1.5rem)', color: colors.stroke }} className="font-bold tracking-widest mt-1 transition-colors duration-700">{custom.unit || data.unit}</span>
             </div>
           </div>
         </div>
@@ -168,7 +168,7 @@ const renderWidgetUI = (widget, isEditing = false, isPreview = false, updateData
             style={{ backgroundColor: themeColor, boxShadow: `0 10px 30px ${themeColor}66` }}
             className="w-full h-full rounded-2xl text-slate-900 font-black tracking-widest uppercase transition-all active:scale-95 flex flex-col items-center justify-center gap-2"
           >
-            <span style={{ fontSize: 'clamp(1rem, 8cqmin, 2rem)' }}>{data.label || 'TRIGGER'}</span>
+            <span style={{ fontSize: 'clamp(1rem, 8cqmin, 2rem)' }}>{data.label || 'Trigger'}</span>
             <div className="w-8 h-1 bg-white/40 rounded-full"></div>
           </button>
         </div>
@@ -636,7 +636,7 @@ const ControlBoard = ({ boardId: propBoardId, readOnly = false }) => {
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-3">
             <button onClick={() => window.location.href = '/dashboard/control-board'} className="text-slate-500 hover:text-white transition-colors">←</button>
-            <h2 className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400 tracking-tight uppercase">{boardInfo.name}</h2>
+            <h2 className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400 tracking-tight">{boardInfo.name}</h2>
           </div>
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-cyan-500 animate-pulse"></span>

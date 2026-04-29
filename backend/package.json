@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node src/index.js",
     "subscriber": "node subscriber.js",
-    "dev": "concurrently --kill-others \"nodemon src/index.js\" \"node subscriber.js\""
+    "dev": "nodemon src/index.js"
   },
   "keywords": [],
   "author": "",

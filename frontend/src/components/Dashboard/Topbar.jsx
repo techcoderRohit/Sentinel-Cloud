@@ -179,7 +179,7 @@ const Topbar = () => {
             {hasCritical ? <Flame size={20} className="animate-pulse" /> : <Bell size={20} />}
 
             {unreadCount > 0 && (
-              <span className={`absolute -top-1.5 -right-1.5 inline-flex items-center justify-center min-w-[20px] h-5 text-[10px] font-bold text-white border-2 border-[#0f172a] rounded-full px-1 ${hasCritical ? 'bg-red-500' : 'bg-cyan-500'}`}>
+              <span className={`absolute -top-1.5 -right-1.5 inline-flex items-center justify-center min-w-[20px] h-5 text-[10px] font-bold text-white border-2 border-[#0f172a] rounded-full px-1 bg-red-500 animate-in zoom-in duration-300`}>
                 {unreadCount > 99 ? '99+' : unreadCount}
               </span>
             )}

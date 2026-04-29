@@ -35,6 +35,7 @@ pending_ota_url = None # Flag for OTA update
 
 # Hardware Setup
 led = machine.Pin(2, machine.Pin.OUT) # Internal LED
+pwm_led = machine.PWM(led, freq=1000) # PWM for brightness control
 relay = machine.Pin(4, machine.Pin.OUT) # Relay on D2
 sensor = dht.DHT11(machine.Pin(5))
 
@@ -42,6 +43,7 @@ sensor = dht.DHT11(machine.Pin(5))
 # Maintain a persistent context for commands (variables stay in memory)
 repl_globals = {
     'led': led,
+    'pwm_led': pwm_led,
     'relay': relay,
     'sensor': sensor,
     'time': time,
@@ -62,30 +64,29 @@ def run_repl_command(cmd):
             self.stream.write(data)
         def readinto(self, buf):
             return 0
-
+    
     sw = StreamWrapper(output)
     redirected = False
     
     try:
-        # Attempt to redirect terminal output to our StringIO buffer
-        # Slot 1 is often available on ESP8266/ESP32 and doesn't disrupt slot 0 (main REPL)
+        # Slot 1 captures output for the web terminal
         try:
             uos.dupterm(sw, 1)
             redirected = True
         except:
             try:
-                uos.dupterm(sw) # Fallback to slot 0 if slot 1 is not supported
+                uos.dupterm(sw)
                 redirected = True
             except:
-                pass # Last resort: run without capture
-
-        # 1. Try eval() for single expressions (to capture return values)
+                pass 
+    
+        # 1. Try eval() for single expressions (like 5+5)
         try:
             result = eval(cmd, repl_globals)
             if result is not None:
                 print(result)
         except SyntaxError:
-            # 2. If eval fails (e.g. assignment), try exec()
+            # 2. If eval fails (e.g. print statement), try exec()
             exec(cmd, repl_globals)
         except Exception as e:
             # 3. Fallback for other errors
@@ -133,27 +134,28 @@ def sub_cb(topic, msg):
                 pending_ota_url = update_url # Set flag to handle outside callback
             return
 
-        # Input Feed Control (New Command System)
+        # 2. INPUT COMMANDS (Slider, Button, etc.)
         if decoded_topic == INPUT_TOPIC:
-            print('input topic')
-            field = data.get("field")
+            # Use .lower() to handle case-sensitivity from dashboard (e.g. BRIGHTNESS vs brightness)
+            field = data.get("field", "").lower()
             value = data.get("value")
+            print("[INPUT] Widget Update: {} -> {}".format(field, value))
             
-            print("🕹️ Dashboard Input: {} -> {}".format(field, value))
-            
-            if field == "status":
+            if field == 'relay':
+                # Relay Control (Active Low)
                 if value is True or value == 1:
-                    led.value(0) # ON
-                else:
-                    led.value(1) # OFF
-            elif field == "relay":
-                print('relay_feed')
-                if value is True or value == 1:
-                    relay.value(0) # ON (Relays are usually HIGH active)
+                    relay.value(0) # ON
                 else:
                     relay.value(1) # OFF
             
-            # You can add more logic here for other fields (e.g. brightness, threshold)
+            elif field == 'brightness':
+                # LED Brightness Control (0-100 range)
+                # Note: Internal LED on ESP8266 (Pin 2) is Active Low.
+                # 100% brightness = 0 duty, 0% brightness = 1023 duty.
+                duty = int(((100 - value) / 100) * 1023)
+                pwm_led.duty(duty)
+                print("[PWM] Brightness set to: {}% (Duty: {})".format(value, duty))
+                
             return
 
         # Regular Repl Command Processing
@@ -169,11 +171,11 @@ def sub_cb(topic, msg):
             # Handle legacy/built-in commands first
             cmd_clean = code_to_run.lower().strip()
             if cmd_clean == "led_on":
-                led.value(0)
+                pwm_led.duty(0) # ON (Active Low: 0 is full brightness)
                 response = "Success: LED is now ON"
                 color = "#4ade80" # Green
             elif cmd_clean == "led_off":
-                led.value(1)
+                pwm_led.duty(1023) # OFF (Active Low: 1023 is no brightness)
                 response = "Success: LED is now OFF"
                 color = "#f87171" # Red
             elif cmd_clean == "status":

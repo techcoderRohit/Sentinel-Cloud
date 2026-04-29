@@ -1,9 +1,9 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import API from '@/utils/api';
-import { 
+import {
   LineChart, Line, AreaChart, Area,
-  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer 
+  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
 
 import { Calendar, Filter, Activity, Droplets, Table as TableIcon, Clock } from 'lucide-react';
@@ -61,11 +61,11 @@ const Reports = () => {
       setLoading(true);
       try {
         const dev = devices.find(d => d.apiKey === selectedDevice);
-        
+
         // 1. Analytics for Charts
         const feedQuery = selectedFeed !== 'All' ? `&feed=${selectedFeed}` : '';
         const analyticsRes = await API.get(`/iot/analytics/${selectedDevice}?range=${range}${feedQuery}`);
-        
+
         const formattedData = analyticsRes.data.map(item => {
           const base = { time: item._id };
           if (!selectedFeed || selectedFeed === 'All') {
@@ -88,7 +88,7 @@ const Reports = () => {
           // 3. Extract Dynamic Feeds from payload keys
           if (historyRes.data.length > 0) {
             const firstPayload = historyRes.data[0].payload || {};
-            const keys = Object.keys(firstPayload).filter(k => 
+            const keys = Object.keys(firstPayload).filter(k =>
               typeof firstPayload[k] === 'number' || typeof firstPayload[k] === 'boolean'
             );
             setAvailableFeeds(keys);
@@ -137,7 +137,7 @@ const Reports = () => {
 
   return (
     <div className="p-4 md:p-6 space-y-6">
-      
+
       {/* Header & Controls */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-[#0d1421] border border-gray-800 p-5 rounded-2xl">
         <div>
@@ -182,8 +182,8 @@ const Reports = () => {
                 key={r}
                 onClick={() => setRange(r)}
                 className={`px-4 py-1.5 text-xs font-bold rounded-md transition-all ${range === r
-                    ? 'bg-cyan-500 text-white shadow-lg'
-                    : 'text-gray-500 hover:text-gray-300'
+                  ? 'bg-cyan-500 text-white shadow-lg'
+                  : 'text-gray-500 hover:text-gray-300'
                   }`}
               >
                 {r}
@@ -194,9 +194,9 @@ const Reports = () => {
           <button
             onClick={handleAiAnalysis}
             disabled={analyzing}
-            className={`flex items-center gap-2 px-5 py-2 rounded-xl font-bold text-xs uppercase tracking-widest transition-all shadow-lg ${analyzing
-                ? 'bg-gray-800 text-gray-500 cursor-not-allowed'
-                : 'bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:scale-105 active:scale-95 shadow-purple-500/20'
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-widest transition-all shadow-lg ${analyzing
+              ? 'bg-gray-800 text-gray-500 cursor-not-allowed'
+              : 'bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:scale-105 active:scale-95 shadow-purple-500/20'
               }`}
           >
             {analyzing ? (
@@ -204,7 +204,7 @@ const Reports = () => {
             ) : (
               <Activity size={14} className="animate-pulse" />
             )}
-            AI Detect Anomalies
+            AI Anomaly
           </button>
         </div>
       </div>
@@ -228,7 +228,7 @@ const Reports = () => {
                 <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
                   <Activity size={120} className="text-purple-500" />
                 </div>
-                
+
                 <div className="flex flex-col xl:flex-row gap-8 relative z-10">
                   {/* Health Score */}
                   <div className="flex flex-col items-center justify-center p-6 bg-[#1e293b]/50 rounded-2xl border border-white/5 min-w-[200px]">
@@ -236,11 +236,11 @@ const Reports = () => {
                     <div className="relative flex items-center justify-center">
                       <svg className="w-32 h-32 transform -rotate-90">
                         <circle cx="64" cy="64" r="58" fill="none" stroke="#1e293b" strokeWidth="8" />
-                        <circle 
-                          cx="64" cy="64" r="58" fill="none" 
-                          stroke={aiReport.healthScore > 80 ? '#10b981' : aiReport.healthScore > 50 ? '#f59e0b' : '#ef4444'} 
-                          strokeWidth="8" 
-                          strokeDasharray={364.4} 
+                        <circle
+                          cx="64" cy="64" r="58" fill="none"
+                          stroke={aiReport.healthScore > 80 ? '#10b981' : aiReport.healthScore > 50 ? '#f59e0b' : '#ef4444'}
+                          strokeWidth="8"
+                          strokeDasharray={364.4}
                           strokeDashoffset={364.4 - (aiReport.healthScore / 100) * 364.4}
                           strokeLinecap="round"
                           className="transition-all duration-1000 ease-out"
@@ -283,9 +283,8 @@ const Reports = () => {
                               <li key={idx} className="bg-rose-500/5 border border-rose-500/10 p-2.5 rounded-lg flex flex-col gap-1">
                                 <div className="flex justify-between items-center">
                                   <span className="text-[10px] font-bold text-rose-500 uppercase">{anomaly.type}</span>
-                                  <span className={`text-[8px] px-1.5 py-0.5 rounded uppercase font-black ${
-                                    anomaly.severity === 'critical' ? 'bg-rose-500 text-white' : 'bg-amber-500 text-black'
-                                  }`}>{anomaly.severity}</span>
+                                  <span className={`text-[8px] px-1.5 py-0.5 rounded uppercase font-black ${anomaly.severity === 'critical' ? 'bg-rose-500 text-white' : 'bg-amber-500 text-black'
+                                    }`}>{anomaly.severity}</span>
                                 </div>
                                 <p className="text-[11px] text-gray-300">{anomaly.message}</p>
                                 <span className="text-[9px] text-gray-500 font-mono">{new Date(anomaly.timestamp).toLocaleString()}</span>
@@ -309,7 +308,7 @@ const Reports = () => {
             {/* Line Chart - Trends */}
             <div className="bg-[#0d1421] border border-gray-800 rounded-2xl p-5 shadow-lg">
               <h3 className="text-sm font-bold text-gray-400 tracking-wider mb-6 flex items-center gap-2 uppercase">
-                <Activity className="text-emerald-400" size={16} /> 
+                <Activity className="text-emerald-400" size={16} />
                 {selectedFeed === 'All' ? 'TEMPERATURE TRENDS' : `${selectedFeed} TRENDS`}
               </h3>
               <div className="h-[300px] w-full">
@@ -424,9 +423,8 @@ const Reports = () => {
                             <td className="px-6 py-4 text-center text-emerald-400 font-bold">{row.payload?.temperature}°C</td>
                             <td className="px-6 py-4 text-center text-blue-400 font-bold">{row.payload?.humidity}%</td>
                             <td className="px-6 py-4 text-center">
-                              <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase ${
-                                row.payload?.motion ? 'bg-rose-500/20 text-rose-500' : 'bg-gray-800 text-gray-600'
-                              }`}>
+                              <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase ${row.payload?.motion ? 'bg-rose-500/20 text-rose-500' : 'bg-gray-800 text-gray-600'
+                                }`}>
                                 {row.payload?.motion ? 'Detected' : 'None'}
                               </span>
                             </td>

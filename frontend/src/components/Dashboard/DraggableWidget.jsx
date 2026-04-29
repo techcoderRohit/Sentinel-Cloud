@@ -82,8 +82,8 @@ export function DraggableWidget({ id, title, isEditing, onRemove, onResize, onSe
           <div className="flex items-center gap-2 text-slate-300 flex-1 overflow-hidden">
             <IconComponent className="w-4 h-4 text-cyan-500 shrink-0" />
             <div className="flex flex-col min-w-0">
-               <span className="text-[9px] font-black uppercase tracking-tighter text-cyan-500/80 truncate">{mappedDevice}</span>
-               <span className="text-[10px] font-bold uppercase tracking-widest text-white truncate">{title}</span>
+               <span className="text-[9px] font-black tracking-tighter text-cyan-500/80 truncate">{mappedDevice}</span>
+               <span className="text-[10px] font-bold tracking-widest text-white truncate">{title}</span>
             </div>
           </div>
           <div className="flex items-center gap-1">
