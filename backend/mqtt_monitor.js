@@ -1,7 +1,7 @@
 const mqtt = require('mqtt');
 
 // Configuration from main.py
-const BROKER_URL = 'mqtt://10.104.179.140';
+const BROKER_URL = 'mqtt://192.168.46.102';
 const TOPIC = 'sensors/data';
 
 console.log(`🔍 Sentinel MQTT Monitor: Connecting to ${BROKER_URL}...`);

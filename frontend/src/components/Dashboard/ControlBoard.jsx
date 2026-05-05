@@ -105,7 +105,7 @@ const renderWidgetUI = (widget, isEditing = false, isPreview = false, updateData
         <div className={`widget-box flex flex-col items-center justify-center ${pointerClass}`}>
           <label className={`relative flex items-center justify-center ${isInteractive ? 'cursor-pointer group' : 'cursor-default'}`}>
             <input type="checkbox" className="sr-only" checked={data.status} onChange={(e) => isInteractive && updateData(widget.id, { ...data, status: e.target.checked }, true)} disabled={!isInteractive} />
-            <div style={{ width: 'clamp(80px, 45cqmin, 160px)', height: 'clamp(40px, 22cqmin, 80px)' }} className={`relative rounded-full border-2 transition-all duration-300 ${data.status ? 'bg-slate-900 border-cyan-500/50' : 'bg-slate-800 border-slate-700 shadow-inner'}`} style={{ borderColor: data.status ? themeColor : undefined }}>
+            <div style={{ width: 'clamp(80px, 45cqmin, 160px)', height: 'clamp(40px, 22cqmin, 80px)', borderColor: data.status ? themeColor : undefined }} className={`relative rounded-full border-2 transition-all duration-300 ${data.status ? 'bg-slate-900 border-cyan-500/50' : 'bg-slate-800 border-slate-700 shadow-inner'}`}>
               <div style={{
                 width: 'clamp(32px, 18cqmin, 68px)', height: 'clamp(32px, 18cqmin, 68px)',
                 left: data.status ? 'calc(100% - clamp(32px, 18cqmin, 68px) - 2px)' : '2px',

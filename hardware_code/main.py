@@ -9,14 +9,14 @@ import sys
 import uio
 import uos
 
-MQTT_BROKER = "10.190.69.133"
+MQTT_BROKER = "192.168.46.102"
 
 # Unique Identification
 # Generate ID based on MAC address to avoid collisions with other students
-CLIENT_ID = "my_esp8266_98"
+CLIENT_ID = "my_esp8266_97"
 print("🆔 Assigned Unique Client ID:", CLIENT_ID)
 
-API_KEY = "sk-sentinel-f5d5c09018c17f280850763ee74b2a86"
+API_KEY = "sk-sentinel-44db4d401445c1785c2abd00cb5988c3"
 
 # Dashboard logic topics (Inhe dhyan se check karein)
 
