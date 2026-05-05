@@ -87,4 +87,4 @@ npm start
 ## 👨‍💻 Contributors
 
 - [Rohit Modi](https://github.com/techcoderRohit)  
-- [Samir Ansari](https://github.com/username)
+- [Samir Ansari](https://github.com/devsamir13)
