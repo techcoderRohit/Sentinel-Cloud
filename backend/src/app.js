@@ -24,7 +24,9 @@ const contactRoutes = require('./routes/contactRoutes');
 const app = express();
 
 //Middleware setup
-app.use(cors());
+app.use(cors({
+    origin: "*"
+}));
 app.use(express.json());
 
 //Serve uploaded files (profile pictures)
