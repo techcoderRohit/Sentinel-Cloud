@@ -65,27 +65,7 @@ router.post('/update', validateApiKey, async (req, res) => {
     }
 });
 
-// GET /api/iot/latest/:apiKeyId
-router.get('/latest/:apiKeyId', async (req, res) => {
-    try {
-        const device = await Device.findOne({ apiKey: req.params.apiKeyId });
-        if (!device) {
-            return res.status(404).json({ message: "Device not found" });
-        }
-
-        const latestData = await SensorData.findOne({ deviceId: device.deviceId })
-            .sort({ timestamp: -1 }); // Sabse naya data upar
-
-        if (!latestData) {
-            return res.status(404).json({ message: "No data found for this device" });
-        }
-
-        res.json(latestData);
-    } catch (err) {
-        res.status(500).json({ message: "Server Error" });
-    }
-});
-
+// GET /api/iot/dashboard-stats (Static first)
 router.get('/dashboard-stats', protect, async (req, res) => {
     try {
         const targetId = req.user.role === 'guest' ? req.user.managedBy : req.user._id;
@@ -120,6 +100,7 @@ router.get('/dashboard-stats', protect, async (req, res) => {
     }
 });
 
+// GET /api/iot/monitor-all (Static first)
 router.get('/monitor-all', protect, async (req, res) => {
     try {
         const targetId = req.user.role === 'guest' ? req.user.managedBy : req.user._id;
@@ -149,6 +130,27 @@ router.get('/monitor-all', protect, async (req, res) => {
         res.json(deviceStatus);
     } catch (err) {
         res.status(500).json({ message: "Monitoring failed" });
+    }
+});
+
+// GET /api/iot/latest/:apiKeyId (Parameterized after static)
+router.get('/latest/:apiKeyId', async (req, res) => {
+    try {
+        const device = await Device.findOne({ apiKey: req.params.apiKeyId });
+        if (!device) {
+            return res.status(404).json({ message: "Device not found" });
+        }
+
+        const latestData = await SensorData.findOne({ deviceId: device.deviceId })
+            .sort({ timestamp: -1 }); // Sabse naya data upar
+
+        if (!latestData) {
+            return res.status(404).json({ message: "No data found for this device" });
+        }
+
+        res.json(latestData);
+    } catch (err) {
+        res.status(500).json({ message: "Server Error" });
     }
 });
 
