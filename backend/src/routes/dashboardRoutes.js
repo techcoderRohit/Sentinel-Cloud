@@ -14,7 +14,44 @@ router.get('/all', protect, async (req, res) => {
   }
 });
 
-// 2. CREATE NEW BOARD
+// 2. GET BOARDS SHARED WITH ME
+router.get('/shared/with-me', protect, async (req, res) => {
+  try {
+    const boards = await Dashboard.find({ sharedWith: req.user._id })
+      .select('name description createdAt userId')
+      .populate('userId', 'name email');
+    res.json({ success: true, boards });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 3. OBSOLETE Compatibility Routes (Static first)
+router.get('/get-layout', protect, async (req, res) => {
+  try {
+    const board = await Dashboard.findOne({ userId: req.user._id }).sort({ createdAt: 1 });
+    if (!board) return res.json({ success: true, widgets: [] });
+    res.json({ success: true, widgets: board.widgets, boardId: board._id });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+router.post('/save-layout', protect, async (req, res) => {
+  const { widgets } = req.body;
+  try {
+    const board = await Dashboard.findOneAndUpdate(
+      { userId: req.user._id },
+      { widgets: widgets },
+      { upsert: true, new: true }
+    );
+    res.json({ success: true, message: "Legacy layout saved", boardId: board._id });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 4. CREATE NEW BOARD
 router.post('/create', protect, async (req, res) => {
   const { name, description } = req.body;
   try {
@@ -30,7 +67,19 @@ router.post('/create', protect, async (req, res) => {
   }
 });
 
-// 3. GET SPECIFIC BOARD LAYOUT (owner OR shared user)
+// 5. PUBLIC FETCH: Get board by shareId (Static-like prefix)
+router.get('/shared/:shareId', async (req, res) => {
+  try {
+      const board = await Dashboard.findOne({ shareId: req.params.shareId }).select('name description widgets createdAt');
+      if (!board) return res.status(404).json({ success: false, message: "Shared dashboard not found" });
+
+      res.json({ success: true, board });
+  } catch (err) {
+      res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 6. GET SPECIFIC BOARD LAYOUT (Parameterized - Should be after static)
 router.get('/:id', protect, async (req, res) => {
   try {
     const board = await Dashboard.findOne({
@@ -50,7 +99,7 @@ router.get('/:id', protect, async (req, res) => {
   }
 });
 
-// 4. SAVE/UPDATE LAYOUT for a specific board
+// 7. SAVE/UPDATE LAYOUT for a specific board
 router.put('/:id/layout', protect, async (req, res) => {
   const { widgets, name, description } = req.body;
   try {
@@ -76,7 +125,7 @@ router.put('/:id/layout', protect, async (req, res) => {
   }
 });
 
-// 5. DELETE BOARD
+// 8. DELETE BOARD
 router.delete('/:id', protect, async (req, res) => {
   try {
     const result = await Dashboard.findOneAndDelete({ _id: req.params.id, userId: req.user._id });
@@ -89,7 +138,7 @@ router.delete('/:id', protect, async (req, res) => {
   }
 });
 
-// 6. TOGGLE SHARING / GENERATE SHARE ID
+// 9. TOGGLE SHARING / GENERATE SHARE ID
 router.put('/:id/share', protect, async (req, res) => {
     try {
         const board = await Dashboard.findOne({ _id: req.params.id, userId: req.user._id });
@@ -108,7 +157,7 @@ router.put('/:id/share', protect, async (req, res) => {
     }
 });
 
-// 7. SHARE BOARD WITH A REGISTERED USER BY EMAIL
+// 10. SHARE BOARD WITH A REGISTERED USER BY EMAIL
 router.post('/:id/share-with-user', protect, async (req, res) => {
   try {
     const { email } = req.body;
@@ -137,7 +186,7 @@ router.post('/:id/share-with-user', protect, async (req, res) => {
   }
 });
 
-// 8. REVOKE SHARE ACCESS FOR A USER
+// 11. REVOKE SHARE ACCESS FOR A USER
 router.delete('/:id/revoke-user', protect, async (req, res) => {
   try {
     const { email } = req.body;
@@ -158,19 +207,7 @@ router.delete('/:id/revoke-user', protect, async (req, res) => {
   }
 });
 
-// 9. GET BOARDS SHARED WITH ME
-router.get('/shared/with-me', protect, async (req, res) => {
-  try {
-    const boards = await Dashboard.find({ sharedWith: req.user._id })
-      .select('name description createdAt userId')
-      .populate('userId', 'name email');
-    res.json({ success: true, boards });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-
-// 10. GET USERS A BOARD IS SHARED WITH (for the owner to manage)
+// 12. GET USERS A BOARD IS SHARED WITH (for the owner to manage)
 router.get('/:id/shared-users', protect, async (req, res) => {
   try {
     const board = await Dashboard.findOne({ _id: req.params.id, userId: req.user._id })
@@ -182,42 +219,4 @@ router.get('/:id/shared-users', protect, async (req, res) => {
   }
 });
 
-// PUBLIC FETCH: Get board by shareId (No Protect Middleware)
-router.get('/shared/:shareId', async (req, res) => {
-    try {
-        const board = await Dashboard.findOne({ shareId: req.params.shareId }).select('name description widgets createdAt');
-        if (!board) return res.status(404).json({ success: false, message: "Shared dashboard not found" });
-
-        res.json({ success: true, board });
-    } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
-    }
-});
-
-
-// 6. OBSOLETE Compatibility Route (Optional: For migration)
-router.get('/get-layout', protect, async (req, res) => {
-  try {
-    const board = await Dashboard.findOne({ userId: req.user._id }).sort({ createdAt: 1 });
-    if (!board) return res.json({ success: true, widgets: [] });
-    res.json({ success: true, widgets: board.widgets, boardId: board._id });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-
-router.post('/save-layout', protect, async (req, res) => {
-  const { widgets } = req.body;
-  try {
-    const board = await Dashboard.findOneAndUpdate(
-      { userId: req.user._id },
-      { widgets: widgets },
-      { upsert: true, new: true }
-    );
-    res.json({ success: true, message: "Legacy layout saved", boardId: board._id });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-
-module.exports = router;
+module.exports = router;

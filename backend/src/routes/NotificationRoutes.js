@@ -25,7 +25,30 @@ router.post('/create', protect, async (req, res) => {
     }
 });
 
-// 2. Get all notifications for logged-in user (GET /api/notifications/)
+// 2. Get unread count (GET /api/notifications/unread-count)
+router.get('/unread-count', protect, async (req, res) => {
+    try {
+        const count = await Notification.countDocuments({ userId: req.user._id, isRead: false });
+        res.json({ success: true, count });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// 3. Mark all notifications as read (PUT /api/notifications/read-all)
+router.put('/read-all', protect, async (req, res) => {
+    try {
+        await Notification.updateMany(
+            { userId: req.user._id, isRead: false },
+            { isRead: true }
+        );
+        res.json({ success: true, message: 'All notifications marked as read' });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// 4. Get all notifications (GET /api/notifications/)
 router.get('/', protect, async (req, res) => {
     try {
         const notifications = await Notification.find({ userId: req.user._id })
@@ -43,17 +66,7 @@ router.get('/', protect, async (req, res) => {
     }
 });
 
-// 3. Get unread count (GET /api/notifications/unread-count)
-router.get('/unread-count', protect, async (req, res) => {
-    try {
-        const count = await Notification.countDocuments({ userId: req.user._id, isRead: false });
-        res.json({ success: true, count });
-    } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
-    }
-});
-
-// 4. Mark single notification as read (PUT /api/notifications/read/:id)
+// 5. Mark single notification as read (PUT /api/notifications/read/:id)
 router.put('/read/:id', protect, async (req, res) => {
     try {
         const notification = await Notification.findOneAndUpdate(
@@ -67,19 +80,6 @@ router.put('/read/:id', protect, async (req, res) => {
         }
 
         res.json({ success: true, data: notification });
-    } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
-    }
-});
-
-// 5. Mark all notifications as read (PUT /api/notifications/read-all)
-router.put('/read-all', protect, async (req, res) => {
-    try {
-        await Notification.updateMany(
-            { userId: req.user._id, isRead: false },
-            { isRead: true }
-        );
-        res.json({ success: true, message: 'All notifications marked as read' });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
     }
@@ -103,4 +103,4 @@ router.delete('/:id', protect, async (req, res) => {
     }
 });
 
-module.exports = router;
+module.exports = router;
